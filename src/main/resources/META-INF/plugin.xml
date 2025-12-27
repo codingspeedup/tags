@@ -5,7 +5,7 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
-    <name>Tags</name>
+    <name>T.A.G.S.+</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor url="https://github.com/codingspeedup/tags">CodingSpeedup</vendor>
@@ -13,8 +13,9 @@
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-description -->
     <description><![CDATA[
-        T.A.G.S.<br>
-        <em>Targeted Annotations Generative Syntax</em>
+        <em>Targeted Annotations Generative Syntax</em><br/>
+        A productivity framework that integrates structured prompting directly into the development workflow via lightweight code annotations.
+        It serves as a lightweight orchestration engine, transforming inline comments into precise, template-driven AI directives for seamless software construction.
     ]]></description>
 
     <!-- Product and plugin compatibility requirements.
