@@ -26,7 +26,15 @@
     <!-- Extensions defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
+
+        <applicationConfigurable
+                instance="io.github.codingspeedup.tags.settings.PluginConfigurable"
+                id="io.github.codingspeedup.tags.settings.PluginConfigurable"
+                key="settings.displayName"/>
+        <applicationService serviceImplementation="io.github.codingspeedup.tags.settings.PluginSettingsState"/>
+
         <toolWindow id="MyToolWindow" factoryClass="io.github.codingspeedup.tags.MyToolWindowFactory"
                     icon="AllIcons.Toolwindows.ToolWindowPalette"/>
+
     </extensions>
 </idea-plugin>

@@ -7,10 +7,11 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
+import io.github.codingspeedup.tags.integration.LLM;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.util.Random;
 
 public class MyToolWindowFactory implements ToolWindowFactory {
 
@@ -27,9 +28,9 @@ public class MyToolWindowFactory implements ToolWindowFactory {
     }
 
     public static class MyToolWindow {
+        @Getter
         private final JBPanel<JBPanel<?>> content;
         private final JBLabel label;
-        private final Random random = new Random();
 
         public MyToolWindow() {
             this.content = new JBPanel<>();
@@ -37,16 +38,13 @@ public class MyToolWindowFactory implements ToolWindowFactory {
 
             JButton shuffleButton = new JButton("Shuffle");
             shuffleButton.addActionListener(e -> {
-                int nextInt = random.nextInt(1000);
-                label.setText("The random number is: " + nextInt);
+                var chatResponse = LLM.chat("Generate a random number between 0 and 1000");
+                label.setText("The random number is: " + chatResponse.aiMessage().text());
             });
 
             this.content.add(label);
             this.content.add(shuffleButton);
         }
 
-        public JBPanel<JBPanel<?>> getContent() {
-            return content;
-        }
     }
 }
