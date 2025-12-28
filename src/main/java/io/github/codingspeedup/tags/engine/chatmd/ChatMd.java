@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.chatmd;
+package io.github.codingspeedup.tags.engine.chatmd;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;

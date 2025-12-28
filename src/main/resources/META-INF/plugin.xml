@@ -31,7 +31,7 @@
                     secondary="true"
                     icon="/META-INF/toolIcon.svg"
                     anchor="bottom"
-                    doNotActivateOnStart="false"
+                    doNotActivateOnStart="true"
                     factoryClass="io.github.codingspeedup.tags.plugin.TagsConsoleWindowFactory"/>
 
         <postStartupActivity implementation="io.github.codingspeedup.tags.plugin.TagsInitializer"/>
@@ -39,12 +39,26 @@
         <applicationConfigurable
                 id="io.github.codingspeedup.tags.plugin.TagsSettingsConfigurable"
                 instance="io.github.codingspeedup.tags.plugin.TagsSettingsConfigurable"
-                key="settings.displayName"/>
+                key="plugin.label"/>
 
         <applicationService serviceImplementation="io.github.codingspeedup.tags.plugin.TagsSettingsState"/>
 
         <toolWindow id="MyToolWindow" factoryClass="io.github.codingspeedup.tags.MyToolWindowFactory"
                     icon="AllIcons.Toolwindows.ToolWindowPalette"/>
 
+        <actionPromoter implementation="io.github.codingspeedup.tags.actions.ChatActionPromoter"/>
+
     </extensions>
+
+    <actions>
+        <group id="TagsGroup" popup="true" icon="/META-INF/toolIcon.svg">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+
+            <action id="SendToLLM"
+                    class="io.github.codingspeedup.tags.actions.ExecutePromptAction">
+                <keyboard-shortcut first-keystroke="control ENTER" keymap="$default"/>
+            </action>
+
+        </group>
+    </actions>
 </idea-plugin>

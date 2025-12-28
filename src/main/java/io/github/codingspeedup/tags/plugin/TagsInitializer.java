@@ -2,7 +2,7 @@ package io.github.codingspeedup.tags.plugin;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
-import io.github.codingspeedup.tags.chatmd.ChatMd;
+import io.github.codingspeedup.tags.engine.chatmd.ChatMd;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
