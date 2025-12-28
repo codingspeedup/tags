@@ -31,7 +31,7 @@ public class PluginConfigurable implements Configurable {
         var comboEntries = new ArrayList<ComboEntry>();
         comboEntries.add(ComboEntry.EMPTY_VALUE);
         try {
-            var settings = PluginSettingsState.getInstance();
+            var settings = PluginSettingsStateImpl.getInstance();
             var modelCatalog = GoogleAiGeminiModelCatalog.builder().apiKey(settings.getGeminiApiKey()).build();
             var models = modelCatalog.listModels().stream()
                     .filter(item -> ModelType.CHAT.equals(item.type()))
@@ -46,7 +46,7 @@ public class PluginConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-        var settings = PluginSettingsState.getInstance();
+        var settings = PluginSettingsStateImpl.getInstance();
         return !(StringUtils.equals(settings.getGeminiModel(), settingsComponent.getGeminiModel())
                 && StringUtils.equals(settings.getGeminiApiKey(), settingsComponent.getGeminiApiKey())
         );
@@ -55,13 +55,13 @@ public class PluginConfigurable implements Configurable {
     @Override
     public void apply() {
         PluginSecretManager.saveSecret(GEMINI_API_KEY, settingsComponent.getGeminiApiKey());
-        var settings = PluginSettingsState.getInstance();
+        var settings = PluginSettingsStateImpl.getInstance();
         settings.geminiModel = settingsComponent.getGeminiModel();
     }
 
     @Override
     public void reset() {
-        var settings = PluginSettingsState.getInstance();
+        var settings = PluginSettingsStateImpl.getInstance();
         settingsComponent.setGeminiApiKey(settings.getGeminiApiKey());
         settingsComponent.setGeminiModel(settings.getGeminiModel());
     }

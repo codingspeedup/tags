@@ -31,7 +31,7 @@
                 instance="io.github.codingspeedup.tags.settings.PluginConfigurable"
                 id="io.github.codingspeedup.tags.settings.PluginConfigurable"
                 key="settings.displayName"/>
-        <applicationService serviceImplementation="io.github.codingspeedup.tags.settings.PluginSettingsState"/>
+        <applicationService serviceImplementation="io.github.codingspeedup.tags.settings.PluginSettingsStateImpl"/>
 
         <toolWindow id="MyToolWindow" factoryClass="io.github.codingspeedup.tags.MyToolWindowFactory"
                     icon="AllIcons.Toolwindows.ToolWindowPalette"/>
