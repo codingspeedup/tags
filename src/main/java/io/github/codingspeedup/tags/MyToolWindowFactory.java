@@ -28,6 +28,7 @@ public class MyToolWindowFactory implements ToolWindowFactory {
     }
 
     public static class MyToolWindow {
+
         @Getter
         private final JBPanel<JBPanel<?>> content;
         private final JBLabel label;
@@ -47,4 +48,5 @@ public class MyToolWindowFactory implements ToolWindowFactory {
         }
 
     }
+
 }
