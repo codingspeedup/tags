@@ -28,9 +28,9 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
 
-    // implementation("org.apache.commons:commons-lang3:3.20.0")
     implementation("dev.langchain4j:langchain4j:1.10.0")
     implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.10.0")
+    implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
 }
 
 intellijPlatform {
