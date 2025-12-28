@@ -24,6 +24,9 @@ dependencies {
         // Add plugin dependencies for compilation here, example:
         // bundledPlugin("com.intellij.java")
     }
+
+    implementation("dev.langchain4j:langchain4j:1.10.0")
+    implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.10.0")
 }
 
 intellijPlatform {

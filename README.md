@@ -1,4 +1,4 @@
-# IntelliJ Platform Plugin Template
+# T.A.G.S.+
 
 [![Twitter Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=twitter)](https://twitter.com/JBPlatform)
 [![Developers Forum](https://img.shields.io/badge/JetBrains%20Platform-Join-blue)][jb:forum]
@@ -15,7 +15,7 @@ A generated project contains the following content structure:
 │   ├── wrapper/            Gradle Wrapper
 ├── src                     Plugin sources
 │   ├── main
-│   │   ├── kotlin/         Kotlin production sources
+│   │   ├── java/           Java production sources
 │   │   └── resources/      Resources - plugin.xml, icons, messages
 ├── .gitignore              Git ignoring rules
 ├── build.gradle.kts        Gradle build configuration
@@ -30,7 +30,7 @@ In addition to the configuration files, the most crucial part is the `src` direc
 and the manifest for our plugin – [plugin.xml][file:plugin.xml].
 
 > [!NOTE]
-> To use Java in your plugin, create the `/src/main/java` directory.
+> To use Kotlin in your plugin, create the `/src/main/kotlin` directory.
 
 ## Plugin configuration file
 
