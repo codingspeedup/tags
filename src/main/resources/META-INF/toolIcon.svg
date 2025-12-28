@@ -1,0 +1,12 @@
+<svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0.1" y="0.1" width="12.5" height="12.5" rx="2" fill="#3574F0" fill-opacity="0.1" stroke="#3574F0" stroke-width="0.25"/>
+
+    <path d="M6.5 3V10M3 6.5H10" stroke="#3574F0" stroke-width="0.25" stroke-linecap="round"/>
+
+    <g fill="#6E6E6E" style="font-family: Arial, sans-serif; font-weight: bold; font-size: 3.5px;">
+        <text x="2.5" y="4.5">T</text>
+        <text x="8.2" y="4.5">A</text>
+        <text x="2.1" y="11">G</text>
+        <text x="8.3" y="11">S</text>
+    </g>
+</svg>

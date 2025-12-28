@@ -1,10 +1,10 @@
-package io.github.codingspeedup.tags.settings;
+package io.github.codingspeedup.tags.plugin;
 
 import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 
-public class PluginSecretManager {
+public class TagsSettingsSecretManager {
 
     public static final String GEMINI_API_KEY = "geminiApiKey";
 

@@ -3,15 +3,15 @@ package io.github.codingspeedup.tags.integration;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
-import io.github.codingspeedup.tags.settings.PluginSettingsState;
+import io.github.codingspeedup.tags.plugin.TagsSettings;
 
-public class GoogleAiIntegration implements LLM {
+public class GoogleAI implements LLM {
 
     private final GoogleAiGeminiChatModel geminiChatModel;
 
-    public GoogleAiIntegration() {
+    public GoogleAI() {
         this.geminiChatModel = GoogleAiGeminiChatModel.builder()
-                .apiKey(PluginSettingsState.getInstance().getGeminiApiKey())
+                .apiKey(TagsSettings.getInstance().getGeminiApiKey())
                 .maxRetries(1)
                 .build();
     }

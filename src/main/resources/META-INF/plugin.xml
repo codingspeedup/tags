@@ -27,11 +27,21 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
 
+        <toolWindow id="T.A.G.S.+"
+                    secondary="true"
+                    icon="/META-INF/toolIcon.svg"
+                    anchor="bottom"
+                    doNotActivateOnStart="false"
+                    factoryClass="io.github.codingspeedup.tags.plugin.TagsConsoleWindowFactory"/>
+
+        <postStartupActivity implementation="io.github.codingspeedup.tags.plugin.TagsInitializer"/>
+
         <applicationConfigurable
-                instance="io.github.codingspeedup.tags.settings.PluginConfigurable"
-                id="io.github.codingspeedup.tags.settings.PluginConfigurable"
+                id="io.github.codingspeedup.tags.plugin.TagsSettingsConfigurable"
+                instance="io.github.codingspeedup.tags.plugin.TagsSettingsConfigurable"
                 key="settings.displayName"/>
-        <applicationService serviceImplementation="io.github.codingspeedup.tags.settings.PluginSettingsStateImpl"/>
+
+        <applicationService serviceImplementation="io.github.codingspeedup.tags.plugin.TagsSettingsState"/>
 
         <toolWindow id="MyToolWindow" factoryClass="io.github.codingspeedup.tags.MyToolWindowFactory"
                     icon="AllIcons.Toolwindows.ToolWindowPalette"/>

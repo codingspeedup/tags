@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.settings;
+package io.github.codingspeedup.tags.plugin;
 
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBLabel;
@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import javax.swing.*;
 import java.util.Collection;
 
-public class PluginSettingsComponent {
+public class TagsSettingsPanel {
 
 
     private final JPanel mainPanel;
@@ -19,7 +19,7 @@ public class PluginSettingsComponent {
     private final DefaultComboBoxModel<ComboEntry> geminiModelsComboModel = new DefaultComboBoxModel<>(new ComboEntry[]{ComboEntry.EMPTY_VALUE});
     private final ComboBox<ComboEntry> geminiModelField = new ComboBox<>(geminiModelsComboModel);
 
-    public PluginSettingsComponent() {
+    public TagsSettingsPanel() {
         mainPanel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(new JBLabel("Gemini API key: "), geminiApiKeyField, 1, false)
                 .addLabeledComponent(new JBLabel("Gemini model: "), geminiModelField, 1, false)
