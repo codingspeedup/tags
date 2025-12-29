@@ -43,8 +43,11 @@
 
         <applicationService serviceImplementation="io.github.codingspeedup.tags.plugin.TagsSettingsState"/>
 
-        <toolWindow id="MyToolWindow" factoryClass="io.github.codingspeedup.tags.MyToolWindowFactory"
-                    icon="AllIcons.Toolwindows.ToolWindowPalette"/>
+        <intentionAction>
+            <language/>
+            <className>io.github.codingspeedup.tags.intentions.TagsGroupIntention</className>
+            <categoryKey>plugin.label</categoryKey>
+        </intentionAction>
 
     </extensions>
 
