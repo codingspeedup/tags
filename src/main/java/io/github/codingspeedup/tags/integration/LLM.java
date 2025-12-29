@@ -4,7 +4,6 @@ import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.output.FinishReason;
 import io.github.codingspeedup.tags.plugin.TagsSettings;
 import org.apache.commons.lang.StringUtils;
 
@@ -49,18 +48,7 @@ public interface LLM {
                 .messages(processedMessages)
                 .build();
 
-        try {
-            return new GoogleAI().chat(chatRequest);
-        } catch (Exception e) {
-            var aiMessage = AiMessage.builder()
-                    .text(e.getClass().getName() + ": " + e.getMessage())
-                    .build();
-            return ChatResponse.builder()
-                    .aiMessage(aiMessage)
-                    .modelName(chatRequest.modelName())
-                    .finishReason(FinishReason.OTHER)
-                    .build();
-        }
+        return new GoogleAI().chat(chatRequest);
     }
 
     static boolean isSystemRoleSupported(String modelName) {

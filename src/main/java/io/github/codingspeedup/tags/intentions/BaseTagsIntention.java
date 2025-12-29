@@ -1,7 +1,7 @@
 package io.github.codingspeedup.tags.intentions;
 
+import com.intellij.codeInsight.intention.HighPriorityAction;
 import com.intellij.codeInsight.intention.IntentionAction;
-import com.intellij.codeInsight.intention.PriorityAction;
 import com.intellij.codeInsight.intention.preview.IntentionPreviewInfo;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
@@ -9,16 +9,11 @@ import com.intellij.psi.PsiFile;
 import io.github.codingspeedup.tags.MyMessageBundle;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class BaseTagsIntention implements IntentionAction, PriorityAction {
+public abstract class BaseTagsIntention implements IntentionAction, HighPriorityAction {
 
     @Override
     public @NotNull String getFamilyName() {
         return MyMessageBundle.message("plugin.label");
-    }
-
-    @Override
-    public @NotNull Priority getPriority() {
-        return Priority.TOP;
     }
 
     @Override
@@ -30,7 +25,6 @@ public abstract class BaseTagsIntention implements IntentionAction, PriorityActi
         return editor != null && editor.getSelectionModel().hasSelection();
     }
 
-
     @Override
     public boolean startInWriteAction() {
         return false;
@@ -40,4 +34,5 @@ public abstract class BaseTagsIntention implements IntentionAction, PriorityActi
     public @NotNull IntentionPreviewInfo generatePreview(@NotNull Project project, @NotNull Editor editor, @NotNull PsiFile file) {
         return IntentionPreviewInfo.EMPTY;
     }
+
 }

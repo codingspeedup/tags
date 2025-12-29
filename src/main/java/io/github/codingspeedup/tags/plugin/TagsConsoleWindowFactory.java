@@ -12,7 +12,7 @@ public class TagsConsoleWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         var consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
-        project.getService(TagsConsoleService.class).setConsoleView(consoleView);
+        TagsUtl.getLogger(project).setConsoleView(consoleView);
         var contentFactory = ContentFactory.getInstance();
         var content = contentFactory.createContent(consoleView.getComponent(), "Logs", false);
         toolWindow.getContentManager().addContent(content);

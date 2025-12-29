@@ -24,7 +24,7 @@ import io.github.codingspeedup.tags.engine.chatmd.ChatMdHandler;
 import io.github.codingspeedup.tags.engine.chatmd.ChatMdUtl;
 import io.github.codingspeedup.tags.engine.core.GenerationResponse;
 import io.github.codingspeedup.tags.engine.selection.SelectionHandler;
-import io.github.codingspeedup.tags.plugin.TagsConsoleService;
+import io.github.codingspeedup.tags.plugin.TagsUtl;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,7 +62,7 @@ public class ExecutePromptAction extends AnAction {
         if (project == null) {
             return;
         }
-        var logger = project.getService(TagsConsoleService.class);
+        var logger = TagsUtl.getLogger(project);
 
         var editorFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
         if (editorFile == null) {
@@ -139,7 +139,7 @@ public class ExecutePromptAction extends AnAction {
     }
 
     private static void updateCurrentBuffer(Project project, Editor editor, Document document, GenerationResponse gr) {
-        WriteCommandAction.runWriteCommandAction(project, () -> document.setText( gr.getGeneratedContent()));
+        WriteCommandAction.runWriteCommandAction(project, () -> document.setText(gr.getGeneratedContent()));
         var caretModel = editor.getCaretModel();
         caretModel.moveToOffset(gr.getContentOffset());
         var scrollingModel = editor.getScrollingModel();

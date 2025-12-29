@@ -39,11 +39,12 @@
         <applicationConfigurable
                 id="io.github.codingspeedup.tags.plugin.TagsSettingsConfigurable"
                 instance="io.github.codingspeedup.tags.plugin.TagsSettingsConfigurable"
+                groupId="tools"
                 key="plugin.label"/>
 
         <applicationService serviceImplementation="io.github.codingspeedup.tags.plugin.TagsSettingsState"/>
 
-        <intentionAction>
+        <intentionAction order="first">
             <language/>
             <className>io.github.codingspeedup.tags.intentions.TagsGroupIntention</className>
             <categoryKey>plugin.label</categoryKey>

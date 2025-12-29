@@ -1,6 +1,6 @@
 package io.github.codingspeedup.tags.plugin;
 
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -15,46 +15,45 @@ import java.util.Optional;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TagsUtl {
 
-    public static Optional<VirtualFile> getPluginFolder(@NotNull Project project, String... path) {
-        var logger = project.getService(TagsConsoleService.class);
-
-        var projectRoot = ProjectUtil.guessProjectDir(project);
-        if (projectRoot == null) {
-            logger.error("Project root not found");
-            return Optional.empty();
-        }
-
-        final var pluginFolder = new VirtualFile[]{projectRoot};
-        ApplicationManager.getApplication().invokeAndWait(() -> {
-            try {
-                var tagsRoot = ".tags";
-                var child = pluginFolder[0].findChild(tagsRoot);
-                if (child == null) {
-                    child = pluginFolder[0].createChildDirectory(TagsUtl.class, tagsRoot);
-                }
-                pluginFolder[0] = child;
-
-                for (var segment : path) {
-                    if (StringUtils.isBlank(segment)) {
-                        continue;
-                    }
-                    child = pluginFolder[0].findChild(segment);
-                    if (child == null) {
-                        child = pluginFolder[0].createChildDirectory(TagsUtl.class, segment);
-                    }
-                    pluginFolder[0] = child;
-                }
-            } catch (IOException e) {
-                logger.error("Failed to create folder", e);
-                pluginFolder[0] = null;
-            }
-        });
-
-        return pluginFolder[0] == null ? Optional.empty() : Optional.of(pluginFolder[0]);
+    public static TagsConsoleService getLogger(Project project) {
+        return project.getService(TagsConsoleService.class);
     }
 
     public static Optional<VirtualFile> getChatFolder(@NotNull Project project) {
         return getPluginFolder(project, "chat");
     }
+
+    public static Optional<VirtualFile> getPluginFolder(@NotNull Project project, String... path) {
+        var logger = getLogger(project);
+        var projectRoot = ProjectUtil.guessProjectDir(project);
+
+        if (projectRoot == null) return Optional.empty();
+
+        final var result = new VirtualFile[]{projectRoot};
+
+        WriteCommandAction.runWriteCommandAction(project, () -> {
+            try {
+                var tagsRoot = ".tags";
+                result[0] = getOrCreateChild(result[0], tagsRoot);
+
+                for (var segment : path) {
+                    if (StringUtils.isNotBlank(segment)) {
+                        result[0] = getOrCreateChild(result[0], segment);
+                    }
+                }
+            } catch (IOException e) {
+                logger.error("Failed to create folder", e);
+                result[0] = null;
+            }
+        });
+
+        return Optional.ofNullable(result[0]);
+    }
+
+    private static VirtualFile getOrCreateChild(VirtualFile parent, String name) throws IOException {
+        var child = parent.findChild(name);
+        return (child != null) ? child : parent.createChildDirectory(TagsUtl.class, name);
+    }
+
 
 }

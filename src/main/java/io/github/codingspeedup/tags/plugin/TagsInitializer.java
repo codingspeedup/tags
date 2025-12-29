@@ -13,7 +13,7 @@ public class TagsInitializer implements ProjectActivity {
     @Nullable
     @Override
     public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
-        var logger = project.getService(TagsConsoleService.class);
+        var logger = TagsUtl.getLogger(project);
         logger.info("Initializing T.A.G.S.+ for project `" + project.getName() + "' ...");
 
         try {
