@@ -15,6 +15,7 @@ import java.util.Locale;
 public final class ChatMdUtl {
 
     public static final String CHAT_MD_EXTENSION = ".chat.md";
+    public static final String PARAMETERS_BLOCK_INFO = "llm-parameters";
 
     private static final String DEFAULT_CHAT_MD = "default" + CHAT_MD_EXTENSION;
 
@@ -27,13 +28,13 @@ public final class ChatMdUtl {
             ApplicationManager.getApplication().invokeAndWait(() -> WriteAction.run(() -> {
                 try {
                     var newFile = chatMdRoot.createChildData(ChatMdUtl.class, DEFAULT_CHAT_MD);
-                    VfsUtil.saveText(newFile, """
+                    VfsUtil.saveText(newFile, String.format("""
                             #### 🛠️ parameters
-                            ```llm-parameters
+                            ```%s
                             maxOutputTokens=1000
                             temperature=0.7
                             ```
-                            """
+                            """, PARAMETERS_BLOCK_INFO)
                             + PromptUtl.getSystemBlock(PromptUtl.getDefaultSystemMessage())
                             + PromptUtl.getUserBlock(null));
                 } catch (IOException e) {

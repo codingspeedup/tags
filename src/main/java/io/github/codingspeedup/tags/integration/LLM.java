@@ -2,6 +2,7 @@ package io.github.codingspeedup.tags.integration;
 
 import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.output.FinishReason;
 import io.github.codingspeedup.tags.plugin.TagsSettings;
@@ -14,18 +15,20 @@ public interface LLM {
     @SuppressWarnings("unused")
     ChatResponse chat(ChatRequest chatRequest);
 
-    static ChatResponse chat(String message) {
-        var chatMessage = UserMessage.from("user", message);
-        return chat(chatMessage);
+    static ChatResponse chat(ChatMessage... chatMessages) {
+        return chat(ChatRequestParameters.builder().build(), chatMessages);
     }
 
-    static ChatResponse chat(ChatMessage... chatMessages) {
-        var modelName = TagsSettings.getInstance().getGeminiModel();
-        var systemRoleSupported = isSystemRoleSupported(modelName);
+    static ChatResponse chat(ChatRequestParameters llmParameters, ChatMessage... chatMessages) {
+        var modelName = llmParameters.modelName();
+        if (StringUtils.isBlank(modelName)) {
+            modelName = TagsSettings.getInstance().getGeminiModel();
+            llmParameters = llmParameters.overrideWith(ChatRequestParameters.builder().modelName(modelName).build());
+        }
 
         var processedMessages = new ArrayList<ChatMessage>();
         var pendingSystemText = new StringBuilder();
-
+        var systemRoleSupported = isSystemRoleSupported(modelName);
         for (ChatMessage m : chatMessages) {
             if (m instanceof SystemMessage sm && !systemRoleSupported) {
                 pendingSystemText.append(sm.text()).append("\n\n");
@@ -34,7 +37,7 @@ public interface LLM {
                 newContents.add(TextContent.from(pendingSystemText.toString()));
                 newContents.addAll(um.contents());
 
-                processedMessages.add(UserMessage.from(newContents));
+                processedMessages.add(UserMessage.from(um.name(), newContents));
                 pendingSystemText.setLength(0);
             } else {
                 processedMessages.add(m);
@@ -42,7 +45,7 @@ public interface LLM {
         }
 
         var chatRequest = ChatRequest.builder()
-                .modelName(modelName)
+                .parameters(llmParameters)
                 .messages(processedMessages)
                 .build();
 

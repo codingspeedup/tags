@@ -6,6 +6,6 @@ import java.util.Optional;
 
 public interface PromptHandler {
 
-    Optional<String> process(ProgressIndicator indicator);
+    Optional<GenerationResponse> process(ProgressIndicator indicator);
 
 }

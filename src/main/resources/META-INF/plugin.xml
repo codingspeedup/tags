@@ -49,6 +49,10 @@
             <categoryKey>plugin.label</categoryKey>
         </intentionAction>
 
+        <notificationGroup id="GenerationGroup"
+                           displayType="BALLOON"
+                           key="notification.group.GenerationGroup"/>
+
     </extensions>
 
     <actions>

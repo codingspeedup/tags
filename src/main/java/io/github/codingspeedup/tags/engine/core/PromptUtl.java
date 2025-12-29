@@ -6,9 +6,27 @@ import org.apache.commons.lang.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PromptUtl {
+
+    public static final String SYSTEM_BLOCK_INFO = "llm-system-message";
+    public static final String USER_BLOCK_INFO = "llm-user-message";
+
+
+    public static final List<String> LLM_PARAMETERS_NAMES = List.of(
+            "modelName",
+            "temperature",
+            "topP",
+            "topK",
+            "frequencyPenalty",
+            "presencePenalty",
+            "maxOutputTokens",
+            "stopSequences",
+            "toolChoice",
+            "responseFormat"
+    );
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -26,29 +44,29 @@ public final class PromptUtl {
     public static String getSystemBlock(String message) {
         return String.format("""
                 #### ⚙️ Intention
-                ```system
+                ```%s
                 %s
                 ```
-                """, StringUtils.trimToEmpty(message));
+                """, SYSTEM_BLOCK_INFO, StringUtils.trimToEmpty(message));
     }
 
     public static String getUserBlock(String message) {
         return String.format("""
                 ### 👤 User
-                ```user
+                ```%s
                 %s
                 ```
-                """, StringUtils.trimToEmpty(message));
+                """, USER_BLOCK_INFO, StringUtils.trimToEmpty(message));
     }
 
     public static String getAssistantBlock(String message) {
         return String.format("""
-                ### 🤖 Assistant - %s
+                
+                #### 🤖 Assistant - %s
                 
                 ---
                 %s
                 """, getCurrentTimeIso(), message);
     }
-
 
 }
