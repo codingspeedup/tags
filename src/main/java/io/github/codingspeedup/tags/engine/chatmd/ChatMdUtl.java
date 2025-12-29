@@ -4,39 +4,38 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import io.github.codingspeedup.tags.engine.core.PromptUtl;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
+import java.util.Locale;
 
-public class ChatMd {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ChatMdUtl {
 
     public static final String CHAT_MD_EXTENSION = ".chat.md";
 
-    public static final String USER_BLOCK = """
-            ### 👤 USER
-            ```user
-            Hi!
-            ```
-            """;
-
     private static final String DEFAULT_CHAT_MD = "default" + CHAT_MD_EXTENSION;
+
+    public static boolean isChatMd(String fileName) {
+        return fileName.toLowerCase(Locale.ROOT).endsWith(ChatMdUtl.CHAT_MD_EXTENSION);
+    }
 
     public static void ensureDefaultChat(VirtualFile chatMdRoot) {
         if (chatMdRoot.findChild(DEFAULT_CHAT_MD) == null) {
             ApplicationManager.getApplication().invokeAndWait(() -> WriteAction.run(() -> {
                 try {
-                    var newFile = chatMdRoot.createChildData(ChatMd.class, DEFAULT_CHAT_MD);
+                    var newFile = chatMdRoot.createChildData(ChatMdUtl.class, DEFAULT_CHAT_MD);
                     VfsUtil.saveText(newFile, """
-                            #### 🛠️ PARAMETERS
-                            ```parameters
+                            #### 🛠️ parameters
+                            ```llm-parameters
                             maxOutputTokens=1000
                             temperature=0.7
                             ```
-                            #### ⚙️ SYSTEM
-                            ```system
-                            Act as a senior engineer providing high-density, technically accurate info without fluff or polite filler.
-                            Prioritize immediate Markdown code blocks and use minimal prose only for non-obvious logic.
-                            ```
-                            """ + USER_BLOCK);
+                            """
+                            + PromptUtl.getSystemBlock(PromptUtl.getDefaultSystemMessage())
+                            + PromptUtl.getUserBlock(null));
                 } catch (IOException e) {
                     throw new RuntimeException("Could not create default chat file", e);
                 }

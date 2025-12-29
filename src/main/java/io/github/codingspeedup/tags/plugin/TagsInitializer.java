@@ -2,7 +2,7 @@ package io.github.codingspeedup.tags.plugin;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
-import io.github.codingspeedup.tags.engine.chatmd.ChatMd;
+import io.github.codingspeedup.tags.engine.chatmd.ChatMdUtl;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +18,7 @@ public class TagsInitializer implements ProjectActivity {
 
         try {
             var chatMdFolder = TagsUtl.getChatFolder(project).orElseThrow();
-            ChatMd.ensureDefaultChat(chatMdFolder);
+            ChatMdUtl.ensureDefaultChat(chatMdFolder);
 
             logger.info("T.A.G.S.+ initialized.");
         } catch (Exception e) {

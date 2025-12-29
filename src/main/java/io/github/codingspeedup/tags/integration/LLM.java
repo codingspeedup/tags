@@ -1,11 +1,13 @@
 package io.github.codingspeedup.tags.integration;
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.output.FinishReason;
 import io.github.codingspeedup.tags.plugin.TagsSettings;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.ArrayList;
 
 public interface LLM {
 
@@ -13,11 +15,37 @@ public interface LLM {
     ChatResponse chat(ChatRequest chatRequest);
 
     static ChatResponse chat(String message) {
-        var chatMessage = UserMessage.from(message);
+        var chatMessage = UserMessage.from("user", message);
+        return chat(chatMessage);
+    }
+
+    static ChatResponse chat(ChatMessage... chatMessages) {
+        var modelName = TagsSettings.getInstance().getGeminiModel();
+        var systemRoleSupported = isSystemRoleSupported(modelName);
+
+        var processedMessages = new ArrayList<ChatMessage>();
+        var pendingSystemText = new StringBuilder();
+
+        for (ChatMessage m : chatMessages) {
+            if (m instanceof SystemMessage sm && !systemRoleSupported) {
+                pendingSystemText.append(sm.text()).append("\n\n");
+            } else if (m instanceof UserMessage um && !pendingSystemText.isEmpty()) {
+                var newContents = new ArrayList<Content>();
+                newContents.add(TextContent.from(pendingSystemText.toString()));
+                newContents.addAll(um.contents());
+
+                processedMessages.add(UserMessage.from(newContents));
+                pendingSystemText.setLength(0);
+            } else {
+                processedMessages.add(m);
+            }
+        }
+
         var chatRequest = ChatRequest.builder()
-                .modelName(TagsSettings.getInstance().getGeminiModel())
-                .messages(chatMessage)
+                .modelName(modelName)
+                .messages(processedMessages)
                 .build();
+
         try {
             return new GoogleAI().chat(chatRequest);
         } catch (Exception e) {
@@ -30,6 +58,10 @@ public interface LLM {
                     .finishReason(FinishReason.OTHER)
                     .build();
         }
+    }
+
+    static boolean isSystemRoleSupported(String modelName) {
+        return StringUtils.trimToEmpty(modelName).toLowerCase().contains("gemini");
     }
 
 }

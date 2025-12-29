@@ -46,8 +46,6 @@
         <toolWindow id="MyToolWindow" factoryClass="io.github.codingspeedup.tags.MyToolWindowFactory"
                     icon="AllIcons.Toolwindows.ToolWindowPalette"/>
 
-        <actionPromoter implementation="io.github.codingspeedup.tags.actions.ChatActionPromoter"/>
-
     </extensions>
 
     <actions>
@@ -56,7 +54,6 @@
 
             <action id="SendToLLM"
                     class="io.github.codingspeedup.tags.actions.ExecutePromptAction">
-                <keyboard-shortcut first-keystroke="control ENTER" keymap="$default"/>
             </action>
 
         </group>
