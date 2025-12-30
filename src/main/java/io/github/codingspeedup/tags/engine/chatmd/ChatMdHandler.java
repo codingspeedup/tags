@@ -10,8 +10,8 @@ import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.output.FinishReason;
-import io.github.codingspeedup.tags.engine.core.GenerationSink;
 import io.github.codingspeedup.tags.engine.core.GenerationResponse;
+import io.github.codingspeedup.tags.engine.core.GenerationSink;
 import io.github.codingspeedup.tags.engine.core.PromptHandler;
 import io.github.codingspeedup.tags.engine.core.PromptUtl;
 import io.github.codingspeedup.tags.integration.LLM;
@@ -92,17 +92,30 @@ public class ChatMdHandler implements PromptHandler {
         }
 
         var assistantMessage = PromptUtl.getAssistantBlock(StringUtils.trimToEmpty(llmResponse.aiMessage().text()));
-        var insertionOffset = userBlock.getEndOffset();
-        var newContent = mdContent.substring(0, insertionOffset) + assistantMessage + mdContent.substring(insertionOffset);
-        var footer = StringUtils.trimToNull(mdContent.substring(userBlock.getEndOffset()));
-        if (footer == null) {
-            newContent += PromptUtl.getUserBlock(null);
+        var insertionOffset = userBlock.getEndOffset() + 1;
+
+        var hasFooter = false;
+        var contentLen = mdContent.length();
+        for (var i = userBlock.getEndOffset(); i < contentLen; i++) {
+            if (!Character.isWhitespace(mdContent.charAt(i))) {
+                hasFooter = true;
+                break;
+            }
         }
+        var additionalUserBlock = hasFooter ? StringUtils.EMPTY : PromptUtl.getUserBlock(null);
+
+        @SuppressWarnings("all")
+        var newContent = new StringBuilder(contentLen + assistantMessage.length() + additionalUserBlock.length());
+        newContent.append(mdContent, 0, insertionOffset);
+        newContent.append(assistantMessage);
+        newContent.append(mdContent, insertionOffset, contentLen);
+        newContent.append(additionalUserBlock);
 
         var gr = new GenerationResponse();
-        gr.setOutputChannel(GenerationSink.REPLACE_FILE);
-        gr.setGeneratedContent(newContent);
-        gr.setContentOffset(insertionOffset);
+        gr.setOutputChannel(GenerationSink.REPLACE_CONTENT);
+        gr.setGeneratedContent(newContent.toString());
+        gr.setStartOffset(insertionOffset);
+        gr.setEndOffset(insertionOffset);
         return Optional.of(gr);
     }
 

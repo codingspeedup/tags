@@ -4,6 +4,6 @@ public enum GenerationSink {
 
     CLIPBOARD,
     MD_BUFFER,
-    REPLACE_FILE,
+    REPLACE_CONTENT,
 
 }

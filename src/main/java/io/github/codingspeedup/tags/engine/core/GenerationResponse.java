@@ -10,6 +10,7 @@ public class GenerationResponse {
     private GenerationSink outputChannel;
     private String bufferName;
     private String generatedContent;
-    private int contentOffset;
+    private int startOffset;
+    private int endOffset;
 
 }

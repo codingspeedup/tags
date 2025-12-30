@@ -39,7 +39,8 @@ public class SelectionHandler implements PromptHandler {
         gr.setOutputChannel(GenerationSink.MD_BUFFER);
         gr.setBufferName(fileName + ".result.md");
         gr.setGeneratedContent(mdContent);
-        gr.setContentOffset(mdOffset);
+        gr.setStartOffset(mdOffset);
+        gr.setEndOffset(mdOffset);
         return Optional.of(gr);
     }
 

@@ -68,36 +68,35 @@ public class ExecutePromptAction extends AnAction {
         }
         var logger = TagsUtl.getLogger(project);
 
-        var editorFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
-        if (editorFile == null) {
-            logger.error("No virtual file selected");
-            return;
-        }
-
-        var fileName = editorFile.getName();
-
         var editor = e.getData(CommonDataKeys.EDITOR);
         if (editor == null) {
             logger.error("No editor selected");
             return;
         }
 
-        var document = editor.getDocument();
-        var fileSel = editor.getSelectionModel().getSelectedText();
-        var fileText = fileSel == null ? document.getText() : null;
-        var fileOffset = editor.getCaretModel().getOffset();
+        var editorFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
+        if (editorFile == null) {
+            logger.error("No virtual file selected");
+            return;
+        }
 
-        new Task.Backgroundable(project, "Processing " + fileName) {
+        var editorFileName = editorFile.getName();
+        var editorSelection = editor.getSelectionModel().getSelectedText();
+        var editorOffset = editor.getCaretModel().getOffset();
+        var document = editor.getDocument();
+        var documentText = editorSelection == null ? document.getText() : null;
+
+        new Task.Backgroundable(project, "Processing " + editorFileName) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 Optional<GenerationResponse> result = Optional.empty();
                 try {
-                    if (fileSel != null) {
-                        result = new SelectionHandler(fileName, fileSel).process(indicator);
+                    if (editorSelection != null) {
+                        result = new SelectionHandler(editorFileName, editorSelection).process(indicator);
                     } else {
-                        if (ChatMdUtl.isChatMd(fileName)) {
-                            result = new ChatMdHandler(fileText, fileOffset).process(indicator);
+                        if (ChatMdUtl.isChatMd(editorFileName)) {
+                            result = new ChatMdHandler(documentText, editorOffset).process(indicator);
                         }
                     }
                 } catch (Exception e) {
@@ -109,7 +108,7 @@ public class ExecutePromptAction extends AnAction {
                             switch (gr.getOutputChannel()) {
                                 case CLIPBOARD -> sendToClipboard(project, gr);
                                 case MD_BUFFER -> openReadOnlyBuffer(project, gr);
-                                case REPLACE_FILE -> updateCurrentBuffer(project, editor, document, gr);
+                                case REPLACE_CONTENT -> updateCurrentBuffer(project, editor, document, gr);
                             }
                         }, ModalityState.defaultModalityState()),
                         () -> logger.warn("Prompt execution produced no result")
@@ -140,17 +139,18 @@ public class ExecutePromptAction extends AnAction {
         var fileEditors = FileEditorManager.getInstance(project).openFile(lvf, true);
         if (fileEditors.length > 0 && fileEditors[0] instanceof TextEditor textEditor) {
             var editor = textEditor.getEditor();
-            editor.getCaretModel().moveToOffset(gr.getContentOffset());
+            editor.getCaretModel().moveToOffset(gr.getStartOffset());
             editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
         }
     }
 
     private static void updateCurrentBuffer(Project project, Editor editor, Document document, GenerationResponse gr) {
         WriteCommandAction.runWriteCommandAction(project, () -> document.setText(gr.getGeneratedContent()));
-        var caretModel = editor.getCaretModel();
-        caretModel.moveToOffset(gr.getContentOffset());
-        var scrollingModel = editor.getScrollingModel();
-        scrollingModel.scrollToCaret(ScrollType.CENTER);
+
+        ApplicationManager.getApplication().invokeLater(() -> {
+            editor.getCaretModel().moveToOffset(gr.getStartOffset());
+            editor.getScrollingModel().scrollToCaret(com.intellij.openapi.editor.ScrollType.CENTER);
+        });
     }
 
 }
