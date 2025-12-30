@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -33,8 +34,13 @@ public final class TagsUtl {
 
         WriteCommandAction.runWriteCommandAction(project, () -> {
             try {
-                var tagsRoot = ".tags";
-                result[0] = getOrCreateChild(result[0], tagsRoot);
+                var tagsRootSegment = ".tags";
+                var tagsRoot = result[0].findChild(tagsRootSegment);
+                if (tagsRoot == null) {
+                    tagsRoot = getOrCreateChild(result[0], tagsRootSegment);
+                    generateGitignore(project, tagsRoot);
+                }
+                result[0] = tagsRoot;
 
                 for (var segment : path) {
                     if (StringUtils.isNotBlank(segment)) {
@@ -55,5 +61,9 @@ public final class TagsUtl {
         return (child != null) ? child : parent.createChildDirectory(TagsUtl.class, name);
     }
 
+    private static void generateGitignore(Project project, VirtualFile tagsRoot) throws IOException {
+        var gitignoreFile = tagsRoot.createChildData(project, ".gitignore");
+        gitignoreFile.setBinaryContent("*\n".getBytes(StandardCharsets.UTF_8));
+    }
 
 }
