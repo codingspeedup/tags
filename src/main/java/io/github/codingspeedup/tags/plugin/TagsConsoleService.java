@@ -33,6 +33,10 @@ public final class TagsConsoleService {
         log(message, ConsoleViewContentType.NORMAL_OUTPUT);
     }
 
+    public void warn(String message) {
+        log(message, ConsoleViewContentType.LOG_WARNING_OUTPUT);
+    }
+
     public void error(String message) {
         log(message, ConsoleViewContentType.ERROR_OUTPUT);
     }

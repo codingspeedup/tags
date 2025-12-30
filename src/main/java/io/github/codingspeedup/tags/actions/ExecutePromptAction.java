@@ -33,14 +33,7 @@ import java.util.Optional;
 
 public class ExecutePromptAction extends AnAction {
 
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
-    }
-
-    @Override
-    public void update(@NotNull AnActionEvent e) {
+    public static boolean isAvailable(@NotNull AnActionEvent e) {
         var isAvailable = e.getProject() != null;
         if (isAvailable) {
             var file = e.getData(CommonDataKeys.VIRTUAL_FILE);
@@ -53,7 +46,18 @@ public class ExecutePromptAction extends AnAction {
                 }
             }
         }
-        e.getPresentation().setEnabledAndVisible(isAvailable);
+        return isAvailable;
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+
+        e.getPresentation().setEnabled(isAvailable(e));
     }
 
     @Override
@@ -100,13 +104,16 @@ public class ExecutePromptAction extends AnAction {
                     logger.error("Error processing file", e);
                 }
 
-                result.ifPresent(gr -> ApplicationManager.getApplication().invokeLater(() -> {
-                    switch (gr.getOutputChannel()) {
-                        case CLIPBOARD -> sendToClipboard(project, gr);
-                        case MD_BUFFER -> openReadOnlyBuffer(project, gr);
-                        case REPLACE_FILE -> updateCurrentBuffer(project, editor, document, gr);
-                    }
-                }, ModalityState.defaultModalityState()));
+                result.ifPresentOrElse(
+                        gr -> ApplicationManager.getApplication().invokeLater(() -> {
+                            switch (gr.getOutputChannel()) {
+                                case CLIPBOARD -> sendToClipboard(project, gr);
+                                case MD_BUFFER -> openReadOnlyBuffer(project, gr);
+                                case REPLACE_FILE -> updateCurrentBuffer(project, editor, document, gr);
+                            }
+                        }, ModalityState.defaultModalityState()),
+                        () -> logger.warn("Prompt execution produced no result")
+                );
             }
         }.queue();
     }

@@ -57,13 +57,34 @@
     </extensions>
 
     <actions>
-        <group id="TagsGroup" popup="true" icon="/META-INF/toolIcon.svg">
+        <group id="TagsGroup"
+               class="io.github.codingspeedup.tags.actions.TagsGroup"
+               popup="true"
+               icon="/META-INF/toolIcon.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
 
             <action id="SendToLLM"
                     class="io.github.codingspeedup.tags.actions.ExecutePromptAction">
             </action>
 
+            <separator/>
+
+            <action id="InsertTagsSection"
+                    class="io.github.codingspeedup.tags.actions.InsertTagsSectionAction">
+            </action>
+
+            <group id="InsertTagsTemplate"
+                   class="io.github.codingspeedup.tags.actions.InsertTagsTemplateGroup"
+                   popup="true">
+                <action id="InsertTagsTemplateBlank"
+                        class="io.github.codingspeedup.tags.actions.InsertTagsTemplateAction">
+                </action>
+                <action id="InsertTagsTemplateLibrary"
+                        class="io.github.codingspeedup.tags.actions.InsertTagsTemplateAction">
+                </action>
+            </group>
+
         </group>
     </actions>
+
 </idea-plugin>
