@@ -1,34 +1,20 @@
 package io.github.codingspeedup.tags.actions;
 
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
-import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.ScrollType;
-import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.TextEditor;
-import com.intellij.openapi.fileTypes.FileTypeManager;
-import com.intellij.openapi.ide.CopyPasteManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import com.intellij.openapi.project.Project;
-import com.intellij.testFramework.LightVirtualFile;
 import io.github.codingspeedup.tags.engine.chatmd.ChatMdHandler;
 import io.github.codingspeedup.tags.engine.chatmd.ChatMdUtl;
 import io.github.codingspeedup.tags.engine.core.GenerationResponse;
 import io.github.codingspeedup.tags.engine.selection.SelectionHandler;
 import io.github.codingspeedup.tags.plugin.TagsUtl;
-import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.datatransfer.StringSelection;
 import java.util.Optional;
 
 public class ExecutePromptAction extends AnAction {
@@ -42,7 +28,9 @@ public class ExecutePromptAction extends AnAction {
                 var editor = e.getData(CommonDataKeys.EDITOR);
                 isAvailable = editor != null;
                 if (isAvailable) {
-                    isAvailable = editor.getSelectionModel().hasSelection() || ChatMdUtl.isChatMd(file.getName());
+                    isAvailable = editor.getSelectionModel().hasSelection()
+                            || ChatMdUtl.isChatMd(file.getName())
+                            || InsertTagsActionBase.isAvailable(e);
                 }
             }
         }
@@ -90,8 +78,8 @@ public class ExecutePromptAction extends AnAction {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
-                Optional<GenerationResponse> result = Optional.empty();
                 try {
+                    Optional<GenerationResponse> result = Optional.empty();
                     if (editorSelection != null) {
                         result = new SelectionHandler(editorFileName, editorSelection).process(indicator);
                     } else {
@@ -99,58 +87,23 @@ public class ExecutePromptAction extends AnAction {
                             result = new ChatMdHandler(documentText, editorOffset).process(indicator);
                         }
                     }
+
+                    result.ifPresentOrElse(
+                            gr -> ApplicationManager.getApplication().invokeLater(() -> {
+                                switch (gr.getOutputChannel()) {
+                                    case CLIPBOARD -> TagsUtl.sendToClipboard(project, gr);
+                                    case MD_BUFFER -> TagsUtl.openReadOnlyBuffer(project, gr);
+                                    case REPLACE_CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, gr);
+                                }
+                            }, ModalityState.defaultModalityState()),
+                            () -> logger.warn("Prompt execution produced no result")
+                    );
                 } catch (Exception e) {
                     logger.error("Error processing file", e);
                 }
-
-                result.ifPresentOrElse(
-                        gr -> ApplicationManager.getApplication().invokeLater(() -> {
-                            switch (gr.getOutputChannel()) {
-                                case CLIPBOARD -> sendToClipboard(project, gr);
-                                case MD_BUFFER -> openReadOnlyBuffer(project, gr);
-                                case REPLACE_CONTENT -> updateCurrentBuffer(project, editor, document, gr);
-                            }
-                        }, ModalityState.defaultModalityState()),
-                        () -> logger.warn("Prompt execution produced no result")
-                );
             }
         }.queue();
     }
 
-    private void sendToClipboard(Project project, GenerationResponse gr) {
-        CopyPasteManager.getInstance().setContents(new StringSelection(gr.getGeneratedContent()));
-        NotificationGroupManager.getInstance()
-                .getNotificationGroup("GenerationGroup")
-                .createNotification(
-                        "Copied to Clipboard",
-                        "Content successfully sent to system clipboard.",
-                        NotificationType.INFORMATION
-                )
-                .notify(project);
-    }
-
-    private void openReadOnlyBuffer(Project project, GenerationResponse gr) {
-        var lvf = new LightVirtualFile(
-                gr.getBufferName(),
-                FileTypeManager.getInstance().getFileTypeByExtension(FilenameUtils.getExtension(gr.getBufferName())),
-                gr.getGeneratedContent()
-        );
-        lvf.setWritable(false);
-        var fileEditors = FileEditorManager.getInstance(project).openFile(lvf, true);
-        if (fileEditors.length > 0 && fileEditors[0] instanceof TextEditor textEditor) {
-            var editor = textEditor.getEditor();
-            editor.getCaretModel().moveToOffset(gr.getStartOffset());
-            editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
-        }
-    }
-
-    private static void updateCurrentBuffer(Project project, Editor editor, Document document, GenerationResponse gr) {
-        WriteCommandAction.runWriteCommandAction(project, () -> document.setText(gr.getGeneratedContent()));
-
-        ApplicationManager.getApplication().invokeLater(() -> {
-            editor.getCaretModel().moveToOffset(gr.getStartOffset());
-            editor.getScrollingModel().scrollToCaret(com.intellij.openapi.editor.ScrollType.CENTER);
-        });
-    }
 
 }

@@ -2,8 +2,6 @@ package io.github.codingspeedup.tags.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.engine.core.FileTypeModel;
@@ -52,16 +50,13 @@ public class InsertTagsSectionAction extends InsertTagsActionBase {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
-
-                var sectionEditor = new TagsSectionEditor(fileModel, documentText);
-                var gr = sectionEditor.insertNewSection(fromOffset, toOffset);
-
-                WriteCommandAction.runWriteCommandAction(project, () -> document.setText(gr.getGeneratedContent()));
-
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    editor.getCaretModel().moveToOffset(gr.getStartOffset());
-                    editor.getScrollingModel().scrollToCaret(com.intellij.openapi.editor.ScrollType.CENTER);
-                });
+                try {
+                    var sectionEditor = new TagsSectionEditor(fileModel, documentText);
+                    var gr = sectionEditor.insertNewSection(fromOffset, toOffset);
+                    TagsUtl.updateEditorDocument(project, editor, document, gr);
+                } catch (Exception e) {
+                    logger.error("Error processing file", e);
+                }
             }
         }.queue();
     }

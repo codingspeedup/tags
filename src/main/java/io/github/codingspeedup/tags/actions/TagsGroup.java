@@ -14,10 +14,7 @@ public class TagsGroup extends DefaultActionGroup {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        e.getPresentation().setEnabledAndVisible(
-                ExecutePromptAction.isAvailable(e)
-                || InsertTagsActionBase.isAvailable(e)
-        );
+        e.getPresentation().setEnabledAndVisible(ExecutePromptAction.isAvailable(e));
     }
 
 }
