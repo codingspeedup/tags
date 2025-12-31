@@ -5,11 +5,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GenerationResponse {
+public class TagsResult {
 
-    private GenerationSink outputChannel;
+    private ActionResultGateway gateway;
     private String bufferName;
-    private String generatedContent;
+    private String content;
     private int startOffset;
     private int endOffset;
 

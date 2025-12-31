@@ -8,10 +8,11 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.engine.chatmd.ChatMdHandler;
-import io.github.codingspeedup.tags.engine.chatmd.ChatMdUtl;
-import io.github.codingspeedup.tags.engine.core.GenerationResponse;
-import io.github.codingspeedup.tags.engine.selection.SelectionHandler;
+import io.github.codingspeedup.tags.engine.tags.ChatMdPromptHandler;
+import io.github.codingspeedup.tags.engine.core.ChatMdUtl;
+import io.github.codingspeedup.tags.engine.core.TagsResult;
+import io.github.codingspeedup.tags.engine.tags.SelectionPromptHandler;
+import io.github.codingspeedup.tags.engine.tags.TagsPromptHandler;
 import io.github.codingspeedup.tags.plugin.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,31 +70,36 @@ public class ExecutePromptAction extends AnAction {
         }
 
         var editorFileName = editorFile.getName();
+        var editorCaret = editor.getCaretModel().getPrimaryCaret();
         var editorSelection = editor.getSelectionModel().getSelectedText();
-        var editorOffset = editor.getCaretModel().getOffset();
+
         var document = editor.getDocument();
-        var documentText = editorSelection == null ? document.getText() : null;
+        var documentText = document.getText();
+        var documentOffset = editor.getCaretModel().getOffset();
 
         new Task.Backgroundable(project, "Processing " + editorFileName) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 try {
-                    Optional<GenerationResponse> result = Optional.empty();
-                    if (editorSelection != null) {
-                        result = new SelectionHandler(editorFileName, editorSelection).process(indicator);
+                    Optional<TagsResult> tagsResult;
+
+                    if (editorCaret.hasSelection()) {
+                        tagsResult = new SelectionPromptHandler(editorFileName, editorSelection).process(indicator);
                     } else {
                         if (ChatMdUtl.isChatMd(editorFileName)) {
-                            result = new ChatMdHandler(documentText, editorOffset).process(indicator);
+                            tagsResult = new ChatMdPromptHandler(documentText, documentOffset).process(indicator);
+                        } else {
+                            tagsResult = new TagsPromptHandler(editorFileName, documentText, documentOffset).process(indicator);
                         }
                     }
 
-                    result.ifPresentOrElse(
+                    tagsResult.ifPresentOrElse(
                             gr -> ApplicationManager.getApplication().invokeLater(() -> {
-                                switch (gr.getOutputChannel()) {
+                                switch (gr.getGateway()) {
                                     case CLIPBOARD -> TagsUtl.sendToClipboard(project, gr);
-                                    case MD_BUFFER -> TagsUtl.openReadOnlyBuffer(project, gr);
-                                    case REPLACE_CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, gr);
+                                    case BUFFER -> TagsUtl.openReadOnlyBuffer(project, gr);
+                                    case CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, gr);
                                 }
                             }, ModalityState.defaultModalityState()),
                             () -> logger.warn("Prompt execution produced no result")

@@ -1,19 +1,19 @@
 package io.github.codingspeedup.tags.engine.tags;
 
 import io.github.codingspeedup.tags.engine.core.FileTypeModel;
-import io.github.codingspeedup.tags.engine.core.GenerationResponse;
-import io.github.codingspeedup.tags.engine.core.GenerationSink;
+import io.github.codingspeedup.tags.engine.core.TagsResult;
+import io.github.codingspeedup.tags.engine.core.ActionResultGateway;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class TagsSectionEditor {
 
-    private final FileTypeModel fileModel;
+    private final FileTypeModel ftModel;
     private final String fileContent;
 
-    public GenerationResponse insertNewSection(int fromOffset, int toOffset) {
-        var sPrefix = fileModel.getSPrefix();
-        var existingSections = fileModel.parseSections(fileContent).keySet();
+    public TagsResult insertNewSection(int fromOffset, int toOffset) {
+        var sPrefix = ftModel.getSPrefix();
+        var existingSections = ftModel.getSections(fileContent).keySet();
 
         var sectionIndex = 2;
         var newSectionName = "section-1";
@@ -33,12 +33,12 @@ public class TagsSectionEditor {
         newContent.append("\n").append(sPrefix).append("</").append(newSectionName).append(">\n");
         newContent.append(fileContent,  toOffset, fileContent.length());
 
-        var response = new GenerationResponse();
-        response.setOutputChannel(GenerationSink.REPLACE_CONTENT);
-        response.setGeneratedContent(newContent.toString());
-        response.setStartOffset(startOffset);
-        response.setEndOffset(endOffset);
-        return response;
+        var tagsResult = new TagsResult();
+        tagsResult.setGateway(ActionResultGateway.CONTENT);
+        tagsResult.setContent(newContent.toString());
+        tagsResult.setStartOffset(startOffset);
+        tagsResult.setEndOffset(endOffset);
+        return tagsResult;
     }
 
 }

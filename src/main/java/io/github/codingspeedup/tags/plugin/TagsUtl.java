@@ -15,7 +15,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
-import io.github.codingspeedup.tags.engine.core.GenerationResponse;
+import io.github.codingspeedup.tags.engine.core.TagsResult;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
@@ -26,6 +26,7 @@ import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TagsUtl {
@@ -80,38 +81,47 @@ public final class TagsUtl {
         gitignoreFile.setBinaryContent("*\n".getBytes(StandardCharsets.UTF_8));
     }
 
-    public static void sendToClipboard(Project project, GenerationResponse gr) {
-        CopyPasteManager.getInstance().setContents(new StringSelection(gr.getGeneratedContent()));
-        NotificationGroupManager.getInstance()
+    public static void sendToClipboard(Project project, TagsResult tagsResult) {
+        CopyPasteManager.getInstance().setContents(new StringSelection(tagsResult.getContent()));
+        var notification = NotificationGroupManager.getInstance()
                 .getNotificationGroup("GenerationGroup")
                 .createNotification(
                         "Copied to Clipboard",
                         "Content successfully sent to system clipboard.",
                         NotificationType.INFORMATION
-                )
-                .notify(project);
+                );
+        notification.notify(project);
+
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                TimeUnit.SECONDS.sleep(7);
+                ApplicationManager.getApplication().invokeLater(notification::expire);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
     }
 
-    public static void openReadOnlyBuffer(Project project, GenerationResponse gr) {
+    public static void openReadOnlyBuffer(Project project, TagsResult tagsResult) {
         var lvf = new LightVirtualFile(
-                gr.getBufferName(),
-                FileTypeManager.getInstance().getFileTypeByExtension(FilenameUtils.getExtension(gr.getBufferName())),
-                gr.getGeneratedContent()
+                tagsResult.getBufferName(),
+                FileTypeManager.getInstance().getFileTypeByExtension(FilenameUtils.getExtension(tagsResult.getBufferName())),
+                tagsResult.getContent()
         );
         lvf.setWritable(false);
         var fileEditors = FileEditorManager.getInstance(project).openFile(lvf, true);
         if (fileEditors.length > 0 && fileEditors[0] instanceof TextEditor textEditor) {
             var editor = textEditor.getEditor();
-            editor.getCaretModel().moveToOffset(gr.getStartOffset());
+            editor.getCaretModel().moveToOffset(tagsResult.getStartOffset());
             editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
         }
     }
 
-    public static void updateEditorDocument(Project project, Editor editor, Document document, GenerationResponse gr) {
-        WriteCommandAction.runWriteCommandAction(project, () -> document.setText(gr.getGeneratedContent()));
+    public static void updateEditorDocument(Project project, Editor editor, Document document, TagsResult tagsResult) {
+        WriteCommandAction.runWriteCommandAction(project, () -> document.setText(tagsResult.getContent()));
 
         ApplicationManager.getApplication().invokeLater(() -> {
-            editor.getCaretModel().moveToOffset(gr.getStartOffset());
+            editor.getCaretModel().moveToOffset(tagsResult.getStartOffset());
             editor.getScrollingModel().scrollToCaret(com.intellij.openapi.editor.ScrollType.CENTER);
         });
     }

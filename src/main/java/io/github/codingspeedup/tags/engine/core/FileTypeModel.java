@@ -13,14 +13,16 @@ public abstract class FileTypeModel {
     private static final Map<String, FileTypeModel> MODEL_REGISTRY = new ConcurrentHashMap<>();
 
     private final String lineCommentPrefix;
+    private final String lineCommentSuffix;
     private final String tPrefix;
     private final String aPrefix;
     private final String gPrefix;
     private final String sPrefix;
     private final String plusPrefix;
 
-    protected FileTypeModel(String lineCommentPrefix) {
+    protected FileTypeModel(String lineCommentPrefix, String lineCommentSuffix) {
         this.lineCommentPrefix = lineCommentPrefix;
+        this.lineCommentSuffix = lineCommentSuffix;
         this.tPrefix = this.lineCommentPrefix + "T: ";
         this.aPrefix = this.lineCommentPrefix + "A: ";
         this.gPrefix = this.lineCommentPrefix + "G: ";
@@ -28,20 +30,23 @@ public abstract class FileTypeModel {
         this.plusPrefix = this.lineCommentPrefix + "+: ";
     }
 
-    private record S(String name, boolean closing) {
+
+    public record S(String name, boolean closing) {
     }
 
     public static Optional<FileTypeModel> of(String fileName) {
         var fileExtension = StringUtils.trimToEmpty(FilenameUtils.getExtension(fileName)).toLowerCase(Locale.ROOT);
         var fileModel = MODEL_REGISTRY.computeIfAbsent(fileExtension, (key) -> switch (key) {
-            case "java", "cs" -> new FileTypeModel("// ") {
+            case "txt" -> new FileTypeModel(StringUtils.EMPTY, StringUtils.EMPTY) {
+            };
+            case "java", "cs" -> new FileTypeModel("// ", StringUtils.EMPTY) {
             };
             default -> null;
         });
         return Optional.ofNullable(fileModel);
     }
 
-    public List<TemplateBlock> locateTemplates(String content) {
+    public List<TemplateBlock> identifyTemplates(String content) {
         var templates = new ArrayList<TemplateBlock>();
 
         var currentOffset = content.indexOf(tPrefix);
@@ -65,7 +70,33 @@ public abstract class FileTypeModel {
         return templates;
     }
 
-    public Map<String, SectionBlock> parseSections(String content) {
+    public void fillTemplate(TemplateBlock template, String content) {
+        var arguments = new StringBuilder();
+        var plus = new StringBuilder();
+        content = content.substring(template.getFromOffset(), template.getToOffset());
+        content.lines().forEach(line -> {
+            line = line.trim();
+            if (line.startsWith(aPrefix)) {
+                line = line.substring(aPrefix.length()).trim();
+                if (!line.isEmpty()) {
+                    arguments.append(line).append("\n");
+                }
+            } else if (line.startsWith(gPrefix)) {
+                line = line.substring(gPrefix.length()).trim();
+                template.setGateway(line);
+            } else if (line.startsWith(plusPrefix)) {
+                line = line.substring(plusPrefix.length()).trim();
+                if (!line.isEmpty()) {
+                    plus.append(line).append("\n");
+                }
+            }
+        });
+        template.setArguments(PromptUtl.parseProperties(arguments.toString()));
+        template.setPlus(plus.toString());
+    }
+
+
+    public Map<String, SectionBlock> getSections(String content) {
         var sections = new HashMap<String, SectionBlock>();
 
         var currentOffset = content.indexOf(sPrefix);
@@ -124,5 +155,7 @@ public abstract class FileTypeModel {
         int eol = content.lastIndexOf('\n', endIndex - 1);
         return (eol == -1) ? 0 : eol + 1;
     }
+
+
 
 }

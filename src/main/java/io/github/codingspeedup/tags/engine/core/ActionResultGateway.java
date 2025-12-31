@@ -1,9 +1,9 @@
 package io.github.codingspeedup.tags.engine.core;
 
-public enum GenerationSink {
+public enum ActionResultGateway {
 
+    BUFFER,
     CLIPBOARD,
-    MD_BUFFER,
-    REPLACE_CONTENT,
+    CONTENT,
 
 }

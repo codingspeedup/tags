@@ -7,7 +7,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import io.github.codingspeedup.tags.MyMessageBundle;
-import io.github.codingspeedup.tags.engine.chatmd.ChatMdUtl;
+import io.github.codingspeedup.tags.engine.core.ChatMdUtl;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class BaseTagsIntention implements IntentionAction, HighPriorityAction {

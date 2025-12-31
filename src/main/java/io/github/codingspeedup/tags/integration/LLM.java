@@ -14,11 +14,15 @@ public interface LLM {
     @SuppressWarnings("unused")
     ChatResponse chat(ChatRequest chatRequest);
 
-    static ChatResponse chat(ChatMessage... chatMessages) {
-        return chat(ChatRequestParameters.builder().build(), chatMessages);
+    static ChatResponse doChat(ChatMessage... chatMessages) {
+        return doChat(ChatRequestParameters.builder().build(), chatMessages);
     }
 
-    static ChatResponse chat(ChatRequestParameters llmParameters, ChatMessage... chatMessages) {
+    static ChatResponse doChat(ChatRequest chatRequest) {
+        return doChat(chatRequest.parameters(), chatRequest.messages().toArray(ChatMessage[]::new));
+    }
+
+    static ChatResponse doChat(ChatRequestParameters llmParameters, ChatMessage... chatMessages) {
         var modelName = llmParameters.modelName();
         if (StringUtils.isBlank(modelName)) {
             modelName = TagsSettings.getInstance().getGeminiModel();

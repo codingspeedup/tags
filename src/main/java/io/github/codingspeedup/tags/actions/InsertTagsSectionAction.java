@@ -32,9 +32,10 @@ public class InsertTagsSectionAction extends InsertTagsActionBase {
         }
 
         var editorFileName = editorFile.getName();
+        var editorCaret = editor.getCaretModel().getPrimaryCaret();
 
-        var fileModel = FileTypeModel.of(editorFileName).orElse(null);
-        if (fileModel == null) {
+        var ftModel = FileTypeModel.of(editorFileName).orElse(null);
+        if (ftModel == null) {
             logger.error("Unrecognized file model for `" + editorFileName + "'");
             return;
         }
@@ -42,7 +43,6 @@ public class InsertTagsSectionAction extends InsertTagsActionBase {
         var document = editor.getDocument();
         var documentText = document.getText();
 
-        var editorCaret = editor.getCaretModel().getPrimaryCaret();
         var fromOffset = editorCaret.hasSelection() ? editorCaret.getSelectionStart() : editor.getCaretModel().getOffset();
         var toOffset = editorCaret.hasSelection() ? editorCaret.getSelectionEnd() : fromOffset;
 
@@ -51,7 +51,7 @@ public class InsertTagsSectionAction extends InsertTagsActionBase {
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 try {
-                    var sectionEditor = new TagsSectionEditor(fileModel, documentText);
+                    var sectionEditor = new TagsSectionEditor(ftModel, documentText);
                     var gr = sectionEditor.insertNewSection(fromOffset, toOffset);
                     TagsUtl.updateEditorDocument(project, editor, document, gr);
                 } catch (Exception e) {

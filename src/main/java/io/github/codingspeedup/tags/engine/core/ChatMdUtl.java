@@ -1,10 +1,9 @@
-package io.github.codingspeedup.tags.engine.chatmd;
+package io.github.codingspeedup.tags.engine.core;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import io.github.codingspeedup.tags.engine.core.PromptUtl;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

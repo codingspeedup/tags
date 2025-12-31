@@ -33,8 +33,8 @@ public class InsertTagsTemplateAction extends InsertTagsActionBase {
 
         var editorFileName = editorFile.getName();
 
-        var fileModel = FileTypeModel.of(editorFileName).orElse(null);
-        if (fileModel == null) {
+        var ftModel = FileTypeModel.of(editorFileName).orElse(null);
+        if (ftModel == null) {
             logger.error("Unrecognized file model for `" + editorFileName + "'");
             return;
         }
@@ -48,7 +48,7 @@ public class InsertTagsTemplateAction extends InsertTagsActionBase {
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 try {
-                    var templateEditor = new TagsTemplateEditor(fileModel, documentText);
+                    var templateEditor = new TagsTemplateEditor(ftModel, documentText);
                     var gr = templateEditor.insertNewTemplate(documentOffset);
                     TagsUtl.updateEditorDocument(project, editor, document, gr);
                 } catch (Exception e) {

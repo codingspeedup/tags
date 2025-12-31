@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SectionBlock extends  TagsBlock {
+public class SectionBlock extends TagsBlock {
 
     private String name;
 

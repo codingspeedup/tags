@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.engine.chatmd;
+package io.github.codingspeedup.tags.engine.tags;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
@@ -10,8 +10,8 @@ import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.output.FinishReason;
-import io.github.codingspeedup.tags.engine.core.GenerationResponse;
-import io.github.codingspeedup.tags.engine.core.GenerationSink;
+import io.github.codingspeedup.tags.engine.core.TagsResult;
+import io.github.codingspeedup.tags.engine.core.ActionResultGateway;
 import io.github.codingspeedup.tags.engine.core.PromptHandler;
 import io.github.codingspeedup.tags.engine.core.PromptUtl;
 import io.github.codingspeedup.tags.integration.LLM;
@@ -19,29 +19,28 @@ import lombok.SneakyThrows;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
-import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.engine.chatmd.ChatMdUtl.CHAT_MD_EXTENSION;
-import static io.github.codingspeedup.tags.engine.chatmd.ChatMdUtl.PARAMETERS_BLOCK_INFO;
+import static io.github.codingspeedup.tags.engine.core.ChatMdUtl.CHAT_MD_EXTENSION;
+import static io.github.codingspeedup.tags.engine.core.ChatMdUtl.PARAMETERS_BLOCK_INFO;
 import static io.github.codingspeedup.tags.engine.core.PromptUtl.*;
 
-public class ChatMdHandler implements PromptHandler {
+public class ChatMdPromptHandler implements PromptHandler {
 
-    private final String mdContent;
-    private final int mdOffset;
+    private final String content;
+    private final int contentOffset;
 
-    public ChatMdHandler(String mdContent, int mdOffset) {
-        this.mdContent = mdContent;
-        this.mdOffset = mdOffset;
+    public ChatMdPromptHandler(String content, int contentOffset) {
+        this.content = content;
+        this.contentOffset = contentOffset;
     }
 
-    public Optional<GenerationResponse> process(ProgressIndicator indicator) {
+    public Optional<TagsResult> process(ProgressIndicator indicator) {
         var options = new MutableDataSet();
         var parser = Parser.builder(options).build();
-        var document = parser.parse(mdContent);
+        var document = parser.parse(content);
 
         List<FencedCodeBlock> parametersBlocks = new ArrayList<>();
         List<FencedCodeBlock> systemBlocks = new ArrayList<>();
@@ -64,7 +63,7 @@ public class ChatMdHandler implements PromptHandler {
         userBlocks = userBlocks.stream()
                 .filter(block -> StringUtils.isNotBlank(getContent(block)))
                 .toList();
-        var userBlockIndex = findUserBlock(userBlocks, mdOffset);
+        var userBlockIndex = findUserBlock(userBlocks, contentOffset);
         if (userBlockIndex < 0) {
             return Optional.empty();
         }
@@ -84,20 +83,20 @@ public class ChatMdHandler implements PromptHandler {
                 .map(this::collectParameters)
                 .orElse(ChatRequestParameters.builder().build());
 
-        var llmResponse = system.map(systemMessage -> LLM.chat(llmParameters, systemMessage, userMessage))
-                .orElse(LLM.chat(llmParameters, userMessage));
+        var llmResponse = system.map(systemMessage -> LLM.doChat(llmParameters, systemMessage, userMessage))
+                .orElse(LLM.doChat(llmParameters, userMessage));
 
         if (llmResponse.metadata().finishReason() == FinishReason.OTHER) {
             return Optional.empty();
         }
 
-        var assistantMessage = PromptUtl.getAssistantBlock(StringUtils.trimToEmpty(llmResponse.aiMessage().text()));
+        var assistantMessage = PromptUtl.getAiBlock(StringUtils.trimToEmpty(llmResponse.aiMessage().text()));
         var insertionOffset = userBlock.getEndOffset() + 1;
 
         var hasFooter = false;
-        var contentLen = mdContent.length();
+        var contentLen = content.length();
         for (var i = userBlock.getEndOffset(); i < contentLen; i++) {
-            if (!Character.isWhitespace(mdContent.charAt(i))) {
+            if (!Character.isWhitespace(content.charAt(i))) {
                 hasFooter = true;
                 break;
             }
@@ -106,17 +105,17 @@ public class ChatMdHandler implements PromptHandler {
 
         @SuppressWarnings("all")
         var newContent = new StringBuilder(contentLen + assistantMessage.length() + additionalUserBlock.length());
-        newContent.append(mdContent, 0, insertionOffset);
+        newContent.append(content, 0, insertionOffset);
         newContent.append(assistantMessage);
-        newContent.append(mdContent, insertionOffset, contentLen);
+        newContent.append(content, insertionOffset, contentLen);
         newContent.append(additionalUserBlock);
 
-        var gr = new GenerationResponse();
-        gr.setOutputChannel(GenerationSink.REPLACE_CONTENT);
-        gr.setGeneratedContent(newContent.toString());
-        gr.setStartOffset(insertionOffset);
-        gr.setEndOffset(insertionOffset);
-        return Optional.of(gr);
+        var tagsResult = new TagsResult();
+        tagsResult.setGateway(ActionResultGateway.CONTENT);
+        tagsResult.setContent(newContent.toString());
+        tagsResult.setStartOffset(insertionOffset);
+        tagsResult.setEndOffset(insertionOffset);
+        return Optional.of(tagsResult);
     }
 
     private String getContent(FencedCodeBlock fcb) {
@@ -151,10 +150,7 @@ public class ChatMdHandler implements PromptHandler {
 
     @SneakyThrows
     private ChatRequestParameters collectParameters(String data) {
-        var properties = new Properties();
-        try (var reader = new StringReader(data)) {
-            properties.load(reader);
-        }
+        var properties = PromptUtl.parseProperties(data);
         var llmParameters = ChatRequestParameters.builder();
         for (var parameterName : LLM_PARAMETERS_NAMES) {
             var propertyValue = properties.getProperty(parameterName);
