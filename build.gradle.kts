@@ -1,11 +1,11 @@
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "2.1.20"
+    id("org.jetbrains.kotlin.jvm") version "2.1.20" 
     id("org.jetbrains.intellij.platform") version "2.10.2"
 }
 
 group = "io.github.codingspeedup"
-version = "2025-12-29"
+version = "2025-12-31"
 
 repositories {
     mavenCentral()
