@@ -9,7 +9,7 @@ import io.github.codingspeedup.tags.engine.tags.TagsEditor;
 import io.github.codingspeedup.tags.plugin.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
-public class InsertTagsTemplateAction extends EditTagsActionBase {
+public class StripTagsAction extends EditTagsActionBase {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
@@ -49,8 +49,9 @@ public class InsertTagsTemplateAction extends EditTagsActionBase {
                 indicator.setIndeterminate(true);
                 try {
                     var tagsEditor = new TagsEditor(ftModel, documentText);
-                    var gr = tagsEditor.insertNewTemplate(documentOffset);
-                    TagsUtl.updateEditorDocument(project, editor, document, gr);
+                    var tagsResult = tagsEditor.stripTags(documentOffset);
+                    tagsResult.ifPresent(result ->
+                            TagsUtl.updateEditorDocument(project, editor, document, result));
                 } catch (Exception e) {
                     logger.error("Error processing file", e);
                 }

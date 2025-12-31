@@ -14,7 +14,7 @@ public class InsertTagsTemplateGroup extends DefaultActionGroup {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        e.getPresentation().setEnabled(InsertTagsActionBase.isAvailable(e));
+        e.getPresentation().setEnabled(EditTagsActionBase.isAvailable(e));
     }
 
 }

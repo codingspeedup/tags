@@ -7,7 +7,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import io.github.codingspeedup.tags.engine.core.FileTypeModel;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class InsertTagsActionBase extends AnAction {
+public abstract class EditTagsActionBase extends AnAction {
 
     public static boolean isAvailable(@NotNull AnActionEvent e) {
         var isAvailable = e.getProject() != null;

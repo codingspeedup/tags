@@ -5,11 +5,11 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.engine.core.FileTypeModel;
-import io.github.codingspeedup.tags.engine.tags.TagsSectionEditor;
+import io.github.codingspeedup.tags.engine.tags.TagsEditor;
 import io.github.codingspeedup.tags.plugin.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
-public class InsertTagsSectionAction extends InsertTagsActionBase {
+public class InsertTagsSectionAction extends EditTagsActionBase {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
@@ -51,9 +51,9 @@ public class InsertTagsSectionAction extends InsertTagsActionBase {
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 try {
-                    var sectionEditor = new TagsSectionEditor(ftModel, documentText);
-                    var gr = sectionEditor.insertNewSection(fromOffset, toOffset);
-                    TagsUtl.updateEditorDocument(project, editor, document, gr);
+                    var tagsEditor = new TagsEditor(ftModel, documentText);
+                    var tagsResult = tagsEditor.insertNewSection(fromOffset, toOffset);
+                    TagsUtl.updateEditorDocument(project, editor, document, tagsResult);
                 } catch (Exception e) {
                     logger.error("Error processing file", e);
                 }

@@ -113,7 +113,7 @@ public class TagsPromptHandler implements PromptHandler {
             value = parseSectionName(value);
             var sectionBlock = getContentSections().get(value);
             if (sectionBlock != null) {
-                value = fileContent.substring(sectionBlock.getFromOffset(), sectionBlock.getToOffset());
+                value = sectionBlock.getContent(fileContent);
             }
         }
         return value;
@@ -138,7 +138,16 @@ public class TagsPromptHandler implements PromptHandler {
 
     private BufferContent buildNewContent(String sectionName, ChatResponse chatResponse) {
         var sectionBlock = getContentSections().get(sectionName);
-        return new BufferContent(fileContent, fileOffset);
+        var sectionStart = FileTypeModel.indexOfEol(fileContent, sectionBlock.getFromOffset());
+        var sectionEnd = FileTypeModel.indexOfBol(fileContent, sectionBlock.getToOffset());
+
+        @SuppressWarnings("all")
+        var bufferContent = new StringBuilder();
+        bufferContent.append(fileContent, 0, sectionStart);
+        bufferContent.append("\n").append(chatResponse.aiMessage().text()).append("\n");
+        bufferContent.append(fileContent, sectionEnd, fileContent.length());
+
+        return new BufferContent(bufferContent.toString(), sectionStart + 1);
     }
 
 }

@@ -8,6 +8,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
+import io.github.codingspeedup.tags.engine.core.FileTypeModel;
 import io.github.codingspeedup.tags.engine.tags.ChatMdPromptHandler;
 import io.github.codingspeedup.tags.engine.core.ChatMdUtl;
 import io.github.codingspeedup.tags.engine.core.TagsResult;
@@ -31,7 +32,7 @@ public class ExecutePromptAction extends AnAction {
                 if (isAvailable) {
                     isAvailable = editor.getSelectionModel().hasSelection()
                             || ChatMdUtl.isChatMd(file.getName())
-                            || InsertTagsActionBase.isAvailable(e);
+                            || FileTypeModel.of(file.getName()).isPresent();
                 }
             }
         }
@@ -70,7 +71,6 @@ public class ExecutePromptAction extends AnAction {
         }
 
         var editorFileName = editorFile.getName();
-        var editorCaret = editor.getCaretModel().getPrimaryCaret();
         var editorSelection = editor.getSelectionModel().getSelectedText();
 
         var document = editor.getDocument();
@@ -84,7 +84,7 @@ public class ExecutePromptAction extends AnAction {
                 try {
                     Optional<TagsResult> tagsResult;
 
-                    if (editorCaret.hasSelection()) {
+                    if (editorSelection != null) {
                         tagsResult = new SelectionPromptHandler(editorFileName, editorSelection).process(indicator);
                     } else {
                         if (ChatMdUtl.isChatMd(editorFileName)) {

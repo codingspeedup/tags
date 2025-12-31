@@ -68,7 +68,7 @@ public final class PromptUtl {
     public static String getAiBlock(String message) {
         return String.format("""
                 
-                #### 🤖 AI - %s
+                #### 🤖 AI: %s
                 
                 ---
                 %s

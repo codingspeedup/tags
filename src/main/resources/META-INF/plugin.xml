@@ -64,25 +64,31 @@
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
 
             <action id="SendToLLM"
-                    class="io.github.codingspeedup.tags.actions.ExecutePromptAction">
-            </action>
+                    class="io.github.codingspeedup.tags.actions.ExecutePromptAction"
+            />
 
             <separator/>
 
             <action id="InsertTagsSection"
-                    class="io.github.codingspeedup.tags.actions.InsertTagsSectionAction">
-            </action>
+                    class="io.github.codingspeedup.tags.actions.InsertTagsSectionAction"
+            />
 
             <group id="InsertTagsTemplate"
                    class="io.github.codingspeedup.tags.actions.InsertTagsTemplateGroup"
                    popup="true">
                 <action id="InsertTagsTemplateBlank"
-                        class="io.github.codingspeedup.tags.actions.InsertTagsTemplateAction">
-                </action>
+                        class="io.github.codingspeedup.tags.actions.InsertTagsTemplateAction"
+                />
                 <action id="InsertTagsTemplateLibrary"
-                        class="io.github.codingspeedup.tags.actions.InsertTagsTemplateAction">
-                </action>
+                        class="io.github.codingspeedup.tags.actions.InsertTagsTemplateAction"
+                />
             </group>
+
+            <separator/>
+
+            <action id="StripTags"
+                    class="io.github.codingspeedup.tags.actions.StripTagsAction"
+            />
 
         </group>
     </actions>

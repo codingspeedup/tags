@@ -3,6 +3,7 @@ package io.github.codingspeedup.tags.intentions;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
+import io.github.codingspeedup.tags.engine.core.FileTypeModel;
 import org.jetbrains.annotations.NotNull;
 
 public class ReviewIntention extends BaseTagsIntention {
@@ -14,7 +15,7 @@ public class ReviewIntention extends BaseTagsIntention {
 
     @Override
     public boolean isAvailable(@NotNull Project project, Editor editor, PsiFile file) {
-        return hasSelection(editor);
+        return hasSelection(editor) && FileTypeModel.of(file.getName()).isPresent();
     }
 
     @Override

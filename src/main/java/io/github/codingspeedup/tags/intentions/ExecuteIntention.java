@@ -15,6 +15,11 @@ public class ExecuteIntention extends BaseTagsIntention {
     }
 
     @Override
+    public boolean isAvailable(@NotNull Project project, Editor editor, PsiFile file) {
+        return true;
+    }
+
+    @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile file) {
         var actionManager = ActionManager.getInstance();
         var action = actionManager.getAction("SendToLLM");

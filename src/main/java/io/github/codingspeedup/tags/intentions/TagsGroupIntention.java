@@ -7,6 +7,8 @@ import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
 import com.intellij.psi.PsiFile;
 import io.github.codingspeedup.tags.MyMessageBundle;
+import io.github.codingspeedup.tags.engine.core.ChatMdUtl;
+import io.github.codingspeedup.tags.engine.core.FileTypeModel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -16,6 +18,17 @@ public class TagsGroupIntention extends BaseTagsIntention {
     @Override
     public @NotNull String getText() {
         return MyMessageBundle.message("plugin.label");
+    }
+
+    @Override
+    public boolean isAvailable(@NotNull Project project, Editor editor, PsiFile file) {
+        var isAvailable = file != null && editor != null;
+        if (isAvailable) {
+            isAvailable = editor.getSelectionModel().hasSelection()
+                    || ChatMdUtl.isChatMd(file.getName())
+                    || FileTypeModel.of(file.getName()).isPresent();
+        }
+        return isAvailable;
     }
 
     @Override
