@@ -1,0 +1,18 @@
+parameters: {}
+
+system: |
+  You are an expert assistant. 
+  Focus on factual accuracy and logical consistency.
+
+prompts:
+  - id: "explain"
+    template: |
+      Explain {{concept}}
+  - id: "review"
+    template: |
+      Review the following code snippet:
+      {{snippet}}
+  - id: "document"
+    template: |
+      Document the following code snippet:
+      {{snippet}}

@@ -14,7 +14,7 @@ import io.github.codingspeedup.tags.engine.core.ChatMdUtl;
 import io.github.codingspeedup.tags.engine.core.TagsResult;
 import io.github.codingspeedup.tags.engine.tags.SelectionPromptHandler;
 import io.github.codingspeedup.tags.engine.tags.TagsPromptHandler;
-import io.github.codingspeedup.tags.plugin.TagsUtl;
+import io.github.codingspeedup.tags.engine.core.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;

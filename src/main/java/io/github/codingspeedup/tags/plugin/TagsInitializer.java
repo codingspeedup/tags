@@ -2,7 +2,10 @@ package io.github.codingspeedup.tags.plugin;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
+import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.engine.core.ChatMdUtl;
+import io.github.codingspeedup.tags.engine.core.PromptLibrary;
+import io.github.codingspeedup.tags.engine.core.TagsUtl;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
@@ -14,15 +17,18 @@ public class TagsInitializer implements ProjectActivity {
     @Override
     public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         var logger = TagsUtl.getLogger(project);
-        logger.info("Initializing T.A.G.S.+ for project `" + project.getName() + "' ...");
+        logger.info("Initializing " + MyMessageBundle.message("plugin.label") + " for project `" + project.getName() + "' ...");
 
         try {
-            var chatMdFolder = TagsUtl.getChatFolder(project).orElseThrow();
+            var pl = TagsUtl.resolvePromptLibrary(project).orElseThrow();
+            new PromptLibrary(pl.toNioPath());
+
+            var chatMdFolder = TagsUtl.resolveChatFolder(project).orElseThrow();
             ChatMdUtl.ensureDefaultChat(chatMdFolder);
 
-            logger.info("T.A.G.S.+ initialized.");
+            logger.info(MyMessageBundle.message("plugin.label") + " plugin initialized.");
         } catch (Exception e) {
-            logger.error("T.A.G.S.+ failed to initialize.", e);
+            logger.error(MyMessageBundle.message("plugin.label") + " plugin failed to initialize.", e);
         }
 
         return Unit.INSTANCE;

@@ -6,7 +6,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.engine.core.FileTypeModel;
 import io.github.codingspeedup.tags.engine.tags.TagsEditor;
-import io.github.codingspeedup.tags.plugin.TagsUtl;
+import io.github.codingspeedup.tags.engine.core.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
 public class StripTagsAction extends EditTagsActionBase {
