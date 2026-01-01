@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.engine.core;
+package io.github.codingspeedup.tags.utils;
 
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
@@ -50,15 +50,19 @@ public final class TagsUtl {
         }
     }
 
-    public static Optional<String> readContent(Project project, VirtualFile virtualFile) {
+    public static Optional<String> readText(Project project, VirtualFile virtualFile) {
         if (virtualFile == null || !virtualFile.isValid()) {
             return Optional.empty();
         }
 
-        // Refresh outside ReadAction to avoid deadlocks
-        virtualFile.refresh(false, false);
+        var app = ApplicationManager.getApplication();
 
-        var content = ApplicationManager.getApplication().runReadAction((Computable<String>) () -> {
+        if (!app.isReadAccessAllowed()) {
+            // Refresh outside ReadAction to avoid deadlocks
+            virtualFile.refresh(false, false);
+        }
+
+        var content = app.runReadAction((Computable<String>) () -> {
             var docManager = FileDocumentManager.getInstance();
 
             // Use cached document first to avoid unnecessary loading if possible
@@ -82,6 +86,21 @@ public final class TagsUtl {
         });
 
         return Optional.ofNullable(content);
+    }
+
+    public static void writeText(@NotNull Project project, @NotNull VirtualFile file, @NotNull String content) {
+        Runnable runnable = () -> {
+            try {
+                VfsUtil.saveText(file, content);
+            } catch (IOException e) {
+                getLogger(project).error("Failed to write: " + file.getPath(), e);
+            }
+        };
+        if (ApplicationManager.getApplication().isWriteAccessAllowed()) {
+            runnable.run();
+        } else {
+            WriteCommandAction.runWriteCommandAction(project, runnable);
+        }
     }
 
     public static TagsConsoleService getLogger(Project project) {
@@ -152,7 +171,7 @@ public final class TagsUtl {
                                 
                                 """;
                     }
-                    yamlFile.setBinaryContent(yamlContent.getBytes(StandardCharsets.UTF_8));
+                    writeText(project, yamlFile, yamlContent);
 
                     finalResult[0] = yamlFile;
                 } catch (IOException e) {
@@ -168,31 +187,49 @@ public final class TagsUtl {
 
     public static Optional<VirtualFile> resolvePluginFolder(@NotNull Project project, String... path) {
         var projectRoot = ProjectUtil.guessProjectDir(project);
-
-        if (projectRoot == null) return Optional.empty();
+        if (projectRoot == null) {
+            return Optional.empty();
+        }
 
         final var result = new VirtualFile[]{projectRoot};
+        var tagsRootSegment = ".tags";
 
-        WriteCommandAction.runWriteCommandAction(project, () -> {
-            try {
-                var tagsRootSegment = ".tags";
-                var tagsRoot = result[0].findChild(tagsRootSegment);
-                if (tagsRoot == null) {
-                    tagsRoot = getOrCreateChild(result[0], tagsRootSegment);
-                    generateGitignore(project, tagsRoot);
-                }
-                result[0] = tagsRoot;
-
+        if (ApplicationManager.getApplication().isReadAccessAllowed()) {
+            var current = projectRoot.findChild(tagsRootSegment);
+            if (current != null) {
                 for (var segment : path) {
                     if (StringUtils.isNotBlank(segment)) {
-                        result[0] = getOrCreateChild(result[0], segment);
+                        current = current.findChild(segment);
+                        if (current == null) {
+                            break;
+                        }
                     }
                 }
-            } catch (IOException e) {
-                getLogger(project).error("Failed to create folder", e);
+                result[0] = current;
+            } else {
                 result[0] = null;
             }
-        });
+        } else {
+            WriteCommandAction.runWriteCommandAction(project, () -> {
+                try {
+                    var tagsRoot = result[0].findChild(tagsRootSegment);
+                    if (tagsRoot == null) {
+                        tagsRoot = getOrCreateChild(result[0], tagsRootSegment);
+                        generateGitignore(project, tagsRoot);
+                    }
+                    result[0] = tagsRoot;
+
+                    for (var segment : path) {
+                        if (StringUtils.isNotBlank(segment)) {
+                            result[0] = getOrCreateChild(result[0], segment);
+                        }
+                    }
+                } catch (IOException e) {
+                    getLogger(project).error("Failed to create folder", e);
+                    result[0] = null;
+                }
+            });
+        }
 
         return Optional.ofNullable(result[0]);
     }
@@ -204,7 +241,7 @@ public final class TagsUtl {
 
     private static void generateGitignore(Project project, VirtualFile tagsRoot) throws IOException {
         var gitignoreFile = tagsRoot.createChildData(project, ".gitignore");
-        gitignoreFile.setBinaryContent("*\n".getBytes(StandardCharsets.UTF_8));
+        writeText(project, gitignoreFile, "*\n");
     }
 
     public static void sendToClipboard(Project project, TagsResult tagsResult) {

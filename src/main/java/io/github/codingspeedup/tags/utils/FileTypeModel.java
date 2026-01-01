@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.engine.core;
+package io.github.codingspeedup.tags.utils;
 
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;

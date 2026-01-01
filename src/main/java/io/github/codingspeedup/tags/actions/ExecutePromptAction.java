@@ -8,31 +8,25 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.engine.core.ChatMdUtl;
-import io.github.codingspeedup.tags.engine.core.FileTypeModel;
-import io.github.codingspeedup.tags.engine.core.TagsResult;
-import io.github.codingspeedup.tags.engine.core.TagsUtl;
-import io.github.codingspeedup.tags.engine.tags.ChatMdPromptHandler;
-import io.github.codingspeedup.tags.engine.tags.SelectionPromptHandler;
-import io.github.codingspeedup.tags.engine.tags.TagsPromptHandler;
+import io.github.codingspeedup.tags.utils.*;
+import io.github.codingspeedup.tags.engine.ChatMdPromptHandler;
+import io.github.codingspeedup.tags.engine.SelectionPromptHandler;
+import io.github.codingspeedup.tags.engine.TagsPromptHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
 public class ExecutePromptAction extends AnAction {
 
-    public static final String CORE_ID = "SendToLLM";
-
-    private final String id;
+    private final PromptRef promptRef;
 
     @SuppressWarnings("unused")
     public ExecutePromptAction() {
-        this.id = CORE_ID;
+        this.promptRef = new PromptRef(TagsUtl.PLUGIN_PROMPT_LIBRARY_REF + ".");
     }
 
-    public ExecutePromptAction(String id, String text) {
-        // super(text);
-        this.id = id;
+    public ExecutePromptAction(String promptRef, String text) {
+        this.promptRef = new PromptRef(promptRef);
         getTemplatePresentation().setText(text);
     }
 
@@ -46,7 +40,7 @@ public class ExecutePromptAction extends AnAction {
                 isAvailable = editor != null;
                 if (isAvailable) {
                     isAvailable = editor.getSelectionModel().hasSelection()
-                            || ChatMdUtl.isChatMd(file.getName())
+                            || TagsGroup.isChatMd(file.getName())
                             || FileTypeModel.of(file.getName()).isPresent();
                 }
             }
@@ -100,9 +94,9 @@ public class ExecutePromptAction extends AnAction {
                     Optional<TagsResult> tagsResult;
 
                     if (editorSelection != null) {
-                        tagsResult = new SelectionPromptHandler(editorFileName, editorSelection).process(project, indicator);
+                        tagsResult = new SelectionPromptHandler(editorFileName, editorSelection, promptRef).process(project, indicator);
                     } else {
-                        if (ChatMdUtl.isChatMd(editorFileName)) {
+                        if (TagsGroup.isChatMd(editorFileName)) {
                             tagsResult = new ChatMdPromptHandler(documentText, documentOffset).process(project, indicator);
                         } else {
                             tagsResult = new TagsPromptHandler(editorFileName, documentText, documentOffset).process(project, indicator);

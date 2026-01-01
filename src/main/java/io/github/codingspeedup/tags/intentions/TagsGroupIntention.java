@@ -7,8 +7,8 @@ import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
 import com.intellij.psi.PsiFile;
 import io.github.codingspeedup.tags.MyMessageBundle;
-import io.github.codingspeedup.tags.engine.core.ChatMdUtl;
-import io.github.codingspeedup.tags.engine.core.FileTypeModel;
+import io.github.codingspeedup.tags.actions.TagsGroup;
+import io.github.codingspeedup.tags.utils.FileTypeModel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class TagsGroupIntention extends BaseTagsIntention {
         var isAvailable = file != null && editor != null;
         if (isAvailable) {
             isAvailable = editor.getSelectionModel().hasSelection()
-                    || ChatMdUtl.isChatMd(file.getName())
+                    || TagsGroup.isChatMd(file.getName())
                     || FileTypeModel.of(file.getName()).isPresent();
         }
         return isAvailable;

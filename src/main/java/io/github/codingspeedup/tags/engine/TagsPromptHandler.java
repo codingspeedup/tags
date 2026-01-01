@@ -1,11 +1,11 @@
-package io.github.codingspeedup.tags.engine.tags;
+package io.github.codingspeedup.tags.engine;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
-import io.github.codingspeedup.tags.engine.core.*;
+import io.github.codingspeedup.tags.utils.*;
 import io.github.codingspeedup.tags.integration.LLM;
 import org.apache.commons.lang.StringUtils;
 

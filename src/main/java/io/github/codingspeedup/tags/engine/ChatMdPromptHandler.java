@@ -1,33 +1,34 @@
-package io.github.codingspeedup.tags.engine.tags;
+package io.github.codingspeedup.tags.engine;
 
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
-import dev.langchain4j.model.chat.request.ResponseFormat;
-import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.output.FinishReason;
-import io.github.codingspeedup.tags.engine.core.ActionResultGateway;
-import io.github.codingspeedup.tags.engine.core.PromptHandler;
-import io.github.codingspeedup.tags.engine.core.PromptUtl;
-import io.github.codingspeedup.tags.engine.core.TagsResult;
 import io.github.codingspeedup.tags.integration.LLM;
-import lombok.SneakyThrows;
+import io.github.codingspeedup.tags.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.engine.core.ChatMdUtl.CHAT_MD_EXTENSION;
-import static io.github.codingspeedup.tags.engine.core.PromptUtl.*;
+import static io.github.codingspeedup.tags.utils.PromptUtl.*;
 
 public class ChatMdPromptHandler implements PromptHandler {
+
+    public static final String CHAT_MD_EXTENSION = ".chat.md";
+
+    private static final String DEFAULT_CHAT_MD = "default" + CHAT_MD_EXTENSION;
 
     private final String content;
     private final int contentOffset;
@@ -35,6 +36,28 @@ public class ChatMdPromptHandler implements PromptHandler {
     public ChatMdPromptHandler(String content, int contentOffset) {
         this.content = content;
         this.contentOffset = contentOffset;
+    }
+
+    public static void ensureDefaultChat(Project project, VirtualFile chatMdRoot) {
+        if (chatMdRoot.findChild(DEFAULT_CHAT_MD) != null) {
+            return;
+        }
+        // Use runWriteCommandAction to handle the thread switch to EDT
+        WriteCommandAction.runWriteCommandAction(project, () -> {
+            try {
+                // Re-check inside lock for safety
+                var existing = chatMdRoot.findChild(DEFAULT_CHAT_MD);
+                var file = (existing != null) ? existing :
+                        chatMdRoot.createChildData(ChatMdPromptHandler.class, DEFAULT_CHAT_MD);
+
+                var builtinLib = PromptLibrary.of(project);
+                var chatMd = startChatMd(builtinLib).append(PromptUtl.renderUserBlock(null));
+
+                TagsUtl.writeText(project, file, chatMd.toString());
+            } catch (IOException e) {
+                TagsUtl.getLogger(project).error("Could not create default chat file", e);
+            }
+        });
     }
 
     public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
@@ -77,7 +100,7 @@ public class ChatMdPromptHandler implements PromptHandler {
                 .map(this::getContent)
                 .filter(StringUtils::isNotBlank)
                 .findFirst()
-                .map(this::collectParameters)
+                .map(data -> buildChatRequestParameters(PromptUtl.parseProperties(data)))
                 .orElse(ChatRequestParameters.builder().build());
 
         var llmResponse = system.map(systemMessage -> LLM.doChat(llmParameters, systemMessage, userMessage))
@@ -186,72 +209,6 @@ public class ChatMdPromptHandler implements PromptHandler {
             }
         }
         return StringUtils.isBlank(content) ? Optional.empty() : Optional.of(content);
-    }
-
-
-    @SneakyThrows
-    private ChatRequestParameters collectParameters(String data) {
-        var properties = PromptUtl.parseProperties(data);
-        var llmParameters = ChatRequestParameters.builder();
-        for (var parameterName : LLM_PARAMETERS_NAMES) {
-            var propertyValue = properties.getProperty(parameterName);
-            if (StringUtils.isNotBlank(propertyValue)) {
-                for (var method : llmParameters.getClass().getMethods()) {
-                    if (StringUtils.equals(method.getName(), parameterName) && method.getParameterCount() == 1) {
-                        var parameter = method.getParameters()[0];
-                        var parameterValue = convert(propertyValue, parameter.getType());
-                        if (parameterValue != null) {
-                            method.invoke(llmParameters, parameterValue);
-                        }
-                    }
-                }
-            }
-        }
-        return llmParameters.build();
-    }
-
-    private Object convert(String propertyValue, Class<?> parameterType) {
-        if (parameterType == String.class) {
-            return propertyValue;
-        }
-
-        try {
-            propertyValue = StringUtils.trimToEmpty(propertyValue);
-
-            if (Number.class.isAssignableFrom(parameterType)) {
-                var numericValue = new BigDecimal(propertyValue);
-                if (parameterType == Integer.class) {
-                    return numericValue.intValue();
-                }
-                if (parameterType == Double.class) {
-                    return numericValue.doubleValue();
-                }
-            }
-
-            if (List.class.isAssignableFrom(parameterType)) {
-                return Arrays.stream(propertyValue.split(","))
-                        .map(StringUtils::trimToEmpty)
-                        .filter(StringUtils::isNotBlank)
-                        .collect(Collectors.toList());
-            }
-
-            propertyValue = propertyValue.toUpperCase(Locale.ROOT);
-
-            if (parameterType == ToolChoice.class) {
-                return ToolChoice.valueOf(propertyValue);
-            }
-
-            if (parameterType == ResponseFormat.class) {
-                if ("JSON".equals(propertyValue)) {
-                    return ResponseFormat.JSON;
-                }
-                return ResponseFormat.TEXT;
-            }
-
-        } catch (Exception e) {
-            // Ignore
-        }
-        return null;
     }
 
 }

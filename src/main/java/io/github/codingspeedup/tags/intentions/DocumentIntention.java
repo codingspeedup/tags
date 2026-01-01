@@ -3,7 +3,7 @@ package io.github.codingspeedup.tags.intentions;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import io.github.codingspeedup.tags.engine.core.FileTypeModel;
+import io.github.codingspeedup.tags.utils.FileTypeModel;
 import org.jetbrains.annotations.NotNull;
 
 public class DocumentIntention extends BaseTagsIntention {

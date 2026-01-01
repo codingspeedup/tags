@@ -4,9 +4,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.engine.core.FileTypeModel;
-import io.github.codingspeedup.tags.engine.tags.TagsEditor;
-import io.github.codingspeedup.tags.engine.core.TagsUtl;
+import io.github.codingspeedup.tags.utils.FileTypeModel;
+import io.github.codingspeedup.tags.engine.TagsEditor;
+import io.github.codingspeedup.tags.utils.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
 public class InsertTagsSectionAction extends EditTagsActionBase {

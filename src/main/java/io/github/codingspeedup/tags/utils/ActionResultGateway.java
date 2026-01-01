@@ -1,8 +1,9 @@
-package io.github.codingspeedup.tags.engine.core;
+package io.github.codingspeedup.tags.utils;
 
 public enum ActionResultGateway {
 
     BUFFER,
+    CHAT,
     CLIPBOARD,
     CONTENT,
 

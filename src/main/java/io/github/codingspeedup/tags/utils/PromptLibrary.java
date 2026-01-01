@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.engine.core;
+package io.github.codingspeedup.tags.utils;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -71,8 +71,12 @@ public class PromptLibrary {
         var loaderOptions = new LoaderOptions();
         var yaml = new Yaml(new SafeConstructor(loaderOptions));
         @SuppressWarnings("unchecked")
-        var data = (Map<String, Object>) yaml.load(TagsUtl.readContent(project, libraryFile).orElseThrow());
+        var data = (Map<String, Object>) yaml.load(TagsUtl.readText(project, libraryFile).orElseThrow());
         return new PromptLibrary(name, data);
+    }
+
+    public static PromptLibrary of(Project project) {
+        return PromptLibrary.of(project, TagsUtl.resolvePromptLibrary(project).orElseThrow());
     }
 
 }

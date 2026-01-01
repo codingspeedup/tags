@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.engine.core;
+package io.github.codingspeedup.tags.utils;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;

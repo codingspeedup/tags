@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.engine.core;
+package io.github.codingspeedup.tags.utils;
 
 import org.junit.jupiter.api.Test;
 

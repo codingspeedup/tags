@@ -1,9 +1,8 @@
 package io.github.codingspeedup.tags.actions;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.*;
+import io.github.codingspeedup.tags.utils.PromptLibrary;
+import io.github.codingspeedup.tags.utils.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,21 +15,33 @@ public class ExecutePromptGroup extends DefaultActionGroup {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        e.getPresentation().setEnabled(ExecutePromptAction.isAvailable(e));
+        var isAvailable = e.getProject() != null;
+        if (isAvailable) {
+            var file = e.getData(CommonDataKeys.VIRTUAL_FILE);
+            isAvailable = file != null;
+            if (isAvailable) {
+                var editor = e.getData(CommonDataKeys.EDITOR);
+                isAvailable = editor != null;
+                if (isAvailable) {
+                    isAvailable = editor.getSelectionModel().hasSelection();
+                }
+            }
+        }
+        e.getPresentation().setEnabled(isAvailable);
     }
 
     @Override
     @NotNull
     public AnAction[] getChildren(@Nullable AnActionEvent e) {
-        if (e == null) return AnAction.EMPTY_ARRAY;
-
-        var actions = new AnAction[3];
-        for (int i = 0; i < 3; i++) {
-            var actionId = ExecutePromptAction.CORE_ID + "-" + i;
-            actions[i] = new ExecutePromptAction(actionId, "Prompt As " + (i + 1));
+        if (e == null) {
+            return AnAction.EMPTY_ARRAY;
         }
-
-        return actions;
+        var builtinLib = PromptLibrary.of(e.getProject());
+        return builtinLib.getPrompts().keySet().stream()
+                .filter(promptId -> builtinLib.getVariables(promptId).size() == 1)
+                .map(promptId ->
+                        new ExecutePromptAction(TagsUtl.PLUGIN_PROMPT_LIBRARY_REF + "." + promptId, promptId))
+                .toArray(AnAction[]::new);
     }
 
 }

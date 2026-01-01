@@ -1,9 +1,9 @@
-package io.github.codingspeedup.tags.engine.tags;
+package io.github.codingspeedup.tags.engine;
 
-import io.github.codingspeedup.tags.engine.core.FileTypeModel;
-import io.github.codingspeedup.tags.engine.core.TagsResult;
-import io.github.codingspeedup.tags.engine.core.ActionResultGateway;
-import io.github.codingspeedup.tags.engine.core.TagsBlock;
+import io.github.codingspeedup.tags.utils.FileTypeModel;
+import io.github.codingspeedup.tags.utils.TagsResult;
+import io.github.codingspeedup.tags.utils.ActionResultGateway;
+import io.github.codingspeedup.tags.utils.TagsBlock;
 import lombok.AllArgsConstructor;
 
 import java.util.Locale;

@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import io.github.codingspeedup.tags.engine.core.FileTypeModel;
+import io.github.codingspeedup.tags.utils.FileTypeModel;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
