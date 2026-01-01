@@ -7,7 +7,6 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ScrollType;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileTypes.FileTypeManager;
@@ -101,7 +100,7 @@ public final class TagsUtl {
                                   Provide clear, accurate, and direct responses to the user's instructions.
                                 
                                 prompts:
-                                  - id: "loremIpsum"
+                                  - id: "LoremIpsum"
                                     template: |
                                       Lorem ipsum...
                                 
@@ -109,7 +108,6 @@ public final class TagsUtl {
                     }
                     yamlFile.setBinaryContent(yamlContent.getBytes(StandardCharsets.UTF_8));
 
-                    FileDocumentManager.getInstance().saveAllDocuments();
                     finalResult[0] = yamlFile;
                 } catch (IOException e) {
                     getLogger(project).error("Failed to create prompt template library " + finalFileName, e);
@@ -161,7 +159,6 @@ public final class TagsUtl {
     private static void generateGitignore(Project project, VirtualFile tagsRoot) throws IOException {
         var gitignoreFile = tagsRoot.createChildData(project, ".gitignore");
         gitignoreFile.setBinaryContent("*\n".getBytes(StandardCharsets.UTF_8));
-        FileDocumentManager.getInstance().saveAllDocuments();
     }
 
     public static void sendToClipboard(Project project, TagsResult tagsResult) {

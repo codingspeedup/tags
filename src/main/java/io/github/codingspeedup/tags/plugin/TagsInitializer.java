@@ -1,10 +1,10 @@
 package io.github.codingspeedup.tags.plugin;
 
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
 import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.engine.core.ChatMdUtl;
-import io.github.codingspeedup.tags.engine.core.PromptLibrary;
 import io.github.codingspeedup.tags.engine.core.TagsUtl;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
@@ -20,8 +20,8 @@ public class TagsInitializer implements ProjectActivity {
         logger.info("Initializing " + MyMessageBundle.message("plugin.label") + " for project `" + project.getName() + "' ...");
 
         try {
-            var pl = TagsUtl.resolvePromptLibrary(project).orElseThrow();
-            new PromptLibrary(pl.toNioPath());
+            TagsUtl.resolvePromptLibrary(project).orElseThrow();
+            FileDocumentManager.getInstance().saveAllDocuments();
 
             var chatMdFolder = TagsUtl.resolveChatFolder(project).orElseThrow();
             ChatMdUtl.ensureDefaultChat(chatMdFolder);

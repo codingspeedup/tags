@@ -29,7 +29,7 @@ public final class ChatMdUtl {
                     var newFile = chatMdRoot.createChildData(ChatMdUtl.class, DEFAULT_CHAT_MD);
                     VfsUtil.saveText(newFile, String.format("""
                             #### 🛠️ parameters
-                            ```%s
+                             ```%s
                             maxOutputTokens=1000
                             temperature=0.7
                             ```

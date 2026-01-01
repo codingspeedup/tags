@@ -67,6 +67,10 @@
                     class="io.github.codingspeedup.tags.actions.ExecutePromptAction"
             />
 
+            <group id="SendToLLMAs"
+                   class="io.github.codingspeedup.tags.actions.ExecutePromptGroup"
+                   popup="true"/>
+
             <separator/>
 
             <action id="InsertTagsSection"
@@ -79,9 +83,9 @@
                 <action id="InsertTagsTemplateBlank"
                         class="io.github.codingspeedup.tags.actions.InsertTagsTemplateAction"
                 />
-                <action id="InsertTagsTemplateLibrary"
-                        class="io.github.codingspeedup.tags.actions.InsertTagsTemplateAction"
-                />
+                <group id="InsertTagsTemplateFromLibrary"
+                       class="io.github.codingspeedup.tags.actions.InsertTagsTemplateFromLibraryGroup"
+                       popup="true"/>
             </group>
 
             <separator/>

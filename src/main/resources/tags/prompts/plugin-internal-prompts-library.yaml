@@ -5,14 +5,14 @@ system: |
   Focus on factual accuracy and logical consistency.
 
 prompts:
-  - id: "explain"
+  - id: "Explain"
     template: |
       Explain {{concept}}
-  - id: "review"
+  - id: "Review"
     template: |
       Review the following code snippet:
       {{snippet}}
-  - id: "document"
+  - id: "Document"
     template: |
       Document the following code snippet:
       {{snippet}}

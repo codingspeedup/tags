@@ -8,18 +8,33 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.engine.core.FileTypeModel;
-import io.github.codingspeedup.tags.engine.tags.ChatMdPromptHandler;
 import io.github.codingspeedup.tags.engine.core.ChatMdUtl;
+import io.github.codingspeedup.tags.engine.core.FileTypeModel;
 import io.github.codingspeedup.tags.engine.core.TagsResult;
+import io.github.codingspeedup.tags.engine.core.TagsUtl;
+import io.github.codingspeedup.tags.engine.tags.ChatMdPromptHandler;
 import io.github.codingspeedup.tags.engine.tags.SelectionPromptHandler;
 import io.github.codingspeedup.tags.engine.tags.TagsPromptHandler;
-import io.github.codingspeedup.tags.engine.core.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
 public class ExecutePromptAction extends AnAction {
+
+    public static final String CORE_ID = "SendToLLM";
+
+    private final String id;
+
+    @SuppressWarnings("unused")
+    public ExecutePromptAction() {
+        this.id = CORE_ID;
+    }
+
+    public ExecutePromptAction(String id, String text) {
+        // super(text);
+        this.id = id;
+        getTemplatePresentation().setText(text);
+    }
 
     public static boolean isAvailable(@NotNull AnActionEvent e) {
         var isAvailable = e.getProject() != null;

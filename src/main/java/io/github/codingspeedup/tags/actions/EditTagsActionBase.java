@@ -5,9 +5,15 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import io.github.codingspeedup.tags.engine.core.FileTypeModel;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+@NoArgsConstructor
 public abstract class EditTagsActionBase extends AnAction {
+
+    public EditTagsActionBase(String text) {
+        super(text);
+    }
 
     public static boolean isAvailable(@NotNull AnActionEvent e) {
         var isAvailable = e.getProject() != null;
