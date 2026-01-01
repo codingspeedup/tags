@@ -1,6 +1,7 @@
 package io.github.codingspeedup.tags.engine.tags;
 
 import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.project.Project;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
@@ -37,7 +38,7 @@ public class TagsPromptHandler implements PromptHandler {
         return contentSections;
     }
 
-    public Optional<TagsResult> process(ProgressIndicator indicator) {
+    public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
         var block = ftModel.identifyTemplates(fileContent).stream()
                 .filter(t -> t.contains(fileOffset))
                 .findFirst();
@@ -78,14 +79,14 @@ public class TagsPromptHandler implements PromptHandler {
     }
 
 
-    private ChatRequest compileLlmRequest(TemplateBlock template) {
-        var userTemplate = PromptTemplate.from(template.getTemplate());
+    private ChatRequest compileLlmRequest(TemplateBlock templateBlock) {
+        var userTemplate = PromptTemplate.from(templateBlock.getTemplate());
 
         var arguments = new HashMap<String, Object>();
-        template.getArguments().stringPropertyNames()
-                .forEach(key -> arguments.put(key, resolveArgument(template.getArguments().getProperty(key))));
+        templateBlock.getArguments().stringPropertyNames()
+                .forEach(key -> arguments.put(key, resolveArgument(templateBlock.getArguments().getProperty(key))));
 
-        var userVariables = PromptUtl.findVariables(userTemplate.template());
+        var userVariables = PromptUtl.findVariables(userTemplate);
         userVariables.forEach(key -> {
             if (!arguments.containsKey(key)) {
                 arguments.put(key, "∅");
@@ -127,12 +128,12 @@ public class TagsPromptHandler implements PromptHandler {
         var bufferContent = new StringBuilder();
         chatRequest.messages().forEach(message -> {
             switch (message.type()) {
-                case SYSTEM -> bufferContent.append(PromptUtl.getSystemBlock(message.toString()));
-                case USER -> bufferContent.append(PromptUtl.getUserBlock(message.toString()));
+                case SYSTEM -> bufferContent.append(PromptUtl.renderSystemBlock(message.toString()));
+                case USER -> bufferContent.append(PromptUtl.renderUserBlock(message.toString()));
             }
         });
         var bufferOffset = bufferContent.length() + 1;
-        bufferContent.append(PromptUtl.getAiBlock(chatResponse.aiMessage().text()));
+        bufferContent.append(PromptUtl.renderAiBlock(chatResponse.aiMessage().text()));
         return new BufferContent(bufferContent.toString(), bufferOffset);
     }
 

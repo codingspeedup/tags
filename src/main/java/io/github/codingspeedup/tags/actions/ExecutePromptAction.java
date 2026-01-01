@@ -100,12 +100,12 @@ public class ExecutePromptAction extends AnAction {
                     Optional<TagsResult> tagsResult;
 
                     if (editorSelection != null) {
-                        tagsResult = new SelectionPromptHandler(editorFileName, editorSelection).process(indicator);
+                        tagsResult = new SelectionPromptHandler(editorFileName, editorSelection).process(project, indicator);
                     } else {
                         if (ChatMdUtl.isChatMd(editorFileName)) {
-                            tagsResult = new ChatMdPromptHandler(documentText, documentOffset).process(indicator);
+                            tagsResult = new ChatMdPromptHandler(documentText, documentOffset).process(project, indicator);
                         } else {
-                            tagsResult = new TagsPromptHandler(editorFileName, documentText, documentOffset).process(indicator);
+                            tagsResult = new TagsPromptHandler(editorFileName, documentText, documentOffset).process(project, indicator);
                         }
                     }
 

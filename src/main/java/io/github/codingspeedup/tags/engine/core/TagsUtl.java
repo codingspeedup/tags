@@ -7,12 +7,15 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ScrollType;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.ide.CopyPasteManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.util.Computable;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import io.github.codingspeedup.tags.plugin.TagsConsoleService;
@@ -37,6 +40,49 @@ public final class TagsUtl {
     public static final String PLUGIN_PROMPT_LIBRARY_REF = "~";
 
     private static final String PLUGIN_PROMPT_LIBRARY = "plugin-internal-prompts-library";
+
+    public static void saveAllDocuments() {
+        var application = ApplicationManager.getApplication();
+        if (application.isDispatchThread()) {
+            FileDocumentManager.getInstance().saveAllDocuments();
+        } else {
+            application.invokeLater(() -> FileDocumentManager.getInstance().saveAllDocuments());
+        }
+    }
+
+    public static Optional<String> readContent(Project project, VirtualFile virtualFile) {
+        if (virtualFile == null || !virtualFile.isValid()) {
+            return Optional.empty();
+        }
+
+        // Refresh outside ReadAction to avoid deadlocks
+        virtualFile.refresh(false, false);
+
+        var content = ApplicationManager.getApplication().runReadAction((Computable<String>) () -> {
+            var docManager = FileDocumentManager.getInstance();
+
+            // Use cached document first to avoid unnecessary loading if possible
+            var document = docManager.getCachedDocument(virtualFile);
+            if (document == null) {
+                // This will load the document into memory if not already there
+                document = docManager.getDocument(virtualFile);
+            }
+
+            if (document != null) {
+                return document.getText();
+            }
+
+            try {
+                // VfsUtil.loadText handles charset and stream closing automatically
+                return VfsUtil.loadText(virtualFile);
+            } catch (IOException e) {
+                getLogger(project).error("Error reading content from file " + virtualFile.getPath(), e);
+                return null;
+            }
+        });
+
+        return Optional.ofNullable(content);
+    }
 
     public static TagsConsoleService getLogger(Project project) {
         return project.getService(TagsConsoleService.class);

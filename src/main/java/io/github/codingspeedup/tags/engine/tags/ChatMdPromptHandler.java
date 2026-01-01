@@ -1,6 +1,7 @@
 package io.github.codingspeedup.tags.engine.tags;
 
 import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.project.Project;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
@@ -10,10 +11,10 @@ import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.output.FinishReason;
-import io.github.codingspeedup.tags.engine.core.TagsResult;
 import io.github.codingspeedup.tags.engine.core.ActionResultGateway;
 import io.github.codingspeedup.tags.engine.core.PromptHandler;
 import io.github.codingspeedup.tags.engine.core.PromptUtl;
+import io.github.codingspeedup.tags.engine.core.TagsResult;
 import io.github.codingspeedup.tags.integration.LLM;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.CollectionUtils;
@@ -24,7 +25,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.github.codingspeedup.tags.engine.core.ChatMdUtl.CHAT_MD_EXTENSION;
-import static io.github.codingspeedup.tags.engine.core.ChatMdUtl.PARAMETERS_BLOCK_INFO;
 import static io.github.codingspeedup.tags.engine.core.PromptUtl.*;
 
 public class ChatMdPromptHandler implements PromptHandler {
@@ -37,7 +37,7 @@ public class ChatMdPromptHandler implements PromptHandler {
         this.contentOffset = contentOffset;
     }
 
-    public Optional<TagsResult> process(ProgressIndicator indicator) {
+    public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
         var options = new MutableDataSet();
         var parser = Parser.builder(options).build();
         var document = parser.parse(content);
@@ -70,10 +70,7 @@ public class ChatMdPromptHandler implements PromptHandler {
         var userBlock = userBlocks.get(userBlockIndex);
         var userMessage = UserMessage.from(CHAT_MD_EXTENSION, getContent(userBlock));
 
-        var system = systemBlocks.stream()
-                .map(this::getContent)
-                .filter(StringUtils::isNotBlank)
-                .findFirst()
+        var system = extractMessage(systemBlocks, contentOffset)
                 .map(SystemMessage::from);
 
         var llmParameters = parametersBlocks.stream()
@@ -90,7 +87,7 @@ public class ChatMdPromptHandler implements PromptHandler {
             return Optional.empty();
         }
 
-        var assistantMessage = PromptUtl.getAiBlock(StringUtils.trimToEmpty(llmResponse.aiMessage().text()));
+        var assistantMessage = PromptUtl.renderAiBlock(StringUtils.trimToEmpty(llmResponse.aiMessage().text()));
         var insertionOffset = userBlock.getEndOffset() + 1;
 
         var hasFooter = false;
@@ -101,7 +98,7 @@ public class ChatMdPromptHandler implements PromptHandler {
                 break;
             }
         }
-        var additionalUserBlock = hasFooter ? StringUtils.EMPTY : PromptUtl.getUserBlock(null);
+        var additionalUserBlock = hasFooter ? StringUtils.EMPTY : PromptUtl.renderUserBlock(null);
 
         @SuppressWarnings("all")
         var newContent = new StringBuilder(contentLen + assistantMessage.length() + additionalUserBlock.length());
@@ -145,6 +142,50 @@ public class ChatMdPromptHandler implements PromptHandler {
             }
         }
         return blocks.size() - 1;
+    }
+
+    private Optional<String> extractMessage(List<FencedCodeBlock> blocks, int offset) {
+        if (CollectionUtils.isEmpty(blocks)) {
+            return Optional.empty();
+        }
+        var content = StringUtils.EMPTY;
+        if (blocks.size() == 1) {
+            content = getContent(blocks.get(0));
+        } else {
+            // find the block nearest to the offset (regardless if the offset is inside or outside the block)
+            // if the distance is equal prefer the block at the highest offset
+            FencedCodeBlock nearestBlock = null;
+            int minDistance = Integer.MAX_VALUE;
+
+            for (FencedCodeBlock block : blocks) {
+                int start = block.getStartOffset();
+                int end = block.getEndOffset();
+                int distance;
+
+                if (offset >= start && offset <= end) {
+                    distance = 0;
+                } else if (offset < start) {
+                    distance = start - offset;
+                } else {
+                    distance = offset - end;
+                }
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestBlock = block;
+                } else if (distance == minDistance) {
+                    if (nearestBlock != null && block.getStartOffset() > nearestBlock.getStartOffset()) {
+                        nearestBlock = block;
+                    } else if (nearestBlock == null) {
+                        nearestBlock = block;
+                    }
+                }
+            }
+            if (nearestBlock != null) {
+                content = getContent(nearestBlock);
+            }
+        }
+        return StringUtils.isBlank(content) ? Optional.empty() : Optional.of(content);
     }
 
 

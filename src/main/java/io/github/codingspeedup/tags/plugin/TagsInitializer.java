@@ -1,6 +1,5 @@
 package io.github.codingspeedup.tags.plugin;
 
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
 import io.github.codingspeedup.tags.MyMessageBundle;
@@ -21,11 +20,8 @@ public class TagsInitializer implements ProjectActivity {
 
         try {
             TagsUtl.resolvePromptLibrary(project).orElseThrow();
-            FileDocumentManager.getInstance().saveAllDocuments();
-
-            var chatMdFolder = TagsUtl.resolveChatFolder(project).orElseThrow();
-            ChatMdUtl.ensureDefaultChat(chatMdFolder);
-
+            ChatMdUtl.ensureDefaultChat(project, TagsUtl.resolveChatFolder(project).orElseThrow());
+            TagsUtl.saveAllDocuments();
             logger.info(MyMessageBundle.message("plugin.label") + " plugin initialized.");
         } catch (Exception e) {
             logger.error(MyMessageBundle.message("plugin.label") + " plugin failed to initialize.", e);

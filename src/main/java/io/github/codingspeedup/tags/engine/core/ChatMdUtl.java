@@ -2,6 +2,7 @@ package io.github.codingspeedup.tags.engine.core;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import lombok.AccessLevel;
@@ -14,7 +15,7 @@ import java.util.Locale;
 public final class ChatMdUtl {
 
     public static final String CHAT_MD_EXTENSION = ".chat.md";
-    public static final String PARAMETERS_BLOCK_INFO = "llm-parameters";
+
 
     private static final String DEFAULT_CHAT_MD = "default" + CHAT_MD_EXTENSION;
 
@@ -22,20 +23,15 @@ public final class ChatMdUtl {
         return fileName.toLowerCase(Locale.ROOT).endsWith(ChatMdUtl.CHAT_MD_EXTENSION);
     }
 
-    public static void ensureDefaultChat(VirtualFile chatMdRoot) {
+    public static void ensureDefaultChat(Project project, VirtualFile chatMdRoot) {
         if (chatMdRoot.findChild(DEFAULT_CHAT_MD) == null) {
             ApplicationManager.getApplication().invokeAndWait(() -> WriteAction.run(() -> {
                 try {
+                    var promptContext = PromptUtl.getDefaultPromptContext(project);
                     var newFile = chatMdRoot.createChildData(ChatMdUtl.class, DEFAULT_CHAT_MD);
-                    VfsUtil.saveText(newFile, String.format("""
-                            #### 🛠️ parameters
-                             ```%s
-                            maxOutputTokens=1000
-                            temperature=0.7
-                            ```
-                            """, PARAMETERS_BLOCK_INFO)
-                            + PromptUtl.getSystemBlock(PromptUtl.getDefaultSystemMessage())
-                            + PromptUtl.getUserBlock(null));
+                    VfsUtil.saveText(newFile, PromptUtl.renderParametersBlock(promptContext.getLeft())
+                            + PromptUtl.renderSystemBlock(promptContext.getRight())
+                            + PromptUtl.renderUserBlock(null));
                 } catch (IOException e) {
                     throw new RuntimeException("Could not create default chat file", e);
                 }

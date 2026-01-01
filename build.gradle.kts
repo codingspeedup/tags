@@ -18,8 +18,7 @@ repositories {
 dependencies {
     intellijPlatform {
         intellijIdeaCommunity("2023.1")
-        testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
-
+        // testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
 
         // Add plugin dependencies for compilation here, example:
         // bundledPlugin("com.intellij.java")
@@ -31,6 +30,10 @@ dependencies {
     implementation("dev.langchain4j:langchain4j:1.10.0")
     implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.10.0")
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 }
 
 intellijPlatform {
@@ -50,6 +53,10 @@ tasks {
     withType<JavaCompile> {
         sourceCompatibility = "17"
         targetCompatibility = "17"
+    }
+
+    test {
+        useJUnitPlatform()
     }
 }
 

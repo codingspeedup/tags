@@ -1,22 +1,23 @@
 package io.github.codingspeedup.tags.engine.core;
 
+import com.intellij.openapi.project.Project;
+import dev.langchain4j.model.input.PromptTemplate;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.StringReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PromptUtl {
 
+    public static final String PARAMETERS_BLOCK_INFO = "llm-parameters";
     public static final String SYSTEM_BLOCK_INFO = "llm-system-message";
     public static final String USER_BLOCK_INFO = "llm-user-message";
 
@@ -36,18 +37,32 @@ public final class PromptUtl {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public static String getDefaultSystemMessage() {
-        return """
-                Act as a senior engineer providing high-density, technically accurate info without fluff or polite filler.
-                Prioritize immediate Markdown code blocks and use minimal prose only for non-obvious logic.
-                """;
+    public static Pair<Properties, String> getDefaultPromptContext(Project project) {
+        var pLib = PromptLibrary.of(project, TagsUtl.resolvePromptLibrary(project).orElseThrow());
+        return Pair.of(pLib.getParameters(), pLib.getSystem().template());
     }
 
     public static String getCurrentTimeIso() {
         return LocalDateTime.now().format(FORMATTER);
     }
 
-    public static String getSystemBlock(String message) {
+
+    public static String renderParametersBlock(Properties parameters) {
+        var writer = new StringBuilder();
+        if (parameters != null) {
+            parameters.forEach((key, value) ->
+                    writer.append(key).append("=").append(value).append("\n")
+            );
+        }
+        return String.format("""
+                #### 🛠️ parameters
+                ```%s
+                %s
+                ```
+                """, PARAMETERS_BLOCK_INFO, writer);
+    }
+
+    public static String renderSystemBlock(String message) {
         return String.format("""
                 #### ⚙️ Intention
                 ```%s
@@ -56,7 +71,7 @@ public final class PromptUtl {
                 """, SYSTEM_BLOCK_INFO, StringUtils.trimToEmpty(message));
     }
 
-    public static String getUserBlock(String message) {
+    public static String renderUserBlock(String message) {
         return String.format("""
                 ### 👤 User
                 ```%s
@@ -65,7 +80,7 @@ public final class PromptUtl {
                 """, USER_BLOCK_INFO, StringUtils.trimToEmpty(message));
     }
 
-    public static String getAiBlock(String message) {
+    public static String renderAiBlock(String message) {
         return String.format("""
                 
                 #### 🤖 AI: %s
@@ -86,11 +101,10 @@ public final class PromptUtl {
 
     private static final Pattern LLM_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{\\{(.+?)}}");
 
-    public static Set<String> findVariables(String messageTemplate) {
-        var userVariables = new HashSet<String>();
-        var matcher = LLM_TEMPLATE_VARIABLE_PATTERN.matcher(messageTemplate);
+    public static Set<String> findVariables(PromptTemplate promptTemplate) {
+        var userVariables = new LinkedHashSet<String>();
+        var matcher = LLM_TEMPLATE_VARIABLE_PATTERN.matcher(promptTemplate.template());
         while (matcher.find()) {
-            // .trim() handles spaces like {{ name }} vs {{name}}
             userVariables.add(matcher.group(1).trim());
         }
         return userVariables;
