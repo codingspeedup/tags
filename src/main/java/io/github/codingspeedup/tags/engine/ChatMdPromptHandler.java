@@ -1,9 +1,7 @@
 package io.github.codingspeedup.tags.engine;
 
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
@@ -16,19 +14,15 @@ import io.github.codingspeedup.tags.utils.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.utils.PromptUtl.*;
+import static io.github.codingspeedup.tags.utils.PromptUtl.buildChatRequestParameters;
 
 public class ChatMdPromptHandler implements PromptHandler {
 
-    public static final String CHAT_MD_EXTENSION = ".chat.md";
-
-    private static final String DEFAULT_CHAT_MD = "default" + CHAT_MD_EXTENSION;
 
     private final String content;
     private final int contentOffset;
@@ -36,28 +30,6 @@ public class ChatMdPromptHandler implements PromptHandler {
     public ChatMdPromptHandler(String content, int contentOffset) {
         this.content = content;
         this.contentOffset = contentOffset;
-    }
-
-    public static void ensureDefaultChat(Project project, VirtualFile chatMdRoot) {
-        if (chatMdRoot.findChild(DEFAULT_CHAT_MD) != null) {
-            return;
-        }
-        // Use runWriteCommandAction to handle the thread switch to EDT
-        WriteCommandAction.runWriteCommandAction(project, () -> {
-            try {
-                // Re-check inside lock for safety
-                var existing = chatMdRoot.findChild(DEFAULT_CHAT_MD);
-                var file = (existing != null) ? existing :
-                        chatMdRoot.createChildData(ChatMdPromptHandler.class, DEFAULT_CHAT_MD);
-
-                var builtinLib = PromptLibrary.of(project);
-                var chatMd = startChatMd(builtinLib).append(PromptUtl.renderUserBlock(null));
-
-                TagsUtl.writeText(project, file, chatMd.toString());
-            } catch (IOException e) {
-                TagsUtl.getLogger(project).error("Could not create default chat file", e);
-            }
-        });
     }
 
     public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
@@ -73,9 +45,9 @@ public class ChatMdPromptHandler implements PromptHandler {
             if (node instanceof FencedCodeBlock codeBlock) {
                 var info = codeBlock.getInfo().toString();
                 switch (info) {
-                    case PARAMETERS_BLOCK_INFO -> parametersBlocks.add(codeBlock);
-                    case SYSTEM_BLOCK_INFO -> systemBlocks.add(codeBlock);
-                    case USER_BLOCK_INFO -> userBlocks.add(codeBlock);
+                    case ChatUtl.PARAMETERS_BLOCK_INFO -> parametersBlocks.add(codeBlock);
+                    case ChatUtl.SYSTEM_BLOCK_INFO -> systemBlocks.add(codeBlock);
+                    case ChatUtl.USER_BLOCK_INFO -> userBlocks.add(codeBlock);
                 }
             }
             if (indicator.isCanceled()) {
@@ -91,7 +63,7 @@ public class ChatMdPromptHandler implements PromptHandler {
             return Optional.empty();
         }
         var userBlock = userBlocks.get(userBlockIndex);
-        var userMessage = UserMessage.from(CHAT_MD_EXTENSION, getContent(userBlock));
+        var userMessage = UserMessage.from(ChatUtl.CHAT_MD_EXTENSION, getContent(userBlock));
 
         var system = extractMessage(systemBlocks, contentOffset)
                 .map(SystemMessage::from);
@@ -110,7 +82,7 @@ public class ChatMdPromptHandler implements PromptHandler {
             return Optional.empty();
         }
 
-        var assistantMessage = PromptUtl.renderAiBlock(StringUtils.trimToEmpty(llmResponse.aiMessage().text()));
+        var assistantMessage = ChatUtl.renderAiBlock(StringUtils.trimToEmpty(llmResponse.aiMessage().text()));
         var insertionOffset = userBlock.getEndOffset() + 1;
 
         var hasFooter = false;
@@ -121,7 +93,7 @@ public class ChatMdPromptHandler implements PromptHandler {
                 break;
             }
         }
-        var additionalUserBlock = hasFooter ? StringUtils.EMPTY : PromptUtl.renderUserBlock(null);
+        var additionalUserBlock = hasFooter ? StringUtils.EMPTY : ChatUtl.renderUserBlock(StringUtils.EMPTY);
 
         @SuppressWarnings("all")
         var newContent = new StringBuilder(contentLen + assistantMessage.length() + additionalUserBlock.length());
@@ -130,8 +102,7 @@ public class ChatMdPromptHandler implements PromptHandler {
         newContent.append(content, insertionOffset, contentLen);
         newContent.append(additionalUserBlock);
 
-        var tagsResult = new TagsResult();
-        tagsResult.setGateway(ActionResultGateway.CONTENT);
+        var tagsResult = new TagsResult(ActionResultGateway.CONTENT);
         tagsResult.setContent(newContent.toString());
         tagsResult.setStartOffset(insertionOffset);
         tagsResult.setEndOffset(insertionOffset);

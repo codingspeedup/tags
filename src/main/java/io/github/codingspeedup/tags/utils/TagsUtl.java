@@ -3,6 +3,7 @@ package io.github.codingspeedup.tags.utils;
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -32,7 +33,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TagsUtl {
@@ -48,6 +51,15 @@ public final class TagsUtl {
         } else {
             application.invokeLater(() -> FileDocumentManager.getInstance().saveAllDocuments());
         }
+    }
+
+    public static Set<String> getOpenTabNames(Project project) {
+        return ReadAction.compute(() -> {
+            var manager = FileEditorManager.getInstance(project);
+            return Arrays.stream(manager.getOpenFiles())
+                    .map(VirtualFile::getName)
+                    .collect(Collectors.toSet());
+        });
     }
 
     public static Optional<String> readText(Project project, VirtualFile virtualFile) {
@@ -105,10 +117,6 @@ public final class TagsUtl {
 
     public static TagsConsoleService getLogger(Project project) {
         return project.getService(TagsConsoleService.class);
-    }
-
-    public static Optional<VirtualFile> resolveChatFolder(@NotNull Project project) {
-        return resolvePluginFolder(project, "chat");
     }
 
     public static Optional<VirtualFile> resolvePromptLibrary(@NotNull Project project, String... path) {
@@ -265,14 +273,14 @@ public final class TagsUtl {
         });
     }
 
-    public static void openReadOnlyBuffer(Project project, TagsResult tagsResult) {
-        var lvf = new LightVirtualFile(
+    public static void openChatBuffer(Project project, TagsResult tagsResult) {
+        var chatBuffer = new LightVirtualFile(
                 tagsResult.getBufferName(),
                 FileTypeManager.getInstance().getFileTypeByExtension(FilenameUtils.getExtension(tagsResult.getBufferName())),
                 tagsResult.getContent()
         );
-        lvf.setWritable(false);
-        var fileEditors = FileEditorManager.getInstance(project).openFile(lvf, true);
+        chatBuffer.setWritable(true);
+        var fileEditors = FileEditorManager.getInstance(project).openFile(chatBuffer, true);
         if (fileEditors.length > 0 && fileEditors[0] instanceof TextEditor textEditor) {
             var editor = textEditor.getEditor();
             editor.getCaretModel().moveToOffset(tagsResult.getStartOffset());

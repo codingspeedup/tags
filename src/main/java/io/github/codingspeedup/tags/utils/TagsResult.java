@@ -7,10 +7,14 @@ import lombok.Setter;
 @Setter
 public class TagsResult {
 
-    private ActionResultGateway gateway;
+    private final ActionResultGateway gateway;
     private String bufferName;
     private String content;
     private int startOffset;
     private int endOffset;
+
+    public TagsResult(ActionResultGateway gateway) {
+        this.gateway = gateway;
+    }
 
 }

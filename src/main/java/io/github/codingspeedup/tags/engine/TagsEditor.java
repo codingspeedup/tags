@@ -28,11 +28,10 @@ public class TagsEditor {
         newContent.append(fileContent, 0, tOffset);
         newContent.append(ftModel.getTPrefix()).append("Explain {{concept}}").append("\n");
         newContent.append(ftModel.getAPrefix()).append("concept=abstraction").append("\n");
-        newContent.append(ftModel.getGPrefix()).append(ActionResultGateway.BUFFER.name().toLowerCase(Locale.ROOT)).append("\n");
+        newContent.append(ftModel.getGPrefix()).append(ActionResultGateway.CHAT.name().toLowerCase(Locale.ROOT)).append("\n");
         newContent.append(fileContent, tOffset, fileContent.length());
 
-        var tagsResult = new TagsResult();
-        tagsResult.setGateway(ActionResultGateway.CONTENT);
+        var tagsResult = new TagsResult(ActionResultGateway.CONTENT);
         tagsResult.setContent(newContent.toString());
         tagsResult.setStartOffset(tOffset);
         tagsResult.setEndOffset(tOffset);
@@ -61,8 +60,7 @@ public class TagsEditor {
         newContent.append("\n").append(sPrefix).append("</").append(newSectionName).append(">\n");
         newContent.append(fileContent,  toOffset, fileContent.length());
 
-        var tagsResult = new TagsResult();
-        tagsResult.setGateway(ActionResultGateway.CONTENT);
+        var tagsResult = new TagsResult(ActionResultGateway.CONTENT);
         tagsResult.setContent(newContent.toString());
         tagsResult.setStartOffset(startOffset);
         tagsResult.setEndOffset(endOffset);
@@ -91,8 +89,7 @@ public class TagsEditor {
             return Optional.empty();
         }
 
-        var tagsResult = new TagsResult();
-        tagsResult.setGateway(ActionResultGateway.CONTENT);
+        var tagsResult = new TagsResult(ActionResultGateway.CONTENT);
         tagsResult.setContent(newContent.toString());
         tagsResult.setStartOffset(offset);
         tagsResult.setEndOffset(offset);

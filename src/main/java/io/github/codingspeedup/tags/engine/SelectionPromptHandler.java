@@ -4,10 +4,19 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
-import io.github.codingspeedup.tags.utils.*;
 import io.github.codingspeedup.tags.integration.LLM;
+import io.github.codingspeedup.tags.utils.ActionResultGateway;
+import io.github.codingspeedup.tags.utils.PromptHandler;
+import io.github.codingspeedup.tags.utils.PromptRef;
+import io.github.codingspeedup.tags.utils.TagsResult;
+import org.apache.commons.lang.StringUtils;
 
+import java.util.Map;
 import java.util.Optional;
+
+import static io.github.codingspeedup.tags.utils.ChatUtl.*;
+import static io.github.codingspeedup.tags.utils.PromptUtl.buildChatRequestParameters;
+import static io.github.codingspeedup.tags.utils.PromptUtl.findVariables;
 
 public class SelectionPromptHandler implements PromptHandler {
 
@@ -24,33 +33,39 @@ public class SelectionPromptHandler implements PromptHandler {
     public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
         var promptLib = promptRef.getLibrary(project);
 
-        var chatMd = new StringBuilder();
-
-
-
-        var chatRequestParameters = PromptUtl.buildChatRequestParameters(promptLib.getParameters());
-
-
+        var chatRequestParameters = buildChatRequestParameters(promptLib.getParameters());
         var systemMessage = SystemMessage.from(promptLib.getSystem().template());
-        var userMessage = UserMessage.from(selection);
+        UserMessage userMessage;
+        if (promptRef.getPromptId().isEmpty()) {
+            userMessage = UserMessage.from(selection);
+        } else {
+            var promptTemplate = promptLib.getPromptTemplate(promptRef.getPromptId());
+            var promptVars = findVariables(promptTemplate);
+            Map<String, Object> args = Map.of(promptVars.iterator().next(), selection);
+            userMessage = promptTemplate.apply(args).toUserMessage();
+        }
+
         if (indicator.isCanceled()) {
             return Optional.empty();
         }
-        var response = LLM.doChat(systemMessage, userMessage);
-        var mdContent = PromptUtl.renderUserBlock(selection);
-        var mdOffset = mdContent.length();
+        var response = LLM.doChat(chatRequestParameters, systemMessage, userMessage);
 
-        mdContent += PromptUtl.renderAiBlock(response.aiMessage().text())
-                + "\n\n---\n"
-                + PromptUtl.renderSystemBlock(promptLib.getSystem().template());
+        var mdContent = new StringBuilder();
+        mdContent.append(renderParametersBlock(promptLib.getParameters()));
+        mdContent.append(renderSystemBlock(promptLib.getSystem().template()));
+        mdContent.append(renderUserBlock(userMessage));
+        var aiBlock = renderAiBlock(response.aiMessage().text());
+        var mdOffset = mdContent.length() + aiBlock.indexOf("---");
+        mdContent.append(aiBlock);
+        mdContent.append(StringUtils.EMPTY);
 
-        var tagsResult = new TagsResult();
-        tagsResult.setGateway(ActionResultGateway.BUFFER);
-        tagsResult.setBufferName(fileName + ".result.md");
-        tagsResult.setContent(mdContent);
+        var tagsResult = new TagsResult(ActionResultGateway.CHAT);
+        tagsResult.setBufferName(nextBufferName(project, fileName));
+        tagsResult.setContent(mdContent.toString());
         tagsResult.setStartOffset(mdOffset);
         tagsResult.setEndOffset(mdOffset);
         return Optional.of(tagsResult);
     }
+
 
 }

@@ -9,7 +9,8 @@ system: |
 prompts:
   - id: "Explain"
     template: |
-      Explain {{concept}}
+      Explain the following construct
+      {{construct}}
   - id: "Review"
     template: |
       Review the following code snippet:

@@ -9,7 +9,7 @@ import java.util.Arrays;
 public class PromptRef {
 
     @Getter
-    private final String id;
+    private final String promptId;
     private final String[] path;
 
     public PromptRef(String ref) {
@@ -21,7 +21,7 @@ public class PromptRef {
                 .map(StringUtils::trimToEmpty)
                 .filter(StringUtils::isNotEmpty)
                 .toList();
-        this.id = ref.endsWith(".") ? StringUtils.EMPTY : chunks.get(chunks.size() - 1);
+        this.promptId = ref.endsWith(".") ? StringUtils.EMPTY : chunks.get(chunks.size() - 1);
         this.path = (ref.endsWith(".") ? chunks : chunks.subList(0, chunks.size() - 1)).toArray(String[]::new);
     }
 

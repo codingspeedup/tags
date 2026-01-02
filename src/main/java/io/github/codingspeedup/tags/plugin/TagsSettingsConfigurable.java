@@ -3,6 +3,7 @@ package io.github.codingspeedup.tags.plugin;
 import com.intellij.openapi.options.Configurable;
 import dev.langchain4j.model.catalog.ModelType;
 import dev.langchain4j.model.googleai.GoogleAiGeminiModelCatalog;
+import io.github.codingspeedup.tags.MyMessageBundle;
 import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
@@ -17,7 +18,7 @@ public class TagsSettingsConfigurable implements Configurable {
 
     @Override
     public String getDisplayName() {
-        return "T.A.G.S.+ Settings";
+        return MyMessageBundle.message("plugin.label") + " Settings";
     }
 
     @Override

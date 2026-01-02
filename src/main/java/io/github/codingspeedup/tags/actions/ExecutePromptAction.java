@@ -104,11 +104,11 @@ public class ExecutePromptAction extends AnAction {
                     }
 
                     tagsResult.ifPresentOrElse(
-                            gr -> ApplicationManager.getApplication().invokeLater(() -> {
-                                switch (gr.getGateway()) {
-                                    case CLIPBOARD -> TagsUtl.sendToClipboard(project, gr);
-                                    case BUFFER -> TagsUtl.openReadOnlyBuffer(project, gr);
-                                    case CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, gr);
+                            tr -> ApplicationManager.getApplication().invokeLater(() -> {
+                                switch (tr.getGateway()) {
+                                    case CHAT -> TagsUtl.openChatBuffer(project, tr);
+                                    case CLIPBOARD -> TagsUtl.sendToClipboard(project, tr);
+                                    case CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, tr);
                                 }
                             }, ModalityState.defaultModalityState()),
                             () -> logger.warn("Prompt execution produced no result")

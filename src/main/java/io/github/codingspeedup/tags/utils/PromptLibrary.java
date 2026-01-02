@@ -42,16 +42,17 @@ public class PromptLibrary {
         });
     }
 
+    public PromptTemplate getPromptTemplate(String promptId) {
+        return prompts.get(promptId);
+    }
+
     public Set<String> getVariables() {
         return PromptUtl.findVariables(system);
     }
 
     public Set<String> getVariables(String promptId) {
         var vars = getVariables();
-        var prompt = prompts.get(promptId);
-        if (prompt != null) {
-            vars.addAll(PromptUtl.findVariables(prompt));
-        }
+        vars.addAll(PromptUtl.findVariables(getPromptTemplate(promptId)));
         return vars;
     }
 
@@ -78,5 +79,6 @@ public class PromptLibrary {
     public static PromptLibrary of(Project project) {
         return PromptLibrary.of(project, TagsUtl.resolvePromptLibrary(project).orElseThrow());
     }
+
 
 }

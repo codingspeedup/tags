@@ -2,16 +2,20 @@ package io.github.codingspeedup.tags.engine;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
-import io.github.codingspeedup.tags.utils.*;
 import io.github.codingspeedup.tags.integration.LLM;
+import io.github.codingspeedup.tags.utils.*;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static io.github.codingspeedup.tags.utils.ChatUtl.nextBufferName;
 
 public class TagsPromptHandler implements PromptHandler {
 
@@ -52,19 +56,18 @@ public class TagsPromptHandler implements PromptHandler {
         var chatRequest = compileLlmRequest(templateBlock);
         var chatResponse = LLM.doChat(chatRequest);
 
-        var tagsResult = new TagsResult();
-        tagsResult.setGateway(resolveGateway(templateBlock.getGateway()));
+        var tagsResult = new TagsResult(resolveGateway(templateBlock.getGateway()));
         switch (tagsResult.getGateway()) {
-            case CONTENT: {
-                var bc = buildNewContent(parseSectionName(templateBlock.getGateway()), chatResponse);
+            case CHAT: {
+                var bc = buildBuffer(chatRequest, chatResponse);
+                tagsResult.setBufferName(nextBufferName(project, fileName));
                 tagsResult.setContent(bc.content());
                 tagsResult.setStartOffset(bc.offset());
                 tagsResult.setEndOffset(bc.offset());
                 break;
             }
-            case BUFFER: {
-                var bc = buildBuffer(chatRequest, chatResponse);
-                tagsResult.setBufferName(fileName + ".md");
+            case CONTENT: {
+                var bc = buildNewContent(parseSectionName(templateBlock.getGateway()), chatResponse);
                 tagsResult.setContent(bc.content());
                 tagsResult.setStartOffset(bc.offset());
                 tagsResult.setEndOffset(bc.offset());
@@ -102,8 +105,8 @@ public class TagsPromptHandler implements PromptHandler {
         if (gateway.startsWith("#")) {
             return ActionResultGateway.CONTENT;
         }
-        if (StringUtils.endsWithIgnoreCase("buffer", gateway)) {
-            return ActionResultGateway.BUFFER;
+        if (StringUtils.endsWithIgnoreCase(ActionResultGateway.CHAT.name(), gateway)) {
+            return ActionResultGateway.CHAT;
         }
         return ActionResultGateway.CLIPBOARD;
     }
@@ -128,12 +131,12 @@ public class TagsPromptHandler implements PromptHandler {
         var bufferContent = new StringBuilder();
         chatRequest.messages().forEach(message -> {
             switch (message.type()) {
-                case SYSTEM -> bufferContent.append(PromptUtl.renderSystemBlock(message.toString()));
-                case USER -> bufferContent.append(PromptUtl.renderUserBlock(message.toString()));
+                case SYSTEM -> bufferContent.append(ChatUtl.renderSystemBlock((SystemMessage) message));
+                case USER -> bufferContent.append(ChatUtl.renderUserBlock((UserMessage) message));
             }
         });
         var bufferOffset = bufferContent.length() + 1;
-        bufferContent.append(PromptUtl.renderAiBlock(chatResponse.aiMessage().text()));
+        bufferContent.append(ChatUtl.renderAiBlock(chatResponse.aiMessage().text()));
         return new BufferContent(bufferContent.toString(), bufferOffset);
     }
 

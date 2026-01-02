@@ -5,7 +5,7 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
-    <name>T.A.G.S.+</name>
+    <name>TAGS+</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor url="https://github.com/codingspeedup/tags">CodingSpeedup</vendor>
@@ -27,7 +27,7 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
 
-        <toolWindow id="T.A.G.S.+"
+        <toolWindow id="TAGS+"
                     secondary="true"
                     icon="/META-INF/toolIcon.svg"
                     anchor="bottom"
