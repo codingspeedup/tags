@@ -46,8 +46,8 @@
 
         <intentionAction order="first">
             <language/>
-            <className>io.github.codingspeedup.tags.intentions.TagsGroupIntention</className>
-            <categoryKey>plugin.label</categoryKey>
+            <className>io.github.codingspeedup.tags.intentions.TagsPromptIntention</className>
+            <categoryKey>intention.TagsPromptIntention.text</categoryKey>
         </intentionAction>
 
         <notificationGroup id="GenerationGroup"

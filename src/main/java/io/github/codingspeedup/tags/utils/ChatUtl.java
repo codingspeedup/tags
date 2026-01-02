@@ -20,7 +20,7 @@ public class ChatUtl {
     public static final String SYSTEM_BLOCK_INFO = "llm-system-message";
     public static final String USER_BLOCK_INFO = "llm-user-message";
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
 
     public static String nextBufferName(Project project, String fileName) {
         var vPos = fileName.lastIndexOf(CHAT_MD_VERSION);
@@ -68,8 +68,11 @@ public class ChatUtl {
     public static String renderParametersBlock(Properties parameters) {
         var writer = new StringBuilder();
         if (parameters != null) {
-            parameters.forEach((key, value) ->
-                    writer.append(key).append("=").append(value).append("\n")
+            parameters.forEach((key, value) -> {
+                        if (value != null) {
+                            writer.append(key).append("=").append(value).append("\n");
+                        }
+                    }
             );
         }
         if (!writer.isEmpty()) {

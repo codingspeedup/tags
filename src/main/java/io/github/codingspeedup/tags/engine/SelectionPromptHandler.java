@@ -15,8 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.github.codingspeedup.tags.utils.ChatUtl.*;
-import static io.github.codingspeedup.tags.utils.PromptUtl.buildChatRequestParameters;
-import static io.github.codingspeedup.tags.utils.PromptUtl.findVariables;
+import static io.github.codingspeedup.tags.utils.PromptUtl.*;
 
 public class SelectionPromptHandler implements PromptHandler {
 
@@ -51,12 +50,11 @@ public class SelectionPromptHandler implements PromptHandler {
         var response = LLM.doChat(chatRequestParameters, systemMessage, userMessage);
 
         var mdContent = new StringBuilder();
-        mdContent.append(renderParametersBlock(promptLib.getParameters()));
+        mdContent.append(renderParametersBlock(toProperties(chatRequestParameters, false)));
         mdContent.append(renderSystemBlock(promptLib.getSystem().template()));
         mdContent.append(renderUserBlock(userMessage));
-        var aiBlock = renderAiBlock(response.aiMessage().text());
-        var mdOffset = mdContent.length() + aiBlock.indexOf("---");
-        mdContent.append(aiBlock);
+        var mdOffset = mdContent.length();
+        mdContent.append(renderAiBlock(response.aiMessage().text()));
         mdContent.append(StringUtils.EMPTY);
 
         var tagsResult = new TagsResult(ActionResultGateway.CHAT);

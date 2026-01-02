@@ -15,11 +15,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.github.codingspeedup.tags.utils.ChatUtl.nextBufferName;
+import static io.github.codingspeedup.tags.utils.ChatUtl.*;
+import static io.github.codingspeedup.tags.utils.PromptUtl.toProperties;
 
 public class TagsPromptHandler implements PromptHandler {
 
-    private record BufferContent(String content, int offset) {
+    private record Buffer(String content, int offset) {
     }
 
     private final String fileName;
@@ -59,7 +60,7 @@ public class TagsPromptHandler implements PromptHandler {
         var tagsResult = new TagsResult(resolveGateway(templateBlock.getGateway()));
         switch (tagsResult.getGateway()) {
             case CHAT: {
-                var bc = buildBuffer(chatRequest, chatResponse);
+                var bc = buildChatBuffer(chatRequest, chatResponse);
                 tagsResult.setBufferName(nextBufferName(project, fileName));
                 tagsResult.setContent(bc.content());
                 tagsResult.setStartOffset(bc.offset());
@@ -127,20 +128,21 @@ public class TagsPromptHandler implements PromptHandler {
         return value.substring(1).trim();
     }
 
-    private BufferContent buildBuffer(ChatRequest chatRequest, ChatResponse chatResponse) {
-        var bufferContent = new StringBuilder();
+    private Buffer buildChatBuffer(ChatRequest chatRequest, ChatResponse chatResponse) {
+        var mdContent = new StringBuilder();
+        mdContent.append(renderParametersBlock(toProperties(chatRequest.parameters(), false)));
         chatRequest.messages().forEach(message -> {
             switch (message.type()) {
-                case SYSTEM -> bufferContent.append(ChatUtl.renderSystemBlock((SystemMessage) message));
-                case USER -> bufferContent.append(ChatUtl.renderUserBlock((UserMessage) message));
+                case SYSTEM -> mdContent.append(renderSystemBlock((SystemMessage) message));
+                case USER -> mdContent.append(renderUserBlock((UserMessage) message));
             }
         });
-        var bufferOffset = bufferContent.length() + 1;
-        bufferContent.append(ChatUtl.renderAiBlock(chatResponse.aiMessage().text()));
-        return new BufferContent(bufferContent.toString(), bufferOffset);
+        var bufferOffset = mdContent.length() + 1;
+        mdContent.append(renderAiBlock(chatResponse.aiMessage().text()));
+        return new Buffer(mdContent.toString(), bufferOffset);
     }
 
-    private BufferContent buildNewContent(String sectionName, ChatResponse chatResponse) {
+    private Buffer buildNewContent(String sectionName, ChatResponse chatResponse) {
         var sectionBlock = getContentSections().get(sectionName);
         var sectionStart = FileTypeModel.indexOfEol(fileContent, sectionBlock.getFromOffset());
         var sectionEnd = FileTypeModel.indexOfBol(fileContent, sectionBlock.getToOffset());
@@ -151,7 +153,7 @@ public class TagsPromptHandler implements PromptHandler {
         bufferContent.append("\n").append(chatResponse.aiMessage().text()).append("\n");
         bufferContent.append(fileContent, sectionEnd, fileContent.length());
 
-        return new BufferContent(bufferContent.toString(), sectionStart + 1);
+        return new Buffer(bufferContent.toString(), sectionStart + 1);
     }
 
 }

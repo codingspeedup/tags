@@ -110,6 +110,38 @@ public final class PromptUtl {
         return null;
     }
 
+    public static Properties toProperties(ChatRequestParameters parameters, boolean withModelName) {
+        var properties = new Properties();
+
+        if (withModelName) {
+            properties.put("modelName", parameters.modelName());
+        }
+
+        properties.put("temperature", parameters.temperature());
+        properties.put("topP", parameters.topP());
+        properties.put("topK", parameters.topK());
+        properties.put("frequencyPenalty", parameters.frequencyPenalty());
+        properties.put("presencePenalty", parameters.presencePenalty());
+        properties.put("maxOutputTokens", parameters.maxOutputTokens());
+
+        var stopSequences = parameters.stopSequences();
+        if (stopSequences != null) {
+            properties.put("stopSequences", String.join(",", stopSequences));
+        }
+
+        var toolChoice = parameters.toolChoice();
+        if (toolChoice != null) {
+            properties.put("responseFormat", toolChoice.name());
+        }
+
+        var responseFormat = parameters.responseFormat();
+        if (responseFormat != null) {
+            properties.put("responseFormat", responseFormat.type().name());
+        }
+
+        return properties;
+    }
+
     public static Set<String> findVariables(PromptTemplate promptTemplate) {
         var userVariables = new LinkedHashSet<String>();
         var matcher = LLM_TEMPLATE_VARIABLE_PATTERN.matcher(promptTemplate.template());
