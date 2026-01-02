@@ -6,10 +6,17 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.utils.FileTypeModel;
 import io.github.codingspeedup.tags.engine.TagsEditor;
+import io.github.codingspeedup.tags.utils.PromptDesc;
 import io.github.codingspeedup.tags.utils.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
 public class InsertTagsTemplateAction extends EditTagsActionBase {
+
+    private final PromptDesc promptDesc;
+
+    public InsertTagsTemplateAction() {
+        this.promptDesc = new PromptDesc(String.format("%s.Explain", TagsUtl.PLUGIN_PROMPT_LIBRARY_REF));
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
@@ -49,7 +56,7 @@ public class InsertTagsTemplateAction extends EditTagsActionBase {
                 indicator.setIndeterminate(true);
                 try {
                     var tagsEditor = new TagsEditor(ftModel, documentText);
-                    var gr = tagsEditor.insertNewTemplate(documentOffset);
+                    var gr = tagsEditor.insertNewTemplate(project, documentOffset, promptDesc);
                     TagsUtl.updateEditorDocument(project, editor, document, gr);
                 } catch (Exception e) {
                     logger.error("Error processing file", e);

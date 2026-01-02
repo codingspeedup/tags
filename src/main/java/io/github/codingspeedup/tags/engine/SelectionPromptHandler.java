@@ -7,7 +7,7 @@ import dev.langchain4j.data.message.UserMessage;
 import io.github.codingspeedup.tags.integration.LLM;
 import io.github.codingspeedup.tags.utils.ActionResultGateway;
 import io.github.codingspeedup.tags.utils.PromptHandler;
-import io.github.codingspeedup.tags.utils.PromptRef;
+import io.github.codingspeedup.tags.utils.PromptDesc;
 import io.github.codingspeedup.tags.utils.TagsResult;
 import org.apache.commons.lang.StringUtils;
 
@@ -21,24 +21,24 @@ public class SelectionPromptHandler implements PromptHandler {
 
     private final String fileName;
     private final String selection;
-    private final PromptRef promptRef;
+    private final PromptDesc promptDesc;
 
-    public SelectionPromptHandler(String fileName, String selection, PromptRef promptRef) {
+    public SelectionPromptHandler(String fileName, String selection, PromptDesc promptDesc) {
         this.fileName = fileName;
         this.selection = selection;
-        this.promptRef = promptRef;
+        this.promptDesc = promptDesc;
     }
 
     public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
-        var promptLib = promptRef.getLibrary(project);
+        var promptLib = promptDesc.getLibrary(project);
 
-        var chatRequestParameters = buildChatRequestParameters(promptLib.getParameters());
-        var systemMessage = SystemMessage.from(promptLib.getSystem().template());
+        var chatRequestParameters = toChatRequestParameters(promptLib.getParameters());
+        var systemMessage = SystemMessage.from(promptLib.getSystemTemplate().template());
         UserMessage userMessage;
-        if (promptRef.getPromptId().isEmpty()) {
+        if (promptDesc.getId().isEmpty()) {
             userMessage = UserMessage.from(selection);
         } else {
-            var promptTemplate = promptLib.getPromptTemplate(promptRef.getPromptId());
+            var promptTemplate = promptLib.getPromptTemplate(promptDesc.getId());
             var promptVars = findVariables(promptTemplate);
             Map<String, Object> args = Map.of(promptVars.iterator().next(), selection);
             userMessage = promptTemplate.apply(args).toUserMessage();
@@ -51,7 +51,7 @@ public class SelectionPromptHandler implements PromptHandler {
 
         var mdContent = new StringBuilder();
         mdContent.append(renderParametersBlock(toProperties(chatRequestParameters, false)));
-        mdContent.append(renderSystemBlock(promptLib.getSystem().template()));
+        mdContent.append(renderSystemBlock(promptLib.getSystemTemplate().template()));
         mdContent.append(renderUserBlock(userMessage));
         var mdOffset = mdContent.length();
         mdContent.append(renderAiBlock(response.aiMessage().text()));

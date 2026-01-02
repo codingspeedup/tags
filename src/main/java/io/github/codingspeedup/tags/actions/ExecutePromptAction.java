@@ -18,15 +18,15 @@ import java.util.Optional;
 
 public class ExecutePromptAction extends AnAction {
 
-    private final PromptRef promptRef;
+    private final PromptDesc promptDesc;
 
     @SuppressWarnings("unused")
     public ExecutePromptAction() {
-        this.promptRef = new PromptRef(TagsUtl.PLUGIN_PROMPT_LIBRARY_REF + ".");
+        this.promptDesc = new PromptDesc(TagsUtl.PLUGIN_PROMPT_LIBRARY_REF + ".");
     }
 
     public ExecutePromptAction(String promptRef, String text) {
-        this.promptRef = new PromptRef(promptRef);
+        this.promptDesc = new PromptDesc(promptRef);
         getTemplatePresentation().setText(text);
     }
 
@@ -94,7 +94,7 @@ public class ExecutePromptAction extends AnAction {
                     Optional<TagsResult> tagsResult;
 
                     if (editorSelection != null) {
-                        tagsResult = new SelectionPromptHandler(editorFileName, editorSelection, promptRef).process(project, indicator);
+                        tagsResult = new SelectionPromptHandler(editorFileName, editorSelection, promptDesc).process(project, indicator);
                     } else {
                         if (TagsGroup.isChatMd(editorFileName)) {
                             tagsResult = new ChatMdPromptHandler(documentText, documentOffset).process(project, indicator);

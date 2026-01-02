@@ -20,7 +20,7 @@ public class PromptLibrary {
 
     private final String name;
     private final Properties parameters = new Properties();
-    private final PromptTemplate system;
+    private final PromptTemplate systemTemplate;
     private final Map<String, PromptTemplate> prompts = new LinkedHashMap<>();
 
     @SuppressWarnings("unchecked")
@@ -32,7 +32,7 @@ public class PromptLibrary {
             this.parameters.putAll(parameters);
         }
 
-        system = PromptTemplate.from(StringUtils.trimToEmpty((String) data.get("system")), this.name);
+        systemTemplate = PromptTemplate.from(StringUtils.trimToEmpty((String) data.get("system")), this.name);
 
         var prompts = (List<Map<String, Object>>) data.get("prompts");
         prompts.forEach(prompt -> {
@@ -47,7 +47,7 @@ public class PromptLibrary {
     }
 
     public Set<String> getVariables() {
-        return PromptUtl.findVariables(system);
+        return PromptUtl.findVariables(systemTemplate);
     }
 
     public Set<String> getVariables(String promptId) {

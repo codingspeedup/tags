@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.utils.PromptUtl.buildChatRequestParameters;
+import static io.github.codingspeedup.tags.utils.PromptUtl.toChatRequestParameters;
 
 public class ChatMdPromptHandler implements PromptHandler {
 
@@ -72,7 +72,7 @@ public class ChatMdPromptHandler implements PromptHandler {
                 .map(this::getContent)
                 .filter(StringUtils::isNotBlank)
                 .findFirst()
-                .map(data -> buildChatRequestParameters(PromptUtl.parseProperties(data)))
+                .map(data -> toChatRequestParameters(PromptUtl.parseProperties(data)))
                 .orElse(ChatRequestParameters.builder().build());
 
         var llmResponse = system.map(systemMessage -> LLM.doChat(llmParameters, systemMessage, userMessage))

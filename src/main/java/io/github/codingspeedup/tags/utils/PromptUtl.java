@@ -7,6 +7,7 @@ import dev.langchain4j.model.input.PromptTemplate;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,8 +17,11 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static io.github.codingspeedup.tags.utils.PromptDesc.VAR_PLACEHOLDER;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PromptUtl {
+
 
     public static final List<String> LLM_PARAMETERS_NAMES = List.of(
             "modelName",
@@ -44,7 +48,7 @@ public final class PromptUtl {
     }
 
     @SneakyThrows
-    public static ChatRequestParameters buildChatRequestParameters(Properties properties) {
+    public static ChatRequestParameters toChatRequestParameters(Properties properties) {
         var llmParameters = ChatRequestParameters.builder();
         for (var parameterName : LLM_PARAMETERS_NAMES) {
             var propertyValue = properties.get(parameterName);
@@ -112,33 +116,52 @@ public final class PromptUtl {
 
     public static Properties toProperties(ChatRequestParameters parameters, boolean withModelName) {
         var properties = new Properties();
+        if (parameters != null) {
+            Object value = parameters.modelName();
+            if (withModelName && value != null) {
+                properties.put("modelName", value);
+            }
 
-        if (withModelName) {
-            properties.put("modelName", parameters.modelName());
+            value = parameters.temperature();
+            if (value != null) {
+                properties.put("temperature", value);
+            }
+
+            value = parameters.topP();
+            if (value != null) {
+                properties.put("topP", value);
+            }
+
+            value = parameters.topK();
+            if (value != null) {
+                properties.put("topK", value);
+            }
+
+            value = parameters.frequencyPenalty();
+            if (value != null) {
+                properties.put("frequencyPenalty", value);
+            }
+
+            value = parameters.maxOutputTokens();
+            if (value != null) {
+                properties.put("maxOutputTokens", value);
+            }
+
+            var stopSequences = parameters.stopSequences();
+            if (CollectionUtils.isNotEmpty(stopSequences)) {
+                properties.put("stopSequences", String.join(",", stopSequences));
+            }
+
+            value = parameters.toolChoice();
+            if (value != null) {
+                properties.put("responseFormat", String.valueOf(value));
+            }
+
+            var responseFormat = parameters.responseFormat();
+            if (responseFormat != null) {
+                properties.put("responseFormat", responseFormat.type().name());
+            }
         }
-
-        properties.put("temperature", parameters.temperature());
-        properties.put("topP", parameters.topP());
-        properties.put("topK", parameters.topK());
-        properties.put("frequencyPenalty", parameters.frequencyPenalty());
-        properties.put("presencePenalty", parameters.presencePenalty());
-        properties.put("maxOutputTokens", parameters.maxOutputTokens());
-
-        var stopSequences = parameters.stopSequences();
-        if (stopSequences != null) {
-            properties.put("stopSequences", String.join(",", stopSequences));
-        }
-
-        var toolChoice = parameters.toolChoice();
-        if (toolChoice != null) {
-            properties.put("responseFormat", toolChoice.name());
-        }
-
-        var responseFormat = parameters.responseFormat();
-        if (responseFormat != null) {
-            properties.put("responseFormat", responseFormat.type().name());
-        }
-
         return properties;
     }
 
@@ -149,6 +172,14 @@ public final class PromptUtl {
             userVariables.add(matcher.group(1).trim());
         }
         return userVariables;
+    }
+
+    public static void fillArguments(HashMap<String, Object> arguments, Set<String> requiredVariables) {
+        requiredVariables.forEach(key -> {
+            if (!arguments.containsKey(key)) {
+                arguments.put(key, VAR_PLACEHOLDER);
+            }
+        });
     }
 
 }

@@ -73,10 +73,6 @@
 
             <separator/>
 
-            <action id="InsertTagsSection"
-                    class="io.github.codingspeedup.tags.actions.InsertTagsSectionAction"
-            />
-
             <group id="InsertTagsTemplate"
                    class="io.github.codingspeedup.tags.actions.InsertTagsTemplateGroup"
                    popup="true">
@@ -87,6 +83,10 @@
                        class="io.github.codingspeedup.tags.actions.InsertTagsTemplateFromLibraryGroup"
                        popup="true"/>
             </group>
+
+            <action id="InsertTagsSection"
+                    class="io.github.codingspeedup.tags.actions.InsertTagsSectionAction"
+            />
 
             <separator/>
 

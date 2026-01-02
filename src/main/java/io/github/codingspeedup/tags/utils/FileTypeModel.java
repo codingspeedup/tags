@@ -7,6 +7,8 @@ import org.apache.commons.lang.StringUtils;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.github.codingspeedup.tags.utils.PromptDesc.*;
+
 @Getter
 public abstract class FileTypeModel {
 
@@ -134,17 +136,16 @@ public abstract class FileTypeModel {
     }
 
     private S parseSectionLine(String line) {
-        if (line.startsWith("<") && line.endsWith(">")) {
-            line = line.substring(1, line.length() - 1);
-            var closing = line.startsWith("/");
+        if (line.startsWith(SECTION_NAME_START) && line.endsWith(SECTION_NAME_END)) {
+            line = line.substring(SECTION_NAME_START.length(), line.length() - SECTION_NAME_END.length());
+            var closing = line.startsWith(SECTION_CLOSE);
             if (closing) {
-                line = StringUtils.trimToEmpty(line.substring(1));
+                line = StringUtils.trimToEmpty(line.substring(SECTION_CLOSE.length()));
             }
             return new S(line, closing);
         }
         return null;
     }
-
 
     public static int indexOfEol(String content, int startIndex) {
         int eol = content.indexOf('\n', startIndex);
@@ -155,7 +156,6 @@ public abstract class FileTypeModel {
         int eol = content.lastIndexOf('\n', endIndex - 1);
         return (eol == -1) ? 0 : eol + 1;
     }
-
 
 
 }

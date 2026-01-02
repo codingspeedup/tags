@@ -2,6 +2,7 @@ package io.github.codingspeedup.tags.engine;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
+import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -11,12 +12,14 @@ import io.github.codingspeedup.tags.integration.LLM;
 import io.github.codingspeedup.tags.utils.*;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static io.github.codingspeedup.tags.utils.ChatUtl.*;
-import static io.github.codingspeedup.tags.utils.PromptUtl.toProperties;
+import static io.github.codingspeedup.tags.utils.PromptDesc.SECTION_REF_MARKER;
+import static io.github.codingspeedup.tags.utils.PromptUtl.*;
 
 public class TagsPromptHandler implements PromptHandler {
 
@@ -54,7 +57,7 @@ public class TagsPromptHandler implements PromptHandler {
         var templateBlock = block.get();
         ftModel.fillTemplate(templateBlock, fileContent);
 
-        var chatRequest = compileLlmRequest(templateBlock);
+        var chatRequest = compileLlmRequest(project, templateBlock).orElseThrow();
         var chatResponse = LLM.doChat(chatRequest);
 
         var tagsResult = new TagsResult(resolveGateway(templateBlock.getGateway()));
@@ -82,28 +85,56 @@ public class TagsPromptHandler implements PromptHandler {
         return Optional.of(tagsResult);
     }
 
+    private Optional<ChatRequest> compileLlmRequest(Project project, TemplateBlock templateBlock) {
+        var templateText = templateBlock.getTemplate();
+        if (StringUtils.isBlank(templateText)) {
+            return Optional.empty();
+        }
 
-    private ChatRequest compileLlmRequest(TemplateBlock templateBlock) {
-        var userTemplate = PromptTemplate.from(templateBlock.getTemplate());
+        var chatMessages = new ArrayList<ChatMessage>();
 
         var arguments = new HashMap<String, Object>();
         templateBlock.getArguments().stringPropertyNames()
                 .forEach(key -> arguments.put(key, resolveArgument(templateBlock.getArguments().getProperty(key))));
 
-        var userVariables = PromptUtl.findVariables(userTemplate);
-        userVariables.forEach(key -> {
-            if (!arguments.containsKey(key)) {
-                arguments.put(key, "∅");
-            }
-        });
+        var chatRequestBuilder = ChatRequest.builder();
 
-        var userMessage = userTemplate.apply(arguments).toUserMessage();
-        return ChatRequest.builder().messages(userMessage).build();
+        if (templateText.startsWith(PromptDesc.TEMPLATE_PREFIX)) {
+            var pDesc = new PromptDesc(templateText);
+            var pLib = pDesc.getLibrary(project);
+
+            var pLibParameters = pLib.getParameters();
+            if (!pLibParameters.isEmpty()) {
+                chatRequestBuilder.parameters(toChatRequestParameters(pLibParameters));
+            }
+
+            var promptVariables = pLib.getVariables(pDesc.getId());
+            fillArguments(arguments, promptVariables);
+
+            var systemTemplate = pLib.getSystemTemplate();
+            if (StringUtils.isNotBlank(systemTemplate.template())) {
+                chatMessages.add(systemTemplate.apply(arguments).toSystemMessage());
+            }
+
+            var userTemplate = pLib.getPromptTemplate(pDesc.getId());
+            chatMessages.add(userTemplate.apply(arguments).toUserMessage());
+
+        } else {
+            var userTemplate = PromptTemplate.from(templateBlock.getTemplate());
+
+            var promptVariables = PromptUtl.findVariables(userTemplate);
+            fillArguments(arguments, promptVariables);
+
+            chatMessages.add(userTemplate.apply(arguments).toUserMessage());
+        }
+
+        return Optional.of(chatRequestBuilder.messages(chatMessages).build());
     }
+
 
     private ActionResultGateway resolveGateway(String gateway) {
         gateway = StringUtils.trimToEmpty(gateway);
-        if (gateway.startsWith("#")) {
+        if (gateway.startsWith(SECTION_REF_MARKER)) {
             return ActionResultGateway.CONTENT;
         }
         if (StringUtils.endsWithIgnoreCase(ActionResultGateway.CHAT.name(), gateway)) {
@@ -114,7 +145,7 @@ public class TagsPromptHandler implements PromptHandler {
 
     private String resolveArgument(String value) {
         value = value.trim();
-        if (value.startsWith("#")) {
+        if (value.startsWith(SECTION_REF_MARKER)) {
             value = parseSectionName(value);
             var sectionBlock = getContentSections().get(value);
             if (sectionBlock != null) {
@@ -139,6 +170,7 @@ public class TagsPromptHandler implements PromptHandler {
         });
         var bufferOffset = mdContent.length() + 1;
         mdContent.append(renderAiBlock(chatResponse.aiMessage().text()));
+        mdContent.append(renderUserBlock(StringUtils.EMPTY));
         return new Buffer(mdContent.toString(), bufferOffset);
     }
 

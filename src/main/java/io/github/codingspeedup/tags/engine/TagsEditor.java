@@ -1,14 +1,14 @@
 package io.github.codingspeedup.tags.engine;
 
-import io.github.codingspeedup.tags.utils.FileTypeModel;
-import io.github.codingspeedup.tags.utils.TagsResult;
-import io.github.codingspeedup.tags.utils.ActionResultGateway;
-import io.github.codingspeedup.tags.utils.TagsBlock;
+import com.intellij.openapi.project.Project;
+import io.github.codingspeedup.tags.utils.*;
 import lombok.AllArgsConstructor;
 
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.github.codingspeedup.tags.utils.PromptDesc.*;
 
 @AllArgsConstructor
 public class TagsEditor {
@@ -16,18 +16,21 @@ public class TagsEditor {
     private final FileTypeModel ftModel;
     private final String fileContent;
 
-    public TagsResult insertNewTemplate(int offset) {
+    public TagsResult insertNewTemplate(Project project, int offset, PromptDesc promptDesc) {
         int tOffset = ftModel.getSections(fileContent).values().stream()
                 .filter(section -> section.contains(offset))
                 .findFirst()
                 .map(TagsBlock::getFromOffset)
                 .orElse(FileTypeModel.indexOfBol(fileContent, offset));
 
-        @SuppressWarnings("all")
+        var pLib = promptDesc.getLibrary(project);
+
         var newContent = new StringBuilder(fileContent.length() + 1024);
         newContent.append(fileContent, 0, tOffset);
-        newContent.append(ftModel.getTPrefix()).append("Explain {{concept}}").append("\n");
-        newContent.append(ftModel.getAPrefix()).append("concept=abstraction").append("\n");
+        newContent.append(ftModel.getTPrefix()).append(promptDesc.templateRef()).append("\n");
+        for (var varName : pLib.getVariables(promptDesc.getId())) {
+            newContent.append(ftModel.getAPrefix()).append(varName).append(VAR_SEPARATOR).append(PromptDesc.VAR_PLACEHOLDER).append("\n");
+        }
         newContent.append(ftModel.getGPrefix()).append(ActionResultGateway.CHAT.name().toLowerCase(Locale.ROOT)).append("\n");
         newContent.append(fileContent, tOffset, fileContent.length());
 
@@ -42,10 +45,10 @@ public class TagsEditor {
         var sPrefix = ftModel.getSPrefix();
         var existingSections = ftModel.getSections(fileContent).keySet();
 
-        var sectionIndex = 2;
-        var newSectionName = "section-1";
+        var sectionIndex = 1;
+        var newSectionName = SECTION_ROOT_ID + sectionIndex;
         while (existingSections.contains(newSectionName)) {
-            newSectionName = "section-" + sectionIndex++;
+            newSectionName = SECTION_ROOT_ID + (++sectionIndex);
         }
 
         fromOffset = FileTypeModel.indexOfBol(fileContent, fromOffset);
@@ -53,12 +56,12 @@ public class TagsEditor {
 
         var newContent = new StringBuilder(fileContent.length() + 64);
         newContent.append(fileContent, 0, fromOffset);
-        newContent.append(sPrefix).append("<").append(newSectionName).append(">\n");
+        newContent.append(sPrefix).append(SECTION_NAME_START).append(newSectionName).append(SECTION_NAME_END).append("\n");
         var startOffset = newContent.length();
         newContent.append(fileContent, fromOffset, toOffset);
         var endOffset = newContent.length();
-        newContent.append("\n").append(sPrefix).append("</").append(newSectionName).append(">\n");
-        newContent.append(fileContent,  toOffset, fileContent.length());
+        newContent.append("\n").append(sPrefix).append(SECTION_NAME_START).append(SECTION_CLOSE).append(newSectionName).append(SECTION_NAME_END).append("\n");
+        newContent.append(fileContent, toOffset, fileContent.length());
 
         var tagsResult = new TagsResult(ActionResultGateway.CONTENT);
         tagsResult.setContent(newContent.toString());
