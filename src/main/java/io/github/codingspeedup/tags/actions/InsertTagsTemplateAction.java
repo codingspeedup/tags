@@ -14,8 +14,14 @@ public class InsertTagsTemplateAction extends EditTagsActionBase {
 
     private final PromptDesc promptDesc;
 
+    @SuppressWarnings("unused")
     public InsertTagsTemplateAction() {
         this.promptDesc = new PromptDesc(String.format("%s.Explain", TagsUtl.PLUGIN_PROMPT_LIBRARY_REF));
+    }
+
+    public InsertTagsTemplateAction(String text, PromptDesc promptDesc) {
+        this.promptDesc = promptDesc;
+        getTemplatePresentation().setText(text);
     }
 
     @Override

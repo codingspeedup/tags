@@ -2,9 +2,11 @@ package io.github.codingspeedup.tags.utils;
 
 import com.intellij.openapi.project.Project;
 import lombok.Getter;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 public class PromptDesc {
 
@@ -24,6 +26,20 @@ public class PromptDesc {
     private final String[] path;
     @Getter
     private final String id;
+
+    public PromptDesc(String[] path, String promptId) {
+        this.path = new String[path.length];
+        this.id = promptId;
+        System.arraycopy(path, 0, this.path, 0, path.length);
+        var last = this.path[this.path.length - 1];
+        if (last.toLowerCase(Locale.ROOT).endsWith(".yaml")) {
+            last = FilenameUtils.getBaseName(last);
+        }
+        if (StringUtils.equalsIgnoreCase(TagsUtl.PLUGIN_PROMPT_LIBRARY, last)) {
+            last = TagsUtl.PLUGIN_PROMPT_LIBRARY_REF;
+        }
+        this.path[this.path.length - 1] = last;
+    }
 
     public PromptDesc(String ref) {
         ref = StringUtils.trimToEmpty(ref);

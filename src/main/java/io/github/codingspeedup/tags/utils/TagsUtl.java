@@ -42,7 +42,7 @@ public final class TagsUtl {
 
     public static final String PLUGIN_PROMPT_LIBRARY_REF = "~";
 
-    private static final String PLUGIN_PROMPT_LIBRARY = "plugin-internal-prompts-library";
+    public static final String PLUGIN_PROMPT_LIBRARY = "plugin-internal-prompts-library";
 
     public static void saveAllDocuments() {
         var application = ApplicationManager.getApplication();
