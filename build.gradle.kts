@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "io.github.codingspeedup"
-version = "2026-01-02"
+version = "2026-01-03"
 
 repositories {
     mavenCentral()
@@ -30,6 +30,7 @@ dependencies {
     implementation("dev.langchain4j:langchain4j:1.10.0")
     implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.10.0")
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
+    implementation("com.github.javaparser:javaparser-core:3.27.1")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")

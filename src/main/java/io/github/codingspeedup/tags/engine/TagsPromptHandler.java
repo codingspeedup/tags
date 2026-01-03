@@ -2,10 +2,12 @@ package io.github.codingspeedup.tags.engine;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
+import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
 import io.github.codingspeedup.tags.integration.LLM;
@@ -86,51 +88,70 @@ public class TagsPromptHandler implements PromptHandler {
     }
 
     private Optional<ChatRequest> compileLlmRequest(Project project, TemplateBlock templateBlock) {
+        var logger = TagsUtl.getLogger(project);
+
         var templateText = templateBlock.getTemplate();
         if (StringUtils.isBlank(templateText)) {
             return Optional.empty();
         }
 
-        var chatMessages = new ArrayList<ChatMessage>();
-
-        var arguments = new HashMap<String, Object>();
+        var templateArgs = new HashMap<String, Object>();
         templateBlock.getArguments().stringPropertyNames()
-                .forEach(key -> arguments.put(key, resolveArgument(templateBlock.getArguments().getProperty(key))));
+                .forEach(key -> templateArgs.put(key, resolveArgument(templateBlock.getArguments().getProperty(key))));
+
+        var toolSpecs = new ArrayList<ToolSpecification>();
+        templateBlock.getPlus().lines().forEach(toolName -> buildToolSpec(toolName).ifPresentOrElse(
+                toolSpecs::addAll, () -> logger.error("could not load tool specification for: " + toolName)
+        ));
 
         var chatRequestBuilder = ChatRequest.builder();
+
+        var chatMessages = new ArrayList<ChatMessage>();
 
         if (templateText.startsWith(PromptDesc.TEMPLATE_PREFIX)) {
             var pDesc = new PromptDesc(templateText);
             var pLib = pDesc.getLibrary(project);
 
             var pLibParameters = pLib.getParameters();
-            if (!pLibParameters.isEmpty()) {
-                chatRequestBuilder.parameters(toChatRequestParameters(pLibParameters));
+            if (pLibParameters.isEmpty()) {
+                if (!toolSpecs.isEmpty()) {
+                    chatRequestBuilder.toolSpecifications(toolSpecs);
+                }
+            } else {
+                var chatRequestParameters = toChatRequestParameters(pLibParameters);
+                if (!toolSpecs.isEmpty()) {
+                    chatRequestParameters = chatRequestParameters.overrideWith(
+                            ChatRequestParameters.builder().toolSpecifications(toolSpecs).build());
+                }
+                chatRequestBuilder.parameters(chatRequestParameters);
             }
 
             var promptVariables = pLib.getVariables(pDesc.getId());
-            fillArguments(arguments, promptVariables);
+            fillArguments(templateArgs, promptVariables);
 
             var systemTemplate = pLib.getSystemTemplate();
             if (StringUtils.isNotBlank(systemTemplate.template())) {
-                chatMessages.add(systemTemplate.apply(arguments).toSystemMessage());
+                chatMessages.add(systemTemplate.apply(templateArgs).toSystemMessage());
             }
 
             var userTemplate = pLib.getPromptTemplate(pDesc.getId());
-            chatMessages.add(userTemplate.apply(arguments).toUserMessage());
+            chatMessages.add(userTemplate.apply(templateArgs).toUserMessage());
 
         } else {
             var userTemplate = PromptTemplate.from(templateBlock.getTemplate());
 
             var promptVariables = PromptUtl.findVariables(userTemplate);
-            fillArguments(arguments, promptVariables);
+            fillArguments(templateArgs, promptVariables);
 
-            chatMessages.add(userTemplate.apply(arguments).toUserMessage());
+            chatMessages.add(userTemplate.apply(templateArgs).toUserMessage());
+
+            if (!toolSpecs.isEmpty()) {
+                chatRequestBuilder.toolSpecifications(toolSpecs);
+            }
         }
 
         return Optional.of(chatRequestBuilder.messages(chatMessages).build());
     }
-
 
     private ActionResultGateway resolveGateway(String gateway) {
         gateway = StringUtils.trimToEmpty(gateway);

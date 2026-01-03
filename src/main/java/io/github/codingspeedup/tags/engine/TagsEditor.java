@@ -32,6 +32,7 @@ public class TagsEditor {
             newContent.append(ftModel.getAPrefix()).append(varName).append(VAR_SEPARATOR).append(PromptDesc.VAR_PLACEHOLDER).append("\n");
         }
         newContent.append(ftModel.getGPrefix()).append(ActionResultGateway.CHAT.name().toLowerCase(Locale.ROOT)).append("\n");
+        newContent.append(ftModel.getPlusPrefix()).append(PromptDesc.VAR_PLACEHOLDER).append("\n");
         newContent.append(fileContent, tOffset, fileContent.length());
 
         var tagsResult = new TagsResult(ActionResultGateway.CONTENT);
