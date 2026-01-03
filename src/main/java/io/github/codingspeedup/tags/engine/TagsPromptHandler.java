@@ -10,6 +10,7 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
+import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.integration.LLM;
 import io.github.codingspeedup.tags.utils.*;
 import org.apache.commons.lang.StringUtils;
@@ -101,8 +102,11 @@ public class TagsPromptHandler implements PromptHandler {
 
         var toolSpecs = new ArrayList<ToolSpecification>();
         templateBlock.getPlus().lines().forEach(toolName -> buildToolSpec(toolName).ifPresentOrElse(
-                toolSpecs::addAll, () -> logger.error("could not load tool specification for: " + toolName)
+                toolSpecs::addAll, () -> logger.error(String.format("%s: Could not load tool specification for `%s'",
+                        MyMessageBundle.message("plugin.label"),
+                        toolName))
         ));
+
 
         var chatRequestBuilder = ChatRequest.builder();
 

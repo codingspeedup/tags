@@ -1,10 +1,12 @@
 package io.github.codingspeedup.tags.utils;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
@@ -21,6 +23,15 @@ public class ChatUtl {
     public static final String USER_BLOCK_INFO = "llm-user-message";
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+
+    public static VirtualFile nextBufferName(VirtualFile chatFolder) throws IOException {
+        var version = 1;
+        var bufferName = String.format("Chat%s%d%s", CHAT_MD_VERSION, version, CHAT_MD_EXTENSION);
+        while (chatFolder.findChild(bufferName) != null) {
+            bufferName = String.format("Chat%s%d%s", CHAT_MD_VERSION, ++version, CHAT_MD_EXTENSION);
+        }
+        return chatFolder.createChildData(ChatUtl.class, bufferName);
+    }
 
     public static String nextBufferName(Project project, String fileName) {
         var vPos = fileName.lastIndexOf(CHAT_MD_VERSION);
@@ -88,7 +99,7 @@ public class ChatUtl {
 
     public static String renderSystemBlock(String message) {
         return String.format("""
-                #### ⚙️ Intention
+                #### ⚙️ Guidelines
                 ```%s
                 %s
                 ```
@@ -98,9 +109,9 @@ public class ChatUtl {
     public static String renderUserBlock(String message) {
         return String.format("""
                 ### 👤 User
-                ```%s
+                `````%s
                 %s
-                ```
+                `````
                 """, USER_BLOCK_INFO, StringUtils.trimToEmpty(message));
     }
 

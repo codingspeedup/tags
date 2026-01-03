@@ -15,7 +15,7 @@ public class TagsConsoleWindowFactory implements ToolWindowFactory {
         var consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
         TagsUtl.getLogger(project).setConsoleView(consoleView);
         var contentFactory = ContentFactory.getInstance();
-        var content = contentFactory.createContent(consoleView.getComponent(), "Logs", false);
+        var content = contentFactory.createContent(consoleView.getComponent(), "Plugin", false);
         toolWindow.getContentManager().addContent(content);
     }
 

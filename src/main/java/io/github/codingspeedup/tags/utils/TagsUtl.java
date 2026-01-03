@@ -19,6 +19,7 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
+import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.plugin.TagsConsoleService;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -41,7 +42,6 @@ import java.util.stream.Collectors;
 public final class TagsUtl {
 
     public static final String PLUGIN_PROMPT_LIBRARY_REF = "~";
-
     public static final String PLUGIN_PROMPT_LIBRARY = "plugin-internal-prompts-library";
 
     public static void saveAllDocuments() {
@@ -92,7 +92,8 @@ public final class TagsUtl {
                 // VfsUtil.loadText handles charset and stream closing automatically
                 return VfsUtil.loadText(virtualFile);
             } catch (IOException e) {
-                getLogger(project).error("Error reading content from file " + virtualFile.getPath(), e);
+                getLogger(project).error(String.format("%s: Error reading content from file `%s'",
+                        MyMessageBundle.message("plugin.label"), virtualFile.getPath()), e);
                 return null;
             }
         });
@@ -105,7 +106,8 @@ public final class TagsUtl {
             try {
                 VfsUtil.saveText(file, content);
             } catch (IOException e) {
-                getLogger(project).error("Failed to write: " + file.getPath(), e);
+                getLogger(project).error(String.format("%s: Failed to write `%s'",
+                        MyMessageBundle.message("plugin.label"), file.getPath()), e);
             }
         };
         if (ApplicationManager.getApplication().isWriteAccessAllowed()) {
@@ -183,7 +185,8 @@ public final class TagsUtl {
 
                     finalResult[0] = yamlFile;
                 } catch (IOException e) {
-                    getLogger(project).error("Failed to create prompt template library " + finalFileName, e);
+                    getLogger(project).error(String.format("%s: Failed to create prompt template library `%s'",
+                            MyMessageBundle.message("plugin.label"), finalFileName), e);
                     finalResult[0] = null;
                 }
             });
@@ -234,6 +237,9 @@ public final class TagsUtl {
                     }
                 } catch (IOException e) {
                     getLogger(project).error("Failed to create folder", e);
+                    getLogger(project).error(String.format("%s: Failed to create folder",
+                            MyMessageBundle.message("plugin.label")), e);
+
                     result[0] = null;
                 }
             });
@@ -296,5 +302,6 @@ public final class TagsUtl {
             editor.getScrollingModel().scrollToCaret(com.intellij.openapi.editor.ScrollType.CENTER);
         });
     }
+
 
 }

@@ -8,10 +8,14 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.utils.*;
+import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.engine.ChatMdPromptHandler;
 import io.github.codingspeedup.tags.engine.SelectionPromptHandler;
 import io.github.codingspeedup.tags.engine.TagsPromptHandler;
+import io.github.codingspeedup.tags.utils.FileTypeModel;
+import io.github.codingspeedup.tags.utils.PromptDesc;
+import io.github.codingspeedup.tags.utils.TagsResult;
+import io.github.codingspeedup.tags.utils.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -69,13 +73,15 @@ public class ExecutePromptAction extends AnAction {
 
         var editor = e.getData(CommonDataKeys.EDITOR);
         if (editor == null) {
-            logger.error("No editor selected");
+            logger.error(String.format("%s: No editor selected",
+                    MyMessageBundle.message("plugin.label")));
             return;
         }
 
         var editorFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
         if (editorFile == null) {
-            logger.error("No virtual file selected");
+            logger.error(String.format("%s: No virtual file selected",
+                    MyMessageBundle.message("plugin.label")));
             return;
         }
 
@@ -111,10 +117,12 @@ public class ExecutePromptAction extends AnAction {
                                     case CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, tr);
                                 }
                             }, ModalityState.defaultModalityState()),
-                            () -> logger.warn("Prompt execution produced no result")
+                            () -> logger.warn(String.format("%s: Prompt execution produced no result",
+                                    MyMessageBundle.message("plugin.label")))
                     );
                 } catch (Exception e) {
-                    logger.error("Error processing file", e);
+                    logger.error(String.format("%s: Error processing file",
+                            MyMessageBundle.message("plugin.label")), e);
                 }
             }
         }.queue();

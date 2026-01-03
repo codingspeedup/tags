@@ -15,16 +15,18 @@ public class TagsInitializer implements ProjectActivity {
     @Override
     public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         var logger = TagsUtl.getLogger(project);
-        logger.info("Initializing " + MyMessageBundle.message("plugin.label") + " plugin for project `" + project.getName() + "' ...");
-
+        logger.info(String.format("%s: Initializing plugin for project `%s' ...",
+                MyMessageBundle.message("plugin.label"),
+                project.getName()));
         try {
             TagsUtl.resolvePromptLibrary(project).orElseThrow();
             TagsUtl.saveAllDocuments();
-            logger.info(MyMessageBundle.message("plugin.label") + " plugin initialized.");
+            logger.info(String.format("%s: Plugin initialized.",
+                    MyMessageBundle.message("plugin.label")));
         } catch (Exception e) {
-            logger.error(MyMessageBundle.message("plugin.label") + " plugin failed to initialize!", e);
+            logger.error(String.format("%s: Plugin initialization failure",
+                    MyMessageBundle.message("plugin.label")), e);
         }
-
         return Unit.INSTANCE;
     }
 

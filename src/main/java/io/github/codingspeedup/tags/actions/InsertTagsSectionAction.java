@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
+import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.utils.FileTypeModel;
 import io.github.codingspeedup.tags.engine.TagsEditor;
 import io.github.codingspeedup.tags.utils.TagsUtl;
@@ -21,13 +22,15 @@ public class InsertTagsSectionAction extends EditTagsActionBase {
 
         var editor = e.getData(CommonDataKeys.EDITOR);
         if (editor == null) {
-            logger.error("No editor selected");
+            logger.error(String.format("%s: No editor selected",
+                    MyMessageBundle.message("plugin.label")));
             return;
         }
 
         var editorFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
         if (editorFile == null) {
-            logger.error("No virtual file selected");
+            logger.error(String.format("%s: No virtual file selected",
+                    MyMessageBundle.message("plugin.label")));
             return;
         }
 
@@ -36,7 +39,9 @@ public class InsertTagsSectionAction extends EditTagsActionBase {
 
         var ftModel = FileTypeModel.of(editorFileName).orElse(null);
         if (ftModel == null) {
-            logger.error("Unrecognized file model for `" + editorFileName + "'");
+            logger.error(String.format("%s: Unrecognized file model for `%s'",
+                    MyMessageBundle.message("plugin.label"),
+                    editorFileName));
             return;
         }
 
@@ -55,7 +60,8 @@ public class InsertTagsSectionAction extends EditTagsActionBase {
                     var tagsResult = tagsEditor.insertNewSection(fromOffset, toOffset);
                     TagsUtl.updateEditorDocument(project, editor, document, tagsResult);
                 } catch (Exception e) {
-                    logger.error("Error processing file", e);
+                    logger.error(String.format("%s: Error processing file",
+                            MyMessageBundle.message("plugin.label")), e);
                 }
             }
         }.queue();
