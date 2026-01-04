@@ -11,7 +11,7 @@ import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
 import io.github.codingspeedup.tags.MyMessageBundle;
-import io.github.codingspeedup.tags.integration.LLM;
+import io.github.codingspeedup.tags.integration.llms.LLM;
 import io.github.codingspeedup.tags.utils.*;
 import org.apache.commons.lang.StringUtils;
 

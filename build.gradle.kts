@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "io.github.codingspeedup"
-version = "2026-01-03"
+version = "2026-01-04"
 
 repositories {
     mavenCentral()
@@ -22,6 +22,7 @@ dependencies {
 
         // Add plugin dependencies for compilation here, example:
         // bundledPlugin("com.intellij.java")
+        // bundledPlugin("org.intellij.plugins.markdown")
     }
 
     compileOnly("org.projectlombok:lombok:1.18.30")

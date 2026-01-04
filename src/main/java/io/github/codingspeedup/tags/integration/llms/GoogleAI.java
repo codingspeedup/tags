@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.integration;
+package io.github.codingspeedup.tags.integration.llms;
 
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;

@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.integration;
+package io.github.codingspeedup.tags.integration.llms;
 
 import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -13,10 +13,6 @@ public interface LLM {
 
     @SuppressWarnings("unused")
     ChatResponse chat(ChatRequest chatRequest);
-
-    static ChatResponse doChat(ChatMessage... chatMessages) {
-        return doChat(ChatRequestParameters.builder().build(), chatMessages);
-    }
 
     static ChatResponse doChat(ChatRequest chatRequest) {
         return doChat(chatRequest.parameters(), chatRequest.messages().toArray(ChatMessage[]::new));

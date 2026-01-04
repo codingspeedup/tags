@@ -6,24 +6,11 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.utils.FileTypeModel;
-import io.github.codingspeedup.tags.engine.TagsEditor;
-import io.github.codingspeedup.tags.utils.PromptDesc;
+import io.github.codingspeedup.tags.engine.TagsEditHandler;
 import io.github.codingspeedup.tags.utils.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
-public class InsertTagsTemplateAction extends EditTagsActionBase {
-
-    private final PromptDesc promptDesc;
-
-    @SuppressWarnings("unused")
-    public InsertTagsTemplateAction() {
-        this.promptDesc = new PromptDesc(String.format("%s.Explain", TagsUtl.PLUGIN_PROMPT_LIBRARY_REF));
-    }
-
-    public InsertTagsTemplateAction(String text, PromptDesc promptDesc) {
-        this.promptDesc = promptDesc;
-        getTemplatePresentation().setText(text);
-    }
+public class TagsEditInsertSectionAction extends TagsEditActionBase {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
@@ -48,6 +35,7 @@ public class InsertTagsTemplateAction extends EditTagsActionBase {
         }
 
         var editorFileName = editorFile.getName();
+        var editorCaret = editor.getCaretModel().getPrimaryCaret();
 
         var ftModel = FileTypeModel.of(editorFileName).orElse(null);
         if (ftModel == null) {
@@ -59,16 +47,18 @@ public class InsertTagsTemplateAction extends EditTagsActionBase {
 
         var document = editor.getDocument();
         var documentText = document.getText();
-        var documentOffset = editor.getCaretModel().getOffset();
+
+        var fromOffset = editorCaret.hasSelection() ? editorCaret.getSelectionStart() : editor.getCaretModel().getOffset();
+        var toOffset = editorCaret.hasSelection() ? editorCaret.getSelectionEnd() : fromOffset;
 
         new Task.Backgroundable(project, "Marking new section in " + editorFileName) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 try {
-                    var tagsEditor = new TagsEditor(ftModel, documentText);
-                    var gr = tagsEditor.insertNewTemplate(project, documentOffset, promptDesc);
-                    TagsUtl.updateEditorDocument(project, editor, document, gr);
+                    var tagsEditor = new TagsEditHandler(ftModel, documentText);
+                    var tagsResult = tagsEditor.insertNewSection(fromOffset, toOffset);
+                    TagsUtl.updateEditorDocument(project, editor, document, tagsResult);
                 } catch (Exception e) {
                     logger.error(String.format("%s: Error processing file",
                             MyMessageBundle.message("plugin.label")), e);

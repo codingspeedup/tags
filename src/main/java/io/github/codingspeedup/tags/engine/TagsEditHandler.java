@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static io.github.codingspeedup.tags.utils.PromptDesc.*;
 
 @AllArgsConstructor
-public class TagsEditor {
+public class TagsEditHandler {
 
     private final FileTypeModel ftModel;
     private final String fileContent;

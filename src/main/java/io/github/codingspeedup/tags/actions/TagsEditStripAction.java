@@ -6,11 +6,11 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.utils.FileTypeModel;
-import io.github.codingspeedup.tags.engine.TagsEditor;
+import io.github.codingspeedup.tags.engine.TagsEditHandler;
 import io.github.codingspeedup.tags.utils.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
-public class InsertTagsSectionAction extends EditTagsActionBase {
+public class TagsEditStripAction extends TagsEditActionBase {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
@@ -35,7 +35,6 @@ public class InsertTagsSectionAction extends EditTagsActionBase {
         }
 
         var editorFileName = editorFile.getName();
-        var editorCaret = editor.getCaretModel().getPrimaryCaret();
 
         var ftModel = FileTypeModel.of(editorFileName).orElse(null);
         if (ftModel == null) {
@@ -47,18 +46,17 @@ public class InsertTagsSectionAction extends EditTagsActionBase {
 
         var document = editor.getDocument();
         var documentText = document.getText();
-
-        var fromOffset = editorCaret.hasSelection() ? editorCaret.getSelectionStart() : editor.getCaretModel().getOffset();
-        var toOffset = editorCaret.hasSelection() ? editorCaret.getSelectionEnd() : fromOffset;
+        var documentOffset = editor.getCaretModel().getOffset();
 
         new Task.Backgroundable(project, "Marking new section in " + editorFileName) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 try {
-                    var tagsEditor = new TagsEditor(ftModel, documentText);
-                    var tagsResult = tagsEditor.insertNewSection(fromOffset, toOffset);
-                    TagsUtl.updateEditorDocument(project, editor, document, tagsResult);
+                    var tagsEditor = new TagsEditHandler(ftModel, documentText);
+                    var tagsResult = tagsEditor.stripTags(documentOffset);
+                    tagsResult.ifPresent(result ->
+                            TagsUtl.updateEditorDocument(project, editor, document, result));
                 } catch (Exception e) {
                     logger.error(String.format("%s: Error processing file",
                             MyMessageBundle.message("plugin.label")), e);

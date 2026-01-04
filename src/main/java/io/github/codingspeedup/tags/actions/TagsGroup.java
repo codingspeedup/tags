@@ -24,7 +24,7 @@ public class TagsGroup extends DefaultActionGroup {
     public void update(@NotNull AnActionEvent e) {
         var place = e.getPlace();
         if (ActionPlaces.EDITOR_POPUP.equals(place)) {
-            e.getPresentation().setEnabledAndVisible(ExecutePromptAction.isAvailable(e));
+            e.getPresentation().setEnabledAndVisible(ExecuteAction.isAvailable(e));
         }
     }
 

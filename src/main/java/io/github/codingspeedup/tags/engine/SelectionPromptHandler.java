@@ -4,7 +4,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
-import io.github.codingspeedup.tags.integration.LLM;
+import io.github.codingspeedup.tags.integration.llms.LLM;
 import io.github.codingspeedup.tags.utils.ActionResultGateway;
 import io.github.codingspeedup.tags.utils.PromptHandler;
 import io.github.codingspeedup.tags.utils.PromptDesc;

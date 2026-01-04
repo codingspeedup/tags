@@ -9,7 +9,7 @@ import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.MyMessageBundle;
-import io.github.codingspeedup.tags.engine.ChatMdPromptHandler;
+import io.github.codingspeedup.tags.engine.ChatMdExecuteHandler;
 import io.github.codingspeedup.tags.engine.SelectionPromptHandler;
 import io.github.codingspeedup.tags.engine.TagsPromptHandler;
 import io.github.codingspeedup.tags.utils.FileTypeModel;
@@ -20,16 +20,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public class ExecutePromptAction extends AnAction {
+public class ExecuteAction extends AnAction {
 
     private final PromptDesc promptDesc;
 
     @SuppressWarnings("unused")
-    public ExecutePromptAction() {
+    public ExecuteAction() {
         this.promptDesc = new PromptDesc(TagsUtl.PLUGIN_PROMPT_LIBRARY_REF + ".");
     }
 
-    public ExecutePromptAction(String promptRef, String text) {
+    public ExecuteAction(String promptRef, String text) {
         this.promptDesc = new PromptDesc(promptRef);
         getTemplatePresentation().setText(text);
     }
@@ -60,7 +60,7 @@ public class ExecutePromptAction extends AnAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
 
-        e.getPresentation().setEnabled(isAvailable(e));
+        e.getPresentation().setEnabledAndVisible(isAvailable(e));
     }
 
     @Override
@@ -103,7 +103,7 @@ public class ExecutePromptAction extends AnAction {
                         tagsResult = new SelectionPromptHandler(editorFileName, editorSelection, promptDesc).process(project, indicator);
                     } else {
                         if (TagsGroup.isChatMd(editorFileName)) {
-                            tagsResult = new ChatMdPromptHandler(documentText, documentOffset).process(project, indicator);
+                            tagsResult = new ChatMdExecuteHandler(documentText, documentOffset).process(project, indicator);
                         } else {
                             tagsResult = new TagsPromptHandler(editorFileName, documentText, documentOffset).process(project, indicator);
                         }

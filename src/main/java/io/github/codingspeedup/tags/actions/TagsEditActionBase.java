@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 @NoArgsConstructor
-public abstract class EditTagsActionBase extends AnAction {
-
-    public EditTagsActionBase(String text) {
-        super(text);
-    }
+public abstract class TagsEditActionBase extends AnAction {
 
     public static boolean isAvailable(@NotNull AnActionEvent e) {
         var isAvailable = e.getProject() != null;
@@ -34,7 +30,7 @@ public abstract class EditTagsActionBase extends AnAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        e.getPresentation().setEnabled(isAvailable(e));
+        e.getPresentation().setEnabledAndVisible(isAvailable(e));
     }
 
 }

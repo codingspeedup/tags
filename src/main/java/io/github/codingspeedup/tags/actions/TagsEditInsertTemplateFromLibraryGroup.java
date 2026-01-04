@@ -20,16 +20,16 @@ import java.util.stream.StreamSupport;
 import static io.github.codingspeedup.tags.utils.TagsUtl.PLUGIN_PROMPT_LIBRARY;
 import static io.github.codingspeedup.tags.utils.TagsUtl.PLUGIN_PROMPT_LIBRARY_REF;
 
-public class InsertTagsTemplateFromLibraryGroup extends DefaultActionGroup {
+public class TagsEditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
 
     private final VirtualFile libFile;
 
     @SuppressWarnings("unused")
-    public InsertTagsTemplateFromLibraryGroup() {
+    public TagsEditInsertTemplateFromLibraryGroup() {
         this.libFile = null;
     }
 
-    public InsertTagsTemplateFromLibraryGroup(String name, VirtualFile libFile) {
+    public TagsEditInsertTemplateFromLibraryGroup(String name, VirtualFile libFile) {
         super(name, true);
         this.libFile = libFile;
     }
@@ -41,7 +41,7 @@ public class InsertTagsTemplateFromLibraryGroup extends DefaultActionGroup {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        e.getPresentation().setEnabled(EditTagsActionBase.isAvailable(e));
+        e.getPresentation().setEnabledAndVisible(TagsEditActionBase.isAvailable(e));
     }
 
     @Override
@@ -74,7 +74,7 @@ public class InsertTagsTemplateFromLibraryGroup extends DefaultActionGroup {
             var pLib = PromptLibrary.of(project, libFile);
             return pLib.getPrompts().keySet().stream()
                     .sorted()
-                    .map(promptId -> new InsertTagsTemplateAction(promptId, new PromptDesc(path, promptId)))
+                    .map(promptId -> new TagsEditInsertTemplateAction(promptId, new PromptDesc(path, promptId)))
                     .toArray(AnAction[]::new);
         }
     }
@@ -99,10 +99,10 @@ public class InsertTagsTemplateFromLibraryGroup extends DefaultActionGroup {
             if (PLUGIN_PROMPT_LIBRARY.equals(libName)) {
                 libName = PLUGIN_PROMPT_LIBRARY_REF;
             }
-            actions.add(new InsertTagsTemplateFromLibraryGroup(libName, libFile));
+            actions.add(new TagsEditInsertTemplateFromLibraryGroup(libName, libFile));
         });
 
-        subFolders.forEach(libFile -> actions.add(new InsertTagsTemplateFromLibraryGroup("* " + libFile.getName(), libFile)));
+        subFolders.forEach(libFile -> actions.add(new TagsEditInsertTemplateFromLibraryGroup("* " + libFile.getName(), libFile)));
 
         return actions.toArray(new AnAction[]{});
     }

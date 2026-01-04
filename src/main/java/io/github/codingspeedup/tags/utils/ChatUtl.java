@@ -99,7 +99,7 @@ public class ChatUtl {
 
     public static String renderSystemBlock(String message) {
         return String.format("""
-                #### ⚙️ Guidelines
+                #### 📜 Guidelines
                 ```%s
                 %s
                 ```
@@ -116,14 +116,18 @@ public class ChatUtl {
     }
 
     public static String renderAiBlock(String message) {
+        return renderResponseBlock("LLM", message);
+    }
+
+    public static String renderResponseBlock(String agent, String message) {
         var messageTimestamp = LocalDateTime.now().format(FORMATTER);
         return String.format("""
                 
-                #### 🤖 AI: %s
+                #### 🤖 %s: %s
                 
                 ---
                 %s
-                """, messageTimestamp, message);
+                """, agent, messageTimestamp, message);
     }
 
     public static String renderSystemBlock(SystemMessage message) {
@@ -133,4 +137,35 @@ public class ChatUtl {
     public static String renderUserBlock(UserMessage message) {
         return renderUserBlock(message.singleText());
     }
+
+    public static String sanitizeLineEndings(String message) {
+        if (message == null) {
+            return StringUtils.EMPTY;
+        }
+        return message.replaceAll("\\r\\n|\\r", "\n");
+    }
+
+    public static boolean endsWith(StringBuilder sb, String text) {
+        if (sb == null) {
+            return text == null;
+        }
+        if (text == null) {
+            return false;
+        }
+        var textLen = text.length();
+        if (textLen == 0) {
+            return true;
+        }
+        var sbLen = sb.length();
+        if (sbLen < textLen) {
+            return false;
+        }
+        for (var i = 0; i < textLen; i++) {
+            if (sb.charAt(sbLen - textLen + i) != text.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

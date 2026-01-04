@@ -6,7 +6,7 @@ import io.github.codingspeedup.tags.utils.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ExecutePromptGroup extends DefaultActionGroup {
+public class ExecuteAsPromptGroup extends DefaultActionGroup {
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
@@ -27,7 +27,7 @@ public class ExecutePromptGroup extends DefaultActionGroup {
                 }
             }
         }
-        e.getPresentation().setEnabled(isAvailable);
+        e.getPresentation().setEnabledAndVisible(isAvailable);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ExecutePromptGroup extends DefaultActionGroup {
         return builtinLib.getPrompts().keySet().stream()
                 .filter(promptId -> builtinLib.getVariables(promptId).size() == 1)
                 .map(promptId ->
-                        new ExecutePromptAction(TagsUtl.PLUGIN_PROMPT_LIBRARY_REF + "." + promptId, promptId))
+                        new ExecuteAction(TagsUtl.PLUGIN_PROMPT_LIBRARY_REF + "." + promptId, promptId))
                 .toArray(AnAction[]::new);
     }
 

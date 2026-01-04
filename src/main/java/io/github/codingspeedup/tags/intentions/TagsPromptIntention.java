@@ -27,13 +27,13 @@ public class TagsPromptIntention implements IntentionAction, HighPriorityAction 
 
     @Override
     public @NotNull IntentionPreviewInfo generatePreview(@NotNull Project project, @NotNull Editor editor, @NotNull PsiFile file) {
-        var description = "Same as context menu " + MyMessageBundle.message("plugin.label") + " > " + MyMessageBundle.message("action.SendToLLM.text");
+        var description = "Same as context menu " + getText();
         return new IntentionPreviewInfo.Html(description);
     }
 
     @Override
     public @NotNull String getText() {
-        return MyMessageBundle.message("intention.TagsPromptIntention.text");
+        return MyMessageBundle.message("plugin.label") + " > " + MyMessageBundle.message("action.Execute.text");
     }
 
     @Override
@@ -51,7 +51,7 @@ public class TagsPromptIntention implements IntentionAction, HighPriorityAction 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile file) {
         var actionManager = ActionManager.getInstance();
-        var action = actionManager.getAction("SendToLLM");
+        var action = actionManager.getAction("Execute");
         if (action != null) {
             var context = ((com.intellij.openapi.editor.ex.EditorEx) editor).getDataContext();
             var event = AnActionEvent.createFromDataContext(getClass().getName(), null, context);
