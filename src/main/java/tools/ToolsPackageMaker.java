@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.tools;
+package tools;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

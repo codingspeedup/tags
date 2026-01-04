@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.tools.codegen.java;
+package tools.codegen.java;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;

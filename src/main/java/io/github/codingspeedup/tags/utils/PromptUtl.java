@@ -1,37 +1,26 @@
 package io.github.codingspeedup.tags.utils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.langchain4j.agent.tool.*;
-import dev.langchain4j.internal.JsonSchemaElementUtils;
-import dev.langchain4j.invocation.InvocationContext;
-import dev.langchain4j.invocation.InvocationParameters;
-import dev.langchain4j.invocation.LangChain4jManaged;
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.agent.tool.ToolSpecifications;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ToolChoice;
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
-import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.input.PromptTemplate;
-import io.github.codingspeedup.tags.tools.ToolsPackageMaker;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import tools.ToolsPackageMaker;
 
 import java.io.StringReader;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static dev.langchain4j.internal.Utils.isNullOrBlank;
 import static io.github.codingspeedup.tags.utils.PromptDesc.VAR_PLACEHOLDER;
-import static java.util.Arrays.stream;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PromptUtl {
@@ -51,7 +40,6 @@ public final class PromptUtl {
     );
 
     private static final Pattern LLM_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{\\{(.+?)}}");
-    private static final ObjectMapper SAFE_MAPPER = new ObjectMapper();
 
     @SneakyThrows
     public static Properties parseProperties(String data) {
@@ -201,104 +189,11 @@ public final class PromptUtl {
         try {
             var toolkitClassFQN = ToolsPackageMaker.class.getPackageName() + "." + toolkitName;
             var classWithTools = Class.forName(toolkitClassFQN);
-            var toolSpecifications = stream(classWithTools.getDeclaredMethods())
-                    .filter(method -> method.isAnnotationPresent(Tool.class))
-                    .map(PromptUtl::toolSpecificationFrom)
-                    .toList();
-            ToolSpecifications.validateSpecifications(toolSpecifications);
+            var toolSpecifications = ToolSpecifications.toolSpecificationsFrom(classWithTools);
             return CollectionUtils.isEmpty(toolSpecifications) ? Optional.empty() : Optional.of(toolSpecifications);
         } catch (ClassNotFoundException e) {
             return Optional.empty();
         }
-    }
-
-    public static ToolSpecification toolSpecificationFrom(Method method) {
-        Tool tool = method.getAnnotation(Tool.class);
-        return ToolSpecification.builder()
-                .name(getName(tool, method))
-                .description(getDescription(tool))
-                .parameters(parametersFrom(method.getParameters()))
-                .metadata(getMetadata(tool))
-                .build();
-    }
-
-    private static String getName(Tool tool, Method method) {
-        return isNullOrBlank(tool.name()) ? method.getName() : tool.name();
-    }
-
-    private static String getDescription(Tool tool) {
-        String description = String.join("\n", tool.value());
-        return description.isEmpty() ? null : description;
-    }
-
-    private static Map<String, Object> getMetadata(Tool annotation) {
-        var metadataJson = annotation.metadata();
-        if (isNullOrBlank(metadataJson)) {
-            return Collections.emptyMap();
-        }
-        try {
-            var typeRef = new TypeReference<Map<String, Object>>() {
-            };
-            return SAFE_MAPPER.readValue(metadataJson, typeRef);
-        } catch (Exception e) {
-            return Collections.emptyMap();
-        }
-    }
-
-    private static JsonObjectSchema parametersFrom(Parameter[] parameters) {
-
-        Map<String, JsonSchemaElement> properties = new LinkedHashMap<>();
-        List<String> required = new ArrayList<>();
-
-        Map<Class<?>, JsonSchemaElementUtils.VisitedClassMetadata> visited = new LinkedHashMap<>();
-
-        for (Parameter parameter : parameters) {
-            if (parameter.isAnnotationPresent(ToolMemoryId.class)
-                    || InvocationParameters.class.isAssignableFrom(parameter.getType())
-                    || LangChain4jManaged.class.isAssignableFrom(parameter.getType())
-                    || parameter.getType() == InvocationContext.class) {
-                continue;
-            }
-
-            boolean isRequired = Optional.ofNullable(parameter.getAnnotation(P.class))
-                    .map(P::required)
-                    .orElse(true);
-
-            properties.put(parameter.getName(), jsonSchemaElementFrom(parameter, visited));
-            if (isRequired) {
-                required.add(parameter.getName());
-            }
-        }
-
-        Map<String, JsonSchemaElement> definitions = new LinkedHashMap<>();
-        visited.forEach((clazz, visitedClassMetadata) -> {
-            if (visitedClassMetadata.recursionDetected) {
-                definitions.put(visitedClassMetadata.reference, visitedClassMetadata.jsonSchemaElement);
-            }
-        });
-
-        if (properties.isEmpty()) {
-            return null;
-        }
-
-        return JsonObjectSchema.builder()
-                .addProperties(properties)
-                .required(required)
-                .definitions(definitions.isEmpty() ? null : definitions)
-                .build();
-    }
-
-    private static JsonSchemaElement jsonSchemaElementFrom(Parameter parameter,
-                                                           Map<Class<?>, JsonSchemaElementUtils.VisitedClassMetadata> visited) {
-        P annotation = parameter.getAnnotation(P.class);
-        String description = annotation == null ? null : annotation.value();
-        return JsonSchemaElementUtils.jsonSchemaElementFrom(
-                parameter.getType(),
-                parameter.getParameterizedType(),
-                description,
-                true,
-                visited
-        );
     }
 
 }
