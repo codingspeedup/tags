@@ -6,6 +6,7 @@ import com.intellij.ide.passwordSafe.PasswordSafe;
 
 public class TagsSettingsSecretManager {
 
+    public static final String AZURE_OPEN_AI_API_KEY = "azureOpenAiApiKey";
     public static final String GEMINI_API_KEY = "geminiApiKey";
 
     private static final String SERVICE_NAME = "T.A.G.S.+_Secret_Service";

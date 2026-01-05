@@ -1,10 +1,12 @@
 package io.github.codingspeedup.tags.plugin;
 
+import com.azure.ai.openai.OpenAIServiceVersion;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.ComponentValidator;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.ui.TitledSeparator;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
@@ -12,11 +14,20 @@ import com.intellij.util.ui.FormBuilder;
 import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 
 public class TagsSettingsPanel implements Disposable {
 
     private final JPanel mainPanel;
+
+    private final JBCheckBox azureOpenAiEnabled = new JBCheckBox("Use this model");
+    private final JBPasswordField azureOpenAiApiKeyField = new JBPasswordField();
+    private final JBTextField azureOpenAiUrlField = new JBTextField();
+    private final JBTextField azureOpenAiDeploymentField = new JBTextField();
+    private final DefaultComboBoxModel<String> azureOpenAiApiVersionComboModel = new DefaultComboBoxModel<>();
+    private final ComboBox<String> azureOpenAiApiVersionField = new ComboBox<>(azureOpenAiApiVersionComboModel);
 
     private final JBPasswordField geminiApiKeyField = new JBPasswordField();
     private final DefaultComboBoxModel<ComboEntry> geminiModelsComboModel = new DefaultComboBoxModel<>(new ComboEntry[]{ComboEntry.EMPTY_VALUE});
@@ -27,8 +38,20 @@ public class TagsSettingsPanel implements Disposable {
     private final ComboBox<ComboEntry> ollamaModelField = new ComboBox<>(ollamaModelsComboModel);
 
     public TagsSettingsPanel() {
-        mainPanel = FormBuilder.createFormBuilder()
+        Arrays.stream(OpenAIServiceVersion.values())
+                .map(OpenAIServiceVersion::getVersion)
+                .sorted(Comparator.reverseOrder())
+                .forEach(azureOpenAiApiVersionComboModel::addElement);
 
+        mainPanel = FormBuilder.createFormBuilder()
+                .addComponent(new TitledSeparator("Azure OpenAI Configuration"))
+                .addComponent(azureOpenAiEnabled)
+                .addLabeledComponent(new JBLabel("API key: "), azureOpenAiApiKeyField, 1, false)
+                .addLabeledComponent(new JBLabel("URL: "), azureOpenAiUrlField, 1, false)
+                .addLabeledComponent(new JBLabel("Deployment: "), azureOpenAiDeploymentField, 1, false)
+                .addLabeledComponent(new JBLabel("API version: "), azureOpenAiApiVersionField, 1, false)
+
+                .addVerticalGap(10)
                 .addComponent(new TitledSeparator("Gemini Configuration"))
                 .addLabeledComponent(new JBLabel("API key: "), geminiApiKeyField, 1, false)
                 .addLabeledComponent(new JBLabel("Model: "), geminiModelField, 1, false)
@@ -39,6 +62,16 @@ public class TagsSettingsPanel implements Disposable {
                 .addLabeledComponent(new JBLabel("Model: "), ollamaModelField, 1, false)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
+
+        azureOpenAiEnabled.addActionListener(e -> {
+            var value = azureOpenAiEnabled.isSelected();
+            azureOpenAiApiKeyField.setEnabled(value);
+            azureOpenAiUrlField.setEnabled(value);
+            azureOpenAiDeploymentField.setEnabled(value);
+            azureOpenAiApiVersionField.setEnabled(value);
+        });
+
+        new ComponentValidator(this).installOn(azureOpenAiApiKeyField);
         new ComponentValidator(this).installOn(geminiApiKeyField);
         new ComponentValidator(this).installOn(ollamaUrlField);
     }
@@ -50,6 +83,61 @@ public class TagsSettingsPanel implements Disposable {
     @Override
     public void dispose() {
         // Keep calm and dispose
+    }
+
+    public boolean isUseAzureOpenAiModel() {
+        return azureOpenAiEnabled.isSelected();
+    }
+
+    public void setUseAzureOpenAiModel(boolean value) {
+        azureOpenAiEnabled.setSelected(value);
+    }
+
+    public String getAzureOpenAiApiKey() {
+        return new String(azureOpenAiApiKeyField.getPassword());
+    }
+
+    public void setAzureOpenAiApiKey(String text) {
+        azureOpenAiApiKeyField.setText(text);
+    }
+
+    public String getAzureOpenAiUrl() {
+        return azureOpenAiUrlField.getText();
+    }
+
+    public void setAzureOpenAiError(String message) {
+        var validator = ComponentValidator.getInstance(azureOpenAiApiKeyField).orElseThrow();
+        var info = StringUtils.isBlank(message)
+                ? null
+                : new ValidationInfo(message, azureOpenAiApiKeyField);
+        validator.updateInfo(info);
+    }
+
+    public void setAzureOpenAiUrl(String text) {
+        azureOpenAiUrlField.setText(text);
+    }
+
+    public String getAzureOpenAiDeployment() {
+        return azureOpenAiDeploymentField.getText();
+    }
+
+    public void setAzureOpenAiDeployment(String text) {
+        azureOpenAiDeploymentField.setText(text);
+    }
+
+    public String getAzureOpenAiApiVersion() {
+        var selectedItem = (String) azureOpenAiApiVersionField.getSelectedItem();
+        if (selectedItem != null) {
+            selectedItem = azureOpenAiApiVersionComboModel.getElementAt(0);
+        }
+        return selectedItem;
+    }
+
+    public void setAzureOpenAiApiVersion(String value) {
+        azureOpenAiApiVersionField.setSelectedItem(value);
+        if (azureOpenAiApiVersionField.getSelectedItem() == null) {
+            azureOpenAiApiVersionField.setSelectedIndex(0);
+        }
     }
 
     public String getGeminiApiKey() {
@@ -91,11 +179,11 @@ public class TagsSettingsPanel implements Disposable {
         comboEntries.forEach(geminiModelsComboModel::addElement);
     }
 
-    public String getOllamaURL() {
+    public String getOllamaUrl() {
         return ollamaUrlField.getText();
     }
 
-    public void setOllamaURL(String text) {
+    public void setOllamaUrl(String text) {
         ollamaUrlField.setText(text);
     }
 
