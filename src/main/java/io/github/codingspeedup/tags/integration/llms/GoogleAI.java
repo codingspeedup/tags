@@ -12,7 +12,7 @@ public class GoogleAI implements LLM {
     public GoogleAI() {
         this.geminiChatModel = GoogleAiGeminiChatModel.builder()
                 .apiKey(TagsSettings.getInstance().getGeminiApiKey())
-                .maxRetries(1)
+                .maxRetries(0)
                 .build();
     }
 

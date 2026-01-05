@@ -109,7 +109,7 @@ public class TagsSettingsConfigurable implements Configurable {
                 settingsComponent.setGeminiError("No models could be extracted");
             }
         }
-        comboEntries.add(ComboEntry.EMPTY_VALUE);
+        comboEntries.add(0, ComboEntry.EMPTY_VALUE);
         return comboEntries;
     }
 

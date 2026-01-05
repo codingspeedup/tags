@@ -4,12 +4,16 @@ import com.intellij.openapi.application.ApplicationManager;
 
 public interface TagsSettings {
 
+    static TagsSettings getInstance() {
+        return ApplicationManager.getApplication().getService(TagsSettingsState.class);
+    }
+
     String getGeminiApiKey();
 
     String getGeminiModel();
 
-    static TagsSettings getInstance() {
-        return ApplicationManager.getApplication().getService(TagsSettingsState.class);
-    }
+    String getOllamaURL();
+
+    String getOllamaModel();
 
 }

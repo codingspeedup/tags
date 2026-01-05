@@ -7,9 +7,7 @@ import dev.langchain4j.internal.Json;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import io.github.codingspeedup.tags.plugin.TagsSettings;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,8 +23,10 @@ public interface LLM {
     }
 
     static ChatResponse doChat(ChatRequestParameters llmParameters, ChatMessage... chatMessages) {
+        var model = Model.of(llmParameters.modelName()).orElseThrow();
+
         llmParameters = llmParameters.defaultedBy(ChatRequestParameters.builder()
-                .modelName(TagsSettings.getInstance().getGeminiModel())
+                .modelName(model.getName())
                 .build());
 
         var systemText = new StringBuilder();
@@ -65,7 +65,7 @@ public interface LLM {
         }
 
         if (!systemText.isEmpty()) {
-            var systemMessage = isSystemRoleSupported(llmParameters.modelName())
+            var systemMessage = model.isSystemRoleSupported()
                     ? SystemMessage.from(systemText.toString())
                     : UserMessage.userMessage("system", systemText.toString());
             llmMessages.add(0, systemMessage);
@@ -76,11 +76,8 @@ public interface LLM {
                 .messages(llmMessages)
                 .build();
 
-        return new GoogleAI().chat(chatRequest);
+        return model.getProvider().chat(chatRequest);
     }
 
-    static boolean isSystemRoleSupported(String modelName) {
-        return StringUtils.trimToEmpty(modelName).toLowerCase().contains("gemini");
-    }
 
 }
