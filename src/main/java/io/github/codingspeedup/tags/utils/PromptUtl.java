@@ -186,6 +186,10 @@ public final class PromptUtl {
     }
 
     public static Optional<List<ToolSpecification>> buildToolSpec(String toolkitName) {
+        toolkitName = StringUtils.trimToEmpty(toolkitName);
+        if (StringUtils.isEmpty(toolkitName) || toolkitName.equals(VAR_PLACEHOLDER)) {
+            return Optional.of(List.of());
+        }
         try {
             var toolkitClassFQN = ToolsPackageMaker.class.getPackageName() + "." + toolkitName;
             var classWithTools = Class.forName(toolkitClassFQN);

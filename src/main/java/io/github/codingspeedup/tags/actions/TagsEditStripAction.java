@@ -4,11 +4,12 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.MyMessageBundle;
-import io.github.codingspeedup.tags.utils.FileTypeModel;
 import io.github.codingspeedup.tags.engine.TagsEditHandler;
+import io.github.codingspeedup.tags.utils.FileTypeModel;
 import io.github.codingspeedup.tags.utils.TagsUtl;
 import org.jetbrains.annotations.NotNull;
+
+import static io.github.codingspeedup.tags.utils.TagsUtl.reportError;
 
 public class TagsEditStripAction extends TagsEditActionBase {
 
@@ -18,19 +19,16 @@ public class TagsEditStripAction extends TagsEditActionBase {
         if (project == null) {
             return;
         }
-        var logger = TagsUtl.getLogger(project);
 
         var editor = e.getData(CommonDataKeys.EDITOR);
         if (editor == null) {
-            logger.error(String.format("%s: No editor selected",
-                    MyMessageBundle.message("plugin.label")));
+            reportError(project, "No editor selected");
             return;
         }
 
         var editorFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
         if (editorFile == null) {
-            logger.error(String.format("%s: No virtual file selected",
-                    MyMessageBundle.message("plugin.label")));
+            reportError(project, "No virtual file selected");
             return;
         }
 
@@ -38,9 +36,7 @@ public class TagsEditStripAction extends TagsEditActionBase {
 
         var ftModel = FileTypeModel.of(editorFileName).orElse(null);
         if (ftModel == null) {
-            logger.error(String.format("%s: Unrecognized file model for `%s'",
-                    MyMessageBundle.message("plugin.label"),
-                    editorFileName));
+            reportError(project, String.format("Unrecognized file model for `%s'", editorFileName));
             return;
         }
 
@@ -58,8 +54,7 @@ public class TagsEditStripAction extends TagsEditActionBase {
                     tagsResult.ifPresent(result ->
                             TagsUtl.updateEditorDocument(project, editor, document, result));
                 } catch (Exception e) {
-                    logger.error(String.format("%s: Error processing file",
-                            MyMessageBundle.message("plugin.label")), e);
+                    reportError(project, "Error processing file", e);
                 }
             }
         }.queue();

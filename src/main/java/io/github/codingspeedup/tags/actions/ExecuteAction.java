@@ -8,7 +8,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.engine.ChatMdExecuteHandler;
 import io.github.codingspeedup.tags.engine.SelectionPromptHandler;
 import io.github.codingspeedup.tags.engine.TagsPromptHandler;
@@ -19,6 +18,9 @@ import io.github.codingspeedup.tags.utils.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+
+import static io.github.codingspeedup.tags.utils.TagsUtl.reportError;
+import static io.github.codingspeedup.tags.utils.TagsUtl.reportWarning;
 
 public class ExecuteAction extends AnAction {
 
@@ -69,19 +71,16 @@ public class ExecuteAction extends AnAction {
         if (project == null) {
             return;
         }
-        var logger = TagsUtl.getLogger(project);
 
         var editor = e.getData(CommonDataKeys.EDITOR);
         if (editor == null) {
-            logger.error(String.format("%s: No editor selected",
-                    MyMessageBundle.message("plugin.label")));
+            reportError(project, "No editor selected");
             return;
         }
 
         var editorFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
         if (editorFile == null) {
-            logger.error(String.format("%s: No virtual file selected",
-                    MyMessageBundle.message("plugin.label")));
+            reportError(project, "No virtual file selected");
             return;
         }
 
@@ -117,16 +116,14 @@ public class ExecuteAction extends AnAction {
                                     case CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, tr);
                                 }
                             }, ModalityState.defaultModalityState()),
-                            () -> logger.warn(String.format("%s: Prompt execution produced no result",
-                                    MyMessageBundle.message("plugin.label")))
+                            () -> reportWarning(project, "Prompt execution produced no result")
                     );
+
                 } catch (Exception e) {
-                    logger.error(String.format("%s: Error processing file",
-                            MyMessageBundle.message("plugin.label")), e);
+                    reportError(project, "Processing error", e);
                 }
             }
         }.queue();
     }
-
 
 }

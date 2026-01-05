@@ -9,6 +9,8 @@ import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static io.github.codingspeedup.tags.utils.TagsUtl.reportError;
+
 public class TagsInitializer implements ProjectActivity {
 
     @Nullable
@@ -24,8 +26,7 @@ public class TagsInitializer implements ProjectActivity {
             logger.info(String.format("%s: Plugin initialized.",
                     MyMessageBundle.message("plugin.label")));
         } catch (Exception e) {
-            logger.error(String.format("%s: Plugin initialization failure",
-                    MyMessageBundle.message("plugin.label")), e);
+            reportError(project, "Plugin initialization failure", e);
         }
         return Unit.INSTANCE;
     }

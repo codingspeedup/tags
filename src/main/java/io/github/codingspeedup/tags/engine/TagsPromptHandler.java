@@ -10,7 +10,6 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
-import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.integration.llms.LLM;
 import io.github.codingspeedup.tags.utils.*;
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +22,7 @@ import java.util.Optional;
 import static io.github.codingspeedup.tags.utils.ChatUtl.*;
 import static io.github.codingspeedup.tags.utils.PromptDesc.SECTION_REF_MARKER;
 import static io.github.codingspeedup.tags.utils.PromptUtl.*;
+import static io.github.codingspeedup.tags.utils.TagsUtl.reportWarning;
 
 public class TagsPromptHandler implements PromptHandler {
 
@@ -89,8 +89,6 @@ public class TagsPromptHandler implements PromptHandler {
     }
 
     private Optional<ChatRequest> compileLlmRequest(Project project, TemplateBlock templateBlock) {
-        var logger = TagsUtl.getLogger(project);
-
         var templateText = templateBlock.getTemplate();
         if (StringUtils.isBlank(templateText)) {
             return Optional.empty();
@@ -101,12 +99,11 @@ public class TagsPromptHandler implements PromptHandler {
                 .forEach(key -> templateArgs.put(key, resolveArgument(templateBlock.getArguments().getProperty(key))));
 
         var toolSpecs = new ArrayList<ToolSpecification>();
-        templateBlock.getPlus().lines().forEach(toolName -> buildToolSpec(toolName).ifPresentOrElse(
-                toolSpecs::addAll, () -> logger.error(String.format("%s: Could not load tool specification for `%s'",
-                        MyMessageBundle.message("plugin.label"),
-                        toolName))
-        ));
-
+        templateBlock.getPlus().lines().forEach(toolName -> buildToolSpec(toolName)
+                .ifPresentOrElse(
+                        toolSpecs::addAll,
+                        () -> reportWarning(project, String.format("Could not load tool specification for `%s'", toolName))
+                ));
 
         var chatRequestBuilder = ChatRequest.builder();
 

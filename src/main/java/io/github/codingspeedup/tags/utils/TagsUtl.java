@@ -92,8 +92,7 @@ public final class TagsUtl {
                 // VfsUtil.loadText handles charset and stream closing automatically
                 return VfsUtil.loadText(virtualFile);
             } catch (IOException e) {
-                getLogger(project).error(String.format("%s: Error reading content from file `%s'",
-                        MyMessageBundle.message("plugin.label"), virtualFile.getPath()), e);
+                reportError(project, String.format("Error reading content from file `%s'", virtualFile.getPath()), e);
                 return null;
             }
         });
@@ -106,8 +105,7 @@ public final class TagsUtl {
             try {
                 VfsUtil.saveText(file, content);
             } catch (IOException e) {
-                getLogger(project).error(String.format("%s: Failed to write `%s'",
-                        MyMessageBundle.message("plugin.label"), file.getPath()), e);
+                reportError(project, String.format("Failed to write `%s'", file.getPath()), e);
             }
         };
         if (ApplicationManager.getApplication().isWriteAccessAllowed()) {
@@ -185,8 +183,7 @@ public final class TagsUtl {
 
                     finalResult[0] = yamlFile;
                 } catch (IOException e) {
-                    getLogger(project).error(String.format("%s: Failed to create prompt template library `%s'",
-                            MyMessageBundle.message("plugin.label"), finalFileName), e);
+                    reportError(project, String.format("Failed to create prompt template library `%s'", finalFileName), e);
                     finalResult[0] = null;
                 }
             });
@@ -236,10 +233,7 @@ public final class TagsUtl {
                         }
                     }
                 } catch (IOException e) {
-                    getLogger(project).error("Failed to create folder", e);
-                    getLogger(project).error(String.format("%s: Failed to create folder",
-                            MyMessageBundle.message("plugin.label")), e);
-
+                    reportError(project, "Failed to create folder", e);
                     result[0] = null;
                 }
             });
@@ -261,9 +255,9 @@ public final class TagsUtl {
     public static void sendToClipboard(Project project, TagsResult tagsResult) {
         CopyPasteManager.getInstance().setContents(new StringSelection(tagsResult.getContent()));
         var notification = NotificationGroupManager.getInstance()
-                .getNotificationGroup("GenerationGroup")
+                .getNotificationGroup("TAGS+Group")
                 .createNotification(
-                        "Copied to Clipboard",
+                        MyMessageBundle.message("plugin.label"),
                         "Content successfully sent to system clipboard.",
                         NotificationType.INFORMATION
                 );
@@ -303,5 +297,54 @@ public final class TagsUtl {
         });
     }
 
+    public static void reportWarning(Project project, String message) {
+        reportIssue(project, NotificationType.WARNING, message, null);
+    }
+
+    public static void reportError(Project project, String message) {
+        reportError(project, message, null);
+    }
+
+    public static void reportError(Project project, String message, Exception ex) {
+        reportIssue(project, NotificationType.ERROR, message, ex);
+    }
+
+    private static void reportIssue(Project project, NotificationType level, String message, Exception ex) {
+        message = StringUtils.trimToEmpty(message);
+        if (StringUtils.isEmpty(message) && ex != null) {
+            message = ex.getClass().getName();
+        }
+        var logMessage = String.format("%s: %s", MyMessageBundle.message("plugin.label"), message);
+
+        switch (level) {
+            case ERROR -> {
+                if (ex == null) {
+                    getLogger(project).error(logMessage);
+                } else {
+                    getLogger(project).error(logMessage, ex);
+                }
+            }
+            case WARNING -> getLogger(project).warn(logMessage);
+            default -> getLogger(project).info(logMessage);
+        }
+
+        var notificationMessage = message;
+        if (ex != null) {
+            message = ex.getMessage();
+            if (StringUtils.isBlank(message)) {
+                notificationMessage += ": " + ex.getClass().getSimpleName();
+            } else {
+                notificationMessage += ":\n" + message;
+            }
+        }
+
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup("TAGS+Group")
+                .createNotification(
+                        MyMessageBundle.message("plugin.label"),
+                        notificationMessage,
+                        level
+                ).notify(project);
+    }
 
 }

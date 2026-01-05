@@ -47,12 +47,12 @@
         <intentionAction order="first">
             <language/>
             <className>io.github.codingspeedup.tags.intentions.TagsPromptIntention</className>
-<!--            <categoryKey>intention.TagsPromptIntention.text</categoryKey>-->
+            <!--            <categoryKey>intention.TagsPromptIntention.text</categoryKey>-->
         </intentionAction>
 
-        <notificationGroup id="GenerationGroup"
+        <notificationGroup id="TAGS+Group"
                            displayType="BALLOON"
-                           key="notification.group.GenerationGroup"/>
+                           key="plugin.label"/>
 
     </extensions>
 
@@ -64,21 +64,24 @@
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
 
+        <action id="Execute"
+                class="io.github.codingspeedup.tags.actions.ExecuteAction"
+                icon="/META-INF/toolIcon.svg">
+            <add-to-group group-id="EditorPopupMenu.Run" anchor="last"/>
+        </action>
+
+        <group id="SendToLLMAs"
+               class="io.github.codingspeedup.tags.actions.ExecuteAsPromptGroup"
+               popup="true">
+            icon="/META-INF/toolIcon.svg">
+            <add-to-group group-id="EditorPopupMenu.Run" anchor="last"/>
+        </group>
+
         <group id="TagsGroupEditorPopupMenu"
                class="io.github.codingspeedup.tags.actions.TagsGroup"
                popup="true"
                icon="/META-INF/toolIcon.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-
-            <action id="Execute"
-                    class="io.github.codingspeedup.tags.actions.ExecuteAction"
-            />
-
-            <group id="SendToLLMAs"
-                   class="io.github.codingspeedup.tags.actions.ExecuteAsPromptGroup"
-                   popup="true"/>
-
-            <separator/>
 
             <group id="InsertTagsTemplate"
                    class="io.github.codingspeedup.tags.actions.TagsEditInsertTemplateGroup"

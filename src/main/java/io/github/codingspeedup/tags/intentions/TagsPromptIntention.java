@@ -21,19 +21,19 @@ public class TagsPromptIntention implements IntentionAction, HighPriorityAction 
     }
 
     @Override
-    public boolean startInWriteAction() {
-        return false;
+    public @NotNull String getText() {
+        return MyMessageBundle.message("action.Execute.text");
     }
 
     @Override
     public @NotNull IntentionPreviewInfo generatePreview(@NotNull Project project, @NotNull Editor editor, @NotNull PsiFile file) {
-        var description = "Same as context menu " + getText();
+        var description = MyMessageBundle.message("action.Execute.description");
         return new IntentionPreviewInfo.Html(description);
     }
 
     @Override
-    public @NotNull String getText() {
-        return MyMessageBundle.message("plugin.label") + " > " + MyMessageBundle.message("action.Execute.text");
+    public boolean startInWriteAction() {
+        return false;
     }
 
     @Override
