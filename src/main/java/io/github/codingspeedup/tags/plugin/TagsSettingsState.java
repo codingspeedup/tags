@@ -28,7 +28,7 @@ class TagsSettingsState implements PersistentStateComponent<TagsSettingsState>, 
     public String geminiModel = "";
 
     @Getter
-    public String ollamaURL = "http://localhost:11434";
+    public String ollamaUrl = "http://localhost:11434";
     @Getter
     public String ollamaModel = "";
 

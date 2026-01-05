@@ -8,11 +8,21 @@ public interface TagsSettings {
         return ApplicationManager.getApplication().getService(TagsSettingsState.class);
     }
 
+    boolean isUseAzureOpenAiModel();
+
+    String getAzureOpenAiApiKey();
+
+    String getAzureOpenAiUrl();
+
+    String getAzureOpenAiDeployment();
+
+    String getAzureOpenAiApiVersion();
+
     String getGeminiApiKey();
 
     String getGeminiModel();
 
-    String getOllamaURL();
+    String getOllamaUrl();
 
     String getOllamaModel();
 

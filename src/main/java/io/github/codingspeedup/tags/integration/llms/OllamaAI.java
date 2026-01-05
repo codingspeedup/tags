@@ -13,7 +13,7 @@ public class OllamaAI implements LLM {
 
     public OllamaAI() {
         this.ollamaChatModel = OllamaChatModel.builder()
-                .baseUrl(TagsSettings.getInstance().getOllamaURL())
+                .baseUrl(TagsSettings.getInstance().getOllamaUrl())
                 .timeout(Duration.ofMinutes(5))
                 .maxRetries(0)
                 .build();

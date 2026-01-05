@@ -56,7 +56,7 @@ public class TagsSettingsConfigurable implements Configurable {
                     settings.getAzureOpenAiApiVersion());
         }
         settingsComponent.setGeminiModels(readGeminiModels(settings.getGeminiApiKey()));
-        settingsComponent.setOllamaModels(readOllamaModels(settings.getOllamaURL()));
+        settingsComponent.setOllamaModels(readOllamaModels(settings.getOllamaUrl()));
         return settingsComponent.getPanel();
     }
 
@@ -73,7 +73,7 @@ public class TagsSettingsConfigurable implements Configurable {
         modified = modified || !StringUtils.equals(settings.getGeminiApiKey(), settingsComponent.getGeminiApiKey());
         modified = modified || !StringUtils.equals(settings.getGeminiModel(), settingsComponent.getGeminiModel());
 
-        modified = modified || !StringUtils.equals(settings.getOllamaURL(), settingsComponent.getOllamaUrl());
+        modified = modified || !StringUtils.equals(settings.getOllamaUrl(), settingsComponent.getOllamaUrl());
         modified = modified || !StringUtils.equals(settings.getOllamaModel(), settingsComponent.getOllamaModel());
         return modified;
     }
@@ -93,7 +93,7 @@ public class TagsSettingsConfigurable implements Configurable {
         TagsSettingsSecretManager.saveSecret(GEMINI_API_KEY, settingsComponent.getGeminiApiKey());
         settings.geminiModel = settingsComponent.getGeminiModel();
 
-        settings.ollamaURL = settingsComponent.getOllamaUrl();
+        settings.ollamaUrl = settingsComponent.getOllamaUrl();
         settings.ollamaModel = settingsComponent.getOllamaModel();
     }
 
@@ -110,7 +110,7 @@ public class TagsSettingsConfigurable implements Configurable {
         settingsComponent.setGeminiApiKey(settings.getGeminiApiKey());
         settingsComponent.setGeminiModel(settings.getGeminiModel());
 
-        settingsComponent.setOllamaUrl(settings.getOllamaURL());
+        settingsComponent.setOllamaUrl(settings.getOllamaUrl());
         settingsComponent.setOllamaModel(settings.getOllamaModel());
     }
 
@@ -135,7 +135,7 @@ public class TagsSettingsConfigurable implements Configurable {
         if (!StringUtils.equals(settings.getGeminiApiKey(), settingsComponent.getGeminiApiKey())) {
             settingsComponent.setGeminiModels(readGeminiModels(settingsComponent.getGeminiApiKey()));
         }
-        if (!StringUtils.equals(settings.getOllamaURL(), settingsComponent.getOllamaUrl())) {
+        if (!StringUtils.equals(settings.getOllamaUrl(), settingsComponent.getOllamaUrl())) {
             settingsComponent.setOllamaModels(readOllamaModels(settingsComponent.getOllamaUrl()));
         }
     }

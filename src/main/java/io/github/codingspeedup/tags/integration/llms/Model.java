@@ -24,6 +24,10 @@ public class Model {
     public static Optional<Model> of(String modelHint) {
         var settings = TagsSettings.getInstance();
         if (StringUtils.isBlank(modelHint)) {
+            if (settings.isUseAzureOpenAiModel()) {
+                return Optional.of(new Model(settings.getAzureOpenAiDeployment(), new AzureOpenAI()));
+
+            }
             if (StringUtils.isNotBlank(settings.getGeminiModel())) {
                 return Optional.of(new Model(settings.getGeminiModel(), new GoogleAI()));
             }
