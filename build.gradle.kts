@@ -28,8 +28,13 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
 
-    implementation("dev.langchain4j:langchain4j:1.10.0")
-    implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.10.0")
+    val langchain4jVersion = "1.10.0"
+    implementation("dev.langchain4j:langchain4j:$langchain4jVersion")
+    implementation("dev.langchain4j:langchain4j-azure-open-ai:$langchain4jVersion")
+    implementation("dev.langchain4j:langchain4j-google-ai-gemini:$langchain4jVersion")
+    implementation("dev.langchain4j:langchain4j-ollama:$langchain4jVersion")
+    implementation("dev.langchain4j:langchain4j-open-ai:$langchain4jVersion")
+
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
     implementation("com.github.javaparser:javaparser-core:3.27.1")
     implementation("org.apache.groovy:groovy:5.0.3")

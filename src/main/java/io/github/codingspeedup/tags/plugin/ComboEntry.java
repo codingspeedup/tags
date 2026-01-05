@@ -10,7 +10,7 @@ import java.util.Objects;
 @Getter
 public class ComboEntry {
 
-    public static final ComboEntry EMPTY_VALUE = new ComboEntry(StringUtils.EMPTY, "-- Default --");
+    public static final ComboEntry EMPTY_VALUE = new ComboEntry(StringUtils.EMPTY, "-- None --");
 
     private final String code;
     private final String description;

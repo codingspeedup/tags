@@ -16,6 +16,12 @@ class TagsSettingsState implements PersistentStateComponent<TagsSettingsState>, 
     @Getter
     public String geminiModel = "";
 
+    @Getter
+    public String ollamaURL = "http://localhost:11434";
+
+    @Getter
+    public String ollamaModel = "";
+
     public static TagsSettingsState getInstance() {
         return ApplicationManager.getApplication().getService(TagsSettingsState.class);
     }
