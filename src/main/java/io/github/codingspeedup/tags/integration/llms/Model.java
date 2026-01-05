@@ -26,7 +26,6 @@ public class Model {
         if (StringUtils.isBlank(modelHint)) {
             if (settings.isUseAzureOpenAiModel()) {
                 return Optional.of(new Model(settings.getAzureOpenAiDeployment(), new AzureOpenAI()));
-
             }
             if (StringUtils.isNotBlank(settings.getGeminiModel())) {
                 return Optional.of(new Model(settings.getGeminiModel(), new GoogleAI()));

@@ -97,10 +97,12 @@ public class ChatMdExecuteHandler implements PromptHandler {
         var executor = new ScriptExecutor(new PrintStream(outContent), new PrintStream(errContent));
         var scriptResult = executor.execute(groovyScript);
 
-        var shellMessage = new StringBuilder(sanitizeLineEndings(outContent.toString()));
+        var shellMessage = new StringBuilder("```\n");
+        shellMessage.append(sanitizeLineEndings(outContent.toString()));
         if (!endsWith(shellMessage, "\n")) {
             shellMessage.append("\n");
         }
+        shellMessage.append("```\n");
         var capturedErr = StringUtils.trimToEmpty(errContent.toString());
         if (StringUtils.isNotBlank(capturedErr)) {
             shellMessage.append("<pre style=\"color: Salmon\">\n");
