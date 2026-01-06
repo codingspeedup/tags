@@ -1,11 +1,12 @@
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "2.1.20" 
+    id("groovy")
+    // id("org.jetbrains.kotlin.jvm") version "2.1.20"
     id("org.jetbrains.intellij.platform") version "2.10.2"
 }
 
 group = "io.github.codingspeedup"
-version = "2026-01-04"
+version = "2026-01-06"
 
 repositories {
     mavenCentral()
@@ -27,6 +28,11 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
+    implementation("org.slf4j:slf4j-jdk14:2.0.9")
+
+    val groovyVersion = "4.0.29"
+    implementation("org.apache.groovy:groovy:$groovyVersion")
+    implementation("org.apache.groovy:groovy-ant:$groovyVersion")
 
     val langchain4jVersion = "1.10.0"
     implementation("dev.langchain4j:langchain4j:$langchain4jVersion")
@@ -36,12 +42,26 @@ dependencies {
     implementation("dev.langchain4j:langchain4j-open-ai:$langchain4jVersion")
 
     implementation("com.vladsch.flexmark:flexmark-all:0.64.8")
+
     implementation("com.github.javaparser:javaparser-core:3.27.1")
-    implementation("org.apache.groovy:groovy:5.0.3")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDir("src/main/resources")
+        }
+
+        java {
+            srcDirs(emptyList<String>())
+        }
+        // Type-safe way to access Groovy in Kotlin DSL
+        extensions.getByType<GroovySourceDirectorySet>().srcDirs("src/main/groovy", "src/main/java")
+    }
 }
 
 intellijPlatform {
@@ -57,8 +77,18 @@ intellijPlatform {
 }
 
 tasks {
+
+    withType<Jar> {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
     // Set the JVM compatibility versions
     withType<JavaCompile> {
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
+    }
+
+    withType<GroovyCompile> {
         sourceCompatibility = "17"
         targetCompatibility = "17"
     }
@@ -68,9 +98,10 @@ tasks {
     }
 }
 
-kotlin {
+
+// kotlin {
 //    compilerOptions {
 //        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
 //    }
 //     jvmToolchain(17)
-}
+// }

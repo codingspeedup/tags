@@ -53,7 +53,12 @@ public interface LLM {
                     Your task is to write a script that calls the PROVIDED_API to fulfill ORIGINAL_USER_REQUEST.
                     
                     # PROVIDED_API:
+                    > [!NOTE]
+                    > All calls must use the `ClassName.methodName` syntax.
+                    
                     %s
+                    
+                    ---
                     
                     # TARGET OBJECTIVE:
                     Fulfill the following request by writing a Groovy script using the PROVIDED_API.

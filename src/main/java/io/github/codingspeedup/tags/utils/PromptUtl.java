@@ -12,7 +12,6 @@ import lombok.SneakyThrows;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import tools.ToolsPackageMaker;
 
 import java.io.StringReader;
 import java.math.BigDecimal;
@@ -185,19 +184,22 @@ public final class PromptUtl {
         });
     }
 
-    public static Optional<List<ToolSpecification>> buildToolSpec(String toolkitName) {
-        toolkitName = StringUtils.trimToEmpty(toolkitName);
-        if (StringUtils.isEmpty(toolkitName) || toolkitName.equals(VAR_PLACEHOLDER)) {
+    public static Optional<List<ToolSpecification>> buildToolSpec(String toolkitClassFQN) {
+        toolkitClassFQN = StringUtils.trimToEmpty(toolkitClassFQN);
+        if (StringUtils.isEmpty(toolkitClassFQN) || toolkitClassFQN.equals(VAR_PLACEHOLDER)) {
             return Optional.of(List.of());
         }
         try {
-            var toolkitClassFQN = ToolsPackageMaker.class.getPackageName() + "." + toolkitName;
             var classWithTools = Class.forName(toolkitClassFQN);
-            var toolSpecifications = ToolSpecifications.toolSpecificationsFrom(classWithTools);
-            return CollectionUtils.isEmpty(toolSpecifications) ? Optional.empty() : Optional.of(toolSpecifications);
+            return buildToolSpec(classWithTools);
         } catch (ClassNotFoundException e) {
             return Optional.empty();
         }
+    }
+
+    public static Optional<List<ToolSpecification>> buildToolSpec(Class<?> classWithTools) {
+        var toolSpecifications = ToolSpecifications.toolSpecificationsFrom(classWithTools);
+        return CollectionUtils.isEmpty(toolSpecifications) ? Optional.empty() : Optional.of(toolSpecifications);
     }
 
 }
