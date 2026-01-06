@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static io.github.codingspeedup.tags.integration.llms.Model.nullifyToolSpecification;
+
 public interface LLM {
 
     @SuppressWarnings("unused")
@@ -26,7 +28,7 @@ public interface LLM {
         var model = Model.of(llmParameters.modelName()).orElseThrow();
 
         llmParameters = llmParameters.defaultedBy(ChatRequestParameters.builder()
-                .modelName(model.getName())
+                .modelName(model.name())
                 .build());
 
         var systemText = new StringBuilder();
@@ -40,28 +42,30 @@ public interface LLM {
                     return true;
                 }).collect(Collectors.toCollection(ArrayList::new));
 
-        if (CollectionUtils.isNotEmpty(llmParameters.toolSpecifications())) {
+        var toolsProvided = CollectionUtils.isNotEmpty(llmParameters.toolSpecifications());
+        if (toolsProvided) {
             var toolSpec = Json.toJson(llmParameters.toolSpecifications());
+            nullifyToolSpecification(llmParameters);
 
-            if (!systemText.isEmpty()) {
-                systemText.append("---\n**Additional Engineering Rules:**\n");
-            }
+            var metaSystem = """
+                    # ROLE
+                    You are a Groovy Scripting Engine.
+                    Your task is to write a script that calls the PROVIDED_API to fulfill ORIGINAL_USER_REQUEST.
+                    
+                    # PROVIDED_API:
+                    %s
+                    
+                    # TARGET OBJECTIVE:
+                    Fulfill the following request by writing a Groovy script using the PROVIDED_API.
+                    
+                    ## ORIGINAL_SYSTEM_INSTRUCTIONS:
+                    %s
+                    
+                    ## ORIGINAL_USER_REQUEST:
+                    """.formatted(toolSpec, systemText);
 
-            systemText.append("## ROLE: Expert Groovy Script Generator\n");
-            systemText.append("## TASK: Generate a Groovy script using this API specification:\n\n");
-            systemText.append(toolSpec).append("\n\n");
-            systemText.append("## RULES:\n");
-            systemText.append("- Output ONLY the code block\n");
-            systemText.append("- Code comments are optional\n");
-            systemText.append("- Simulate the logic; do not call external APIs.\n");
-
-            try {
-                var field = llmParameters.getClass().getDeclaredField("toolSpecifications");
-                field.setAccessible(true);
-                field.set(llmParameters, null);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to nullify tools via reflection", e);
-            }
+            systemText.setLength(0);
+            systemText.append(metaSystem);
         }
 
         if (!systemText.isEmpty()) {
@@ -71,13 +75,22 @@ public interface LLM {
             llmMessages.add(0, systemMessage);
         }
 
+        if (toolsProvided) {
+            llmMessages.add(UserMessage.from("""
+                    # CONSTRAINTS
+                    - Return ONLY a valid Groovy script block.
+                    - Use 'var' for all local variable declarations.
+                    - Do not include conversational filler or markdown explanations outside the code block.
+                    - Ensure the script is self-contained and orchestrates the PROVIDED_API to reach the objective.
+                    """));
+        }
+
         var chatRequest = ChatRequest.builder()
                 .parameters(llmParameters)
                 .messages(llmMessages)
                 .build();
 
-        return model.getProvider().chat(chatRequest);
+        return model.provider().chat(chatRequest);
     }
-
 
 }

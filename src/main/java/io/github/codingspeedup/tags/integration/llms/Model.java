@@ -1,16 +1,12 @@
 package io.github.codingspeedup.tags.integration.llms;
 
+import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import io.github.codingspeedup.tags.plugin.TagsSettings;
-import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Optional;
 
-@Getter
-public class Model {
-
-    private final String name;
-    private final LLM provider;
+public record Model(String name, LLM provider) {
 
     public Model(String name, LLM provider) {
         this.name = StringUtils.trimToEmpty(name);
@@ -35,6 +31,17 @@ public class Model {
             }
         }
         return Optional.empty();
+    }
+
+    public static ChatRequestParameters nullifyToolSpecification(ChatRequestParameters llmParameters) {
+        try {
+            var field = llmParameters.getClass().getDeclaredField("toolSpecifications");
+            field.setAccessible(true);
+            field.set(llmParameters, null);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to nullify tools via reflection", e);
+        }
+        return llmParameters;
     }
 
 }
