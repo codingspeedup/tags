@@ -2,12 +2,10 @@ package io.github.codingspeedup.tags.engine;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
-import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
 import io.github.codingspeedup.tags.integration.llms.LLM;
@@ -21,8 +19,8 @@ import java.util.Optional;
 
 import static io.github.codingspeedup.tags.utils.ChatUtl.*;
 import static io.github.codingspeedup.tags.utils.PromptDesc.SECTION_REF_MARKER;
-import static io.github.codingspeedup.tags.utils.PromptUtl.*;
-import static io.github.codingspeedup.tags.utils.TagsUtl.reportWarning;
+import static io.github.codingspeedup.tags.utils.PromptUtl.fillArguments;
+import static io.github.codingspeedup.tags.utils.PromptUtl.toProperties;
 
 public class TagsPromptHandler implements PromptHandler {
 
@@ -61,7 +59,8 @@ public class TagsPromptHandler implements PromptHandler {
         ftModel.fillTemplate(templateBlock, fileContent);
 
         var chatRequest = compileLlmRequest(project, templateBlock).orElseThrow();
-        var chatResponse = LLM.doChat(chatRequest);
+        var apiSpec = PromptApiSpecBuilder.of(templateBlock.getPlus().lines().toList());
+        var chatResponse = LLM.doChat(chatRequest, apiSpec.orElse(null));
 
         var tagsResult = new TagsResult(resolveGateway(templateBlock.getGateway()));
         switch (tagsResult.getGateway()) {
@@ -96,36 +95,17 @@ public class TagsPromptHandler implements PromptHandler {
 
         var templateArgs = new HashMap<String, Object>();
         templateBlock.getArguments().stringPropertyNames()
-                .forEach(key -> templateArgs.put(key, resolveArgument(templateBlock.getArguments().getProperty(key))));
-
-        var toolSpecs = new ArrayList<ToolSpecification>();
-        templateBlock.getPlus().lines().forEach(toolName -> buildToolSpec(toolName)
-                .ifPresentOrElse(
-                        toolSpecs::addAll,
-                        () -> reportWarning(project, String.format("Could not load tool specification for `%s'", toolName))
-                ));
+                .forEach(key ->
+                        templateArgs.put(key, resolveArgument(templateBlock.getArguments().getProperty(key))));
 
         var chatRequestBuilder = ChatRequest.builder();
 
         var chatMessages = new ArrayList<ChatMessage>();
 
         if (templateText.startsWith(PromptDesc.TEMPLATE_PREFIX)) {
+
             var pDesc = new PromptDesc(templateText);
             var pLib = pDesc.getLibrary(project);
-
-            var pLibParameters = pLib.getParameters();
-            if (pLibParameters.isEmpty()) {
-                if (!toolSpecs.isEmpty()) {
-                    chatRequestBuilder.toolSpecifications(toolSpecs);
-                }
-            } else {
-                var chatRequestParameters = toChatRequestParameters(pLibParameters);
-                if (!toolSpecs.isEmpty()) {
-                    chatRequestParameters = chatRequestParameters.overrideWith(
-                            ChatRequestParameters.builder().toolSpecifications(toolSpecs).build());
-                }
-                chatRequestBuilder.parameters(chatRequestParameters);
-            }
 
             var promptVariables = pLib.getVariables(pDesc.getId());
             fillArguments(templateArgs, promptVariables);
@@ -139,6 +119,7 @@ public class TagsPromptHandler implements PromptHandler {
             chatMessages.add(userTemplate.apply(templateArgs).toUserMessage());
 
         } else {
+
             var userTemplate = PromptTemplate.from(templateBlock.getTemplate());
 
             var promptVariables = PromptUtl.findVariables(userTemplate);
@@ -146,9 +127,6 @@ public class TagsPromptHandler implements PromptHandler {
 
             chatMessages.add(userTemplate.apply(templateArgs).toUserMessage());
 
-            if (!toolSpecs.isEmpty()) {
-                chatRequestBuilder.toolSpecifications(toolSpecs);
-            }
         }
 
         return Optional.of(chatRequestBuilder.messages(chatMessages).build());

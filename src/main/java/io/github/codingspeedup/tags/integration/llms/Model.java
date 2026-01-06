@@ -1,6 +1,5 @@
 package io.github.codingspeedup.tags.integration.llms;
 
-import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import io.github.codingspeedup.tags.plugin.TagsSettings;
 import org.apache.commons.lang.StringUtils;
 
@@ -31,17 +30,6 @@ public record Model(String name, LLM provider) {
             }
         }
         return Optional.empty();
-    }
-
-    public static ChatRequestParameters nullifyToolSpecification(ChatRequestParameters llmParameters) {
-        try {
-            var field = llmParameters.getClass().getDeclaredField("toolSpecifications");
-            field.setAccessible(true);
-            field.set(llmParameters, null);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to nullify tools via reflection", e);
-        }
-        return llmParameters;
     }
 
 }

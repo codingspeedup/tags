@@ -3,28 +3,25 @@ package io.github.codingspeedup.tags.integration.llms;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.internal.Json;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.integration.llms.Model.nullifyToolSpecification;
 
 public interface LLM {
 
     @SuppressWarnings("unused")
     ChatResponse chat(ChatRequest chatRequest);
 
-    static ChatResponse doChat(ChatRequest chatRequest) {
-        return doChat(chatRequest.parameters(), chatRequest.messages().toArray(ChatMessage[]::new));
+    static ChatResponse doChat(ChatRequest chatRequest, String apiSpec) {
+        return doChat(chatRequest.parameters(), apiSpec, chatRequest.messages().toArray(ChatMessage[]::new));
     }
 
-    static ChatResponse doChat(ChatRequestParameters llmParameters, ChatMessage... chatMessages) {
+    static ChatResponse doChat(ChatRequestParameters llmParameters, String apiSpec, ChatMessage... chatMessages) {
         var model = Model.of(llmParameters.modelName()).orElseThrow();
 
         llmParameters = llmParameters.defaultedBy(ChatRequestParameters.builder()
@@ -42,11 +39,7 @@ public interface LLM {
                     return true;
                 }).collect(Collectors.toCollection(ArrayList::new));
 
-        var toolsProvided = CollectionUtils.isNotEmpty(llmParameters.toolSpecifications());
-        if (toolsProvided) {
-            var toolSpec = Json.toJson(llmParameters.toolSpecifications());
-            nullifyToolSpecification(llmParameters);
-
+        if (apiSpec != null) {
             var metaSystem = """
                     # ROLE
                     You are a Groovy Scripting Engine.
@@ -55,7 +48,6 @@ public interface LLM {
                     # PROVIDED_API:
                     > [!NOTE]
                     > All calls must use the `ClassName.methodName` syntax.
-                    
                     %s
                     
                     ---
@@ -67,7 +59,7 @@ public interface LLM {
                     %s
                     
                     ## ORIGINAL_USER_REQUEST:
-                    """.formatted(toolSpec, systemText);
+                    """.formatted(apiSpec, systemText);
 
             systemText.setLength(0);
             systemText.append(metaSystem);
@@ -80,13 +72,14 @@ public interface LLM {
             llmMessages.add(0, systemMessage);
         }
 
-        if (toolsProvided) {
+        if (apiSpec != null) {
             llmMessages.add(UserMessage.from("""
                     # CONSTRAINTS
                     - Return ONLY a valid Groovy script block.
-                    - Use 'var' for all local variable declarations.
                     - Do not include conversational filler or markdown explanations outside the code block.
                     - Ensure the script is self-contained and orchestrates the PROVIDED_API to reach the objective.
+                    - **NAMED ARGUMENTS**: You may use Groovy's `key: value` syntax for optional parameters.
+                    - **OMISSION**: If a parameter is marked with '?', OMIT it entirely rather than passing null or empty values.
                     """));
         }
 

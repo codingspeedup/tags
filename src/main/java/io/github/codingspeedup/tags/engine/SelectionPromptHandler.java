@@ -47,7 +47,7 @@ public class SelectionPromptHandler implements PromptHandler {
         if (indicator.isCanceled()) {
             return Optional.empty();
         }
-        var response = LLM.doChat(chatRequestParameters, systemMessage, userMessage);
+        var response = LLM.doChat(chatRequestParameters, null, systemMessage, userMessage);
 
         var mdContent = new StringBuilder();
         mdContent.append(renderParametersBlock(toProperties(chatRequestParameters, false)));

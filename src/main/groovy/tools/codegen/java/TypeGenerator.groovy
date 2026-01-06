@@ -1,4 +1,4 @@
-package codegen.java
+package tools.codegen.java
 
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier
@@ -17,12 +17,12 @@ class TypeGenerator {
 
     @Tool("Generates a standard Java Class")
     static String generateClass(
-            @P("The name of the class") String name,
-            @P(value = "Superclass to extend", required = false) @Nullable String extendsClass,
-            @P(value = "Interfaces to implement", required = false) @Nullable List<String> implementsList
+            @P("className") String className,
+            @P(value = "extendsClass -- - the parent class name", required = false) @Nullable String extendsClass = null,
+            @P(value = "implementsList", required = false) @Nullable List<String> implementsList = null
     ) {
         var cu = createCU()
-        var type = cu.addClass(name, Modifier.Keyword.PUBLIC)
+        var type = cu.addClass(className, Modifier.Keyword.PUBLIC)
         if (extendsClass) {
             type.addExtendedType(extendsClass)
         }
@@ -32,23 +32,23 @@ class TypeGenerator {
 
     @Tool("Generates a Java Interface")
     static String generateInterface(
-            @P("The name of the interface") String name,
-            @P(value = "Interfaces to extend", required = false) @Nullable List<String> extendsList
+            @P("interfaceName") String interfaceName,
+            @P(value = "extendsList", required = false) @Nullable List<String> extendsList = null
     ) {
         var cu = createCU()
-        var type = cu.addInterface(name, Modifier.Keyword.PUBLIC)
+        var type = cu.addInterface(interfaceName, Modifier.Keyword.PUBLIC)
         extendsList?.each { type.addExtendedType(it) }
         cu.toString()
     }
 
     @Tool("Generates a Java Record")
     static String generateRecord(
-            @P("The name of the record") String name,
-            @P(value = "Interfaces to implement", required = false) @Nullable List<String> implementsList
+            @P("recordName") String recordName,
+            @P(value = "implementsList", required = false) @Nullable List<String> implementsList = null
     ) {
         var cu = createCU()
         var record = new RecordDeclaration()
-        record.setName(name)
+        record.setName(recordName)
         record.setPublic(true)
         cu.addType(record)
 
@@ -58,22 +58,22 @@ class TypeGenerator {
 
     @Tool("Generates a Java Enum")
     static String generateEnum(
-            @P("The name of the enum") String name,
-            @P(value = "Interfaces to implement", required = false) @Nullable List<String> implementsList
+            @P("enumName") String enumName,
+            @P(value = "implementsList", required = false) @Nullable List<String> implementsList = null
     ) {
         var cu = createCU()
-        var type = cu.addEnum(name, Modifier.Keyword.PUBLIC)
+        var type = cu.addEnum(enumName, Modifier.Keyword.PUBLIC)
         implementsList?.each { type.addImplementedType(it) }
         cu.toString()
     }
 
     @Tool("Generates a Java Annotation type")
     static String generateAnnotation(
-            @P("The name of the annotation") String name
+            @P("annotationName") String annotationName
     ) {
         var cu = createCU()
         var annotation = new AnnotationDeclaration()
-        annotation.setName(name)
+        annotation.setName(annotationName)
         annotation.setPublic(true)
         cu.addType(annotation)
         cu.toString()
@@ -81,11 +81,11 @@ class TypeGenerator {
 
     @Tool("Generates a Java Exception class")
     static String generateException(
-            @P("The name of the exception") String name,
-            @P(value = "Base exception to extend (defaults to Exception)", required = false) @Nullable String baseException
+            @P("exceptionName") String exceptionName = null,
+            @P(value = "baseException", required = false) @Nullable String baseException = null
     ) {
         var cu = createCU()
-        var type = cu.addClass(name, Modifier.Keyword.PUBLIC)
+        var type = cu.addClass(exceptionName, Modifier.Keyword.PUBLIC)
         // Using Elvis operator instead of Objects.requireNonNullElse
         type.addExtendedType(baseException ?: "Exception")
         cu.toString()

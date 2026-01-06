@@ -163,8 +163,8 @@ public class ChatMdExecuteHandler implements PromptHandler {
                 .map(data -> toChatRequestParameters(PromptUtl.parseProperties(data)))
                 .orElse(ChatRequestParameters.builder().build());
 
-        var llmResponse = system.map(systemMessage -> LLM.doChat(llmParameters, systemMessage, userMessage))
-                .orElse(LLM.doChat(llmParameters, userMessage));
+        var llmResponse = system.map(systemMessage -> LLM.doChat(llmParameters, null, systemMessage, userMessage))
+                .orElse(LLM.doChat(llmParameters, null, userMessage));
 
         if (llmResponse.metadata().finishReason() == FinishReason.OTHER) {
             return Optional.empty();
