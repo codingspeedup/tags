@@ -8,6 +8,8 @@ import java.io.PrintStream;
 
 public class ScriptExecutor {
 
+    public static final String GROOVY_EXTENSION = ".groovy";
+
     @Getter
     private final PrintStream stdOut;
     @Getter

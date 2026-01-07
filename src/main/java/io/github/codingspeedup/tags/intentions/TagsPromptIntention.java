@@ -42,7 +42,9 @@ public class TagsPromptIntention implements IntentionAction, HighPriorityAction 
         if (isAvailable) {
             isAvailable = !editor.getSelectionModel().hasSelection();
             if (isAvailable) {
-                isAvailable = TagsGroup.isChatMd(file.getName()) || FileTypeModel.of(file.getName()).isPresent();
+                isAvailable = TagsGroup.isChatMd(file.getName())
+                        || TagsGroup.isGroovy(file.getName())
+                        || FileTypeModel.of(file.getName()).isPresent();
             }
         }
         return isAvailable;

@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface PromptHandler {
 
-    Optional<TagsResult> process(Project project, ProgressIndicator indicator);
+    Optional<TagsResult> process(Project project, ProgressIndicator indicator) throws Exception;
 
 }

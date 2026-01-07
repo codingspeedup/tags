@@ -4,6 +4,7 @@ import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.Service;
+import com.intellij.openapi.project.Project;
 import com.intellij.util.ExceptionUtil;
 
 import java.util.ArrayList;
@@ -11,6 +12,10 @@ import java.util.List;
 
 @Service(Service.Level.PROJECT)
 public final class TagsConsoleService {
+
+    public static TagsConsoleService getInstance(Project project) {
+        return project.getService(TagsConsoleService.class);
+    }
 
     private record DelayedMessage(String message, ConsoleViewContentType type) {
     }
@@ -46,7 +51,7 @@ public final class TagsConsoleService {
         error(ExceptionUtil.getThrowableText(throwable));
     }
 
-    private void log(String message, ConsoleViewContentType type) {
+    void log(String message, ConsoleViewContentType type) {
         var currentView = this.consoleView;
         if (currentView == null) {
             synchronized (buffer) {

@@ -5,5 +5,6 @@ public enum ActionResultGateway {
     CHAT,
     CLIPBOARD,
     CONTENT,
+    INFO
 
 }

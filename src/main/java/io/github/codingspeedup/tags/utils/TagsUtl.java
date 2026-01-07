@@ -115,10 +115,6 @@ public final class TagsUtl {
         }
     }
 
-    public static TagsConsoleService getLogger(Project project) {
-        return project.getService(TagsConsoleService.class);
-    }
-
     public static Optional<VirtualFile> resolvePromptLibrary(@NotNull Project project, String... path) {
         var folders = new ArrayList<String>();
         folders.add("prompts");
@@ -191,6 +187,10 @@ public final class TagsUtl {
         }
 
         return Optional.ofNullable(libraryFile);
+    }
+
+    public static Optional<VirtualFile> resolveToolsFolder(@NotNull Project project) {
+        return resolvePluginFolder(project, "tools");
     }
 
     public static Optional<VirtualFile> resolvePluginFolder(@NotNull Project project, String... path) {
@@ -297,6 +297,10 @@ public final class TagsUtl {
         });
     }
 
+    public static void reportInfo(Project project, String message) {
+        reportIssue(project, NotificationType.INFORMATION, message, null);
+    }
+
     public static void reportWarning(Project project, String message) {
         reportIssue(project, NotificationType.WARNING, message, null);
     }
@@ -319,13 +323,13 @@ public final class TagsUtl {
         switch (level) {
             case ERROR -> {
                 if (ex == null) {
-                    getLogger(project).error(logMessage);
+                    TagsConsoleService.getInstance(project).error(logMessage);
                 } else {
-                    getLogger(project).error(logMessage, ex);
+                    TagsConsoleService.getInstance(project).error(logMessage, ex);
                 }
             }
-            case WARNING -> getLogger(project).warn(logMessage);
-            default -> getLogger(project).info(logMessage);
+            case WARNING -> TagsConsoleService.getInstance(project).warn(logMessage);
+            default -> TagsConsoleService.getInstance(project).info(logMessage);
         }
 
         var notificationMessage = message;
@@ -346,5 +350,6 @@ public final class TagsUtl {
                         level
                 ).notify(project);
     }
+
 
 }

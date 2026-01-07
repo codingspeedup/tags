@@ -8,7 +8,8 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.engine.ChatMdExecuteHandler;
+import io.github.codingspeedup.tags.engine.ChatMdPromptHandler;
+import io.github.codingspeedup.tags.engine.GroovyScriptHandler;
 import io.github.codingspeedup.tags.engine.SelectionPromptHandler;
 import io.github.codingspeedup.tags.engine.TagsPromptHandler;
 import io.github.codingspeedup.tags.utils.FileTypeModel;
@@ -19,8 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-import static io.github.codingspeedup.tags.utils.TagsUtl.reportError;
-import static io.github.codingspeedup.tags.utils.TagsUtl.reportWarning;
+import static io.github.codingspeedup.tags.utils.TagsUtl.*;
 
 public class ExecuteAction extends AnAction {
 
@@ -47,6 +47,7 @@ public class ExecuteAction extends AnAction {
                 if (isAvailable) {
                     isAvailable = editor.getSelectionModel().hasSelection()
                             || TagsGroup.isChatMd(file.getName())
+                            || TagsGroup.isGroovy(file.getName())
                             || FileTypeModel.of(file.getName()).isPresent();
                 }
             }
@@ -61,7 +62,6 @@ public class ExecuteAction extends AnAction {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-
         e.getPresentation().setEnabledAndVisible(isAvailable(e));
     }
 
@@ -102,7 +102,9 @@ public class ExecuteAction extends AnAction {
                         tagsResult = new SelectionPromptHandler(editorFileName, editorSelection, promptDesc).process(project, indicator);
                     } else {
                         if (TagsGroup.isChatMd(editorFileName)) {
-                            tagsResult = new ChatMdExecuteHandler(documentText, documentOffset).process(project, indicator);
+                            tagsResult = new ChatMdPromptHandler(documentText, documentOffset).process(project, indicator);
+                        } else  if (TagsGroup.isGroovy(editorFileName)) {
+                            tagsResult = new GroovyScriptHandler(documentText).process(project, indicator);
                         } else {
                             tagsResult = new TagsPromptHandler(editorFileName, documentText, documentOffset).process(project, indicator);
                         }
@@ -114,9 +116,10 @@ public class ExecuteAction extends AnAction {
                                     case CHAT -> TagsUtl.openChatBuffer(project, tr);
                                     case CLIPBOARD -> TagsUtl.sendToClipboard(project, tr);
                                     case CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, tr);
+                                    case INFO -> TagsUtl.reportInfo(project, tr.getContent());
                                 }
                             }, ModalityState.defaultModalityState()),
-                            () -> reportWarning(project, "Prompt execution produced no result")
+                            () -> reportInfo(project, "Prompt execution produced no result")
                     );
 
                 } catch (Exception e) {

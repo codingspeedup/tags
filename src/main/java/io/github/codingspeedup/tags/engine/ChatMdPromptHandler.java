@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import static io.github.codingspeedup.tags.utils.ChatUtl.*;
 import static io.github.codingspeedup.tags.utils.PromptUtl.toChatRequestParameters;
 
-public class ChatMdExecuteHandler implements PromptHandler {
+public class ChatMdPromptHandler implements PromptHandler {
 
     private final String content;
     private final int contentOffset;
@@ -39,7 +39,7 @@ public class ChatMdExecuteHandler implements PromptHandler {
     private final List<FencedCodeBlock> userBlocks;
     private final List<FencedCodeBlock> groovyBlocks;
 
-    public ChatMdExecuteHandler(String content, int contentOffset) {
+    public ChatMdPromptHandler(String content, int contentOffset) {
         this.content = content;
         this.contentOffset = contentOffset;
 
