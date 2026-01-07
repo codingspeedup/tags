@@ -6,7 +6,6 @@ import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import io.github.codingspeedup.tags.integration.llms.LLM;
 import io.github.codingspeedup.tags.utils.ActionResultGateway;
-import io.github.codingspeedup.tags.utils.PromptHandler;
 import io.github.codingspeedup.tags.utils.PromptDesc;
 import io.github.codingspeedup.tags.utils.TagsResult;
 import org.apache.commons.lang.StringUtils;
@@ -17,13 +16,13 @@ import java.util.Optional;
 import static io.github.codingspeedup.tags.utils.ChatUtl.*;
 import static io.github.codingspeedup.tags.utils.PromptUtl.*;
 
-public class SelectionPromptHandler implements PromptHandler {
+public class SelectionHandler implements ActionHandler {
 
     private final String fileName;
     private final String selection;
     private final PromptDesc promptDesc;
 
-    public SelectionPromptHandler(String fileName, String selection, PromptDesc promptDesc) {
+    public SelectionHandler(String fileName, String selection, PromptDesc promptDesc) {
         this.fileName = fileName;
         this.selection = selection;
         this.promptDesc = promptDesc;

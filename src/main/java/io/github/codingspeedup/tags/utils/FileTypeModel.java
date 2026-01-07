@@ -1,5 +1,7 @@
 package io.github.codingspeedup.tags.utils;
 
+import io.github.codingspeedup.tags.prompting.template.SectionBlock;
+import io.github.codingspeedup.tags.prompting.template.TemplateBlock;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;

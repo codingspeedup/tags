@@ -1,11 +1,12 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.prompting.template;
 
+import io.github.codingspeedup.tags.utils.FileTypeModel;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class SectionBlock extends TagsBlock {
+public class SectionBlock extends PromptBlock {
 
     private String name;
 

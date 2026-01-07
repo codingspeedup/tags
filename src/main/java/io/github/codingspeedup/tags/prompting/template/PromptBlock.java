@@ -1,11 +1,11 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.prompting.template;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class TagsBlock {
+public abstract class PromptBlock {
 
     private int fromOffset;
     private int toOffset = -1;

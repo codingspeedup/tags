@@ -10,9 +10,9 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.output.FinishReason;
 import io.github.codingspeedup.tags.integration.groovy.ScriptExecutor;
+import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
 import io.github.codingspeedup.tags.integration.llms.LLM;
 import io.github.codingspeedup.tags.utils.ActionResultGateway;
-import io.github.codingspeedup.tags.utils.PromptHandler;
 import io.github.codingspeedup.tags.utils.PromptUtl;
 import io.github.codingspeedup.tags.utils.TagsResult;
 import org.apache.commons.collections.CollectionUtils;
@@ -29,8 +29,9 @@ import java.util.stream.Collectors;
 import static io.github.codingspeedup.tags.utils.ChatUtl.*;
 import static io.github.codingspeedup.tags.utils.PromptUtl.toChatRequestParameters;
 
-public class ChatMdPromptHandler implements PromptHandler {
+public class ChatMdHandler implements ActionHandler {
 
+    private final String contentName;
     private final String content;
     private final int contentOffset;
 
@@ -39,7 +40,8 @@ public class ChatMdPromptHandler implements PromptHandler {
     private final List<FencedCodeBlock> userBlocks;
     private final List<FencedCodeBlock> groovyBlocks;
 
-    public ChatMdPromptHandler(String content, int contentOffset) {
+    public ChatMdHandler(String contentName, String content, int contentOffset) {
+        this.contentName = contentName;
         this.content = content;
         this.contentOffset = contentOffset;
 
@@ -73,7 +75,7 @@ public class ChatMdPromptHandler implements PromptHandler {
     }
 
     public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
-        var result = executeGroovy();
+        var result = executeGroovy(project);
         if (result.isEmpty()) {
             result = executeUserPrompt();
         }
@@ -81,7 +83,7 @@ public class ChatMdPromptHandler implements PromptHandler {
     }
 
     @SuppressWarnings("ExtractMethodRecommender")
-    private @NonNull Optional<TagsResult> executeGroovy() {
+    private @NonNull Optional<TagsResult> executeGroovy(Project project) {
         var groovyBlock = groovyBlocks.stream()
                 .filter(block -> block.getStartOffset() <= contentOffset && contentOffset <= block.getEndOffset())
                 .findFirst();
@@ -94,8 +96,11 @@ public class ChatMdPromptHandler implements PromptHandler {
         var outContent = new ByteArrayOutputStream();
         var errContent = new ByteArrayOutputStream();
 
-        var executor = new ScriptExecutor(new PrintStream(outContent), new PrintStream(errContent));
-        var scriptResult = executor.execute(groovyScript);
+        var toolboxManager = ToolboxManagerService.getInstance(project);
+        toolboxManager.reloadIfChanged();
+
+        var executor = new ScriptExecutor(new PrintStream(outContent), new PrintStream(errContent), toolboxManager.getActiveLoader());
+        var scriptResult = executor.execute(groovyScript, contentName);
 
         var shellMessage = new StringBuilder("```\n");
         shellMessage.append(sanitizeLineEndings(outContent.toString()));

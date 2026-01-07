@@ -1,6 +1,7 @@
 package io.github.codingspeedup.tags.engine;
 
 import com.intellij.openapi.project.Project;
+import io.github.codingspeedup.tags.prompting.template.PromptBlock;
 import io.github.codingspeedup.tags.utils.*;
 import lombok.AllArgsConstructor;
 
@@ -20,7 +21,7 @@ public class TagsEditHandler {
         int tOffset = ftModel.getSections(fileContent).values().stream()
                 .filter(section -> section.contains(offset))
                 .findFirst()
-                .map(TagsBlock::getFromOffset)
+                .map(PromptBlock::getFromOffset)
                 .orElse(FileTypeModel.indexOfBol(fileContent, offset));
 
         var pLib = promptDesc.getLibrary(project);

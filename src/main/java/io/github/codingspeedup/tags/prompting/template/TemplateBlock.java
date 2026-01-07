@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.prompting.template;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,7 @@ import java.util.Properties;
 
 @Getter
 @Setter
-public class TemplateBlock extends TagsBlock {
+public class TemplateBlock extends PromptBlock {
 
     private String template;
     private Properties arguments = new Properties();

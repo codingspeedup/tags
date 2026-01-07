@@ -29,7 +29,7 @@ public class ScriptExecutor {
     }
 
     public Object execute(String script) {
-        return execute(script, null);
+        return execute(script, "Snippet1");
     }
 
     public Object execute(String script, String scriptName) {

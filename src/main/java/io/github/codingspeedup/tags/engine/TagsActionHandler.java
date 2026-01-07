@@ -9,6 +9,9 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
 import io.github.codingspeedup.tags.integration.llms.LLM;
+import io.github.codingspeedup.tags.prompting.api.PromptApiSpecBuilder;
+import io.github.codingspeedup.tags.prompting.template.SectionBlock;
+import io.github.codingspeedup.tags.prompting.template.TemplateBlock;
 import io.github.codingspeedup.tags.utils.*;
 import org.apache.commons.lang.StringUtils;
 
@@ -22,7 +25,7 @@ import static io.github.codingspeedup.tags.utils.PromptDesc.SECTION_REF_MARKER;
 import static io.github.codingspeedup.tags.utils.PromptUtl.fillArguments;
 import static io.github.codingspeedup.tags.utils.PromptUtl.toProperties;
 
-public class TagsPromptHandler implements PromptHandler {
+public class TagsActionHandler implements ActionHandler {
 
     private record Buffer(String content, int offset) {
     }
@@ -33,7 +36,7 @@ public class TagsPromptHandler implements PromptHandler {
     private final FileTypeModel ftModel;
     private Map<String, SectionBlock> contentSections;
 
-    public TagsPromptHandler(String fileName, String fileContent, int fileOffset) {
+    public TagsActionHandler(String fileName, String fileContent, int fileOffset) {
         this.fileName = fileName;
         this.fileContent = fileContent;
         this.fileOffset = fileOffset;
@@ -59,7 +62,7 @@ public class TagsPromptHandler implements PromptHandler {
         ftModel.fillTemplate(templateBlock, fileContent);
 
         var chatRequest = compileLlmRequest(project, templateBlock).orElseThrow();
-        var apiSpec = PromptApiSpecBuilder.of(templateBlock.getPlus().lines().toList());
+        var apiSpec = PromptApiSpecBuilder.of(project, templateBlock.getPlus().lines().toList());
         var chatResponse = LLM.doChat(chatRequest, apiSpec.orElse(null));
 
         var tagsResult = new TagsResult(resolveGateway(templateBlock.getGateway()));

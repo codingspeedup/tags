@@ -8,10 +8,10 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.engine.ChatMdPromptHandler;
+import io.github.codingspeedup.tags.engine.ChatMdHandler;
 import io.github.codingspeedup.tags.engine.GroovyScriptHandler;
-import io.github.codingspeedup.tags.engine.SelectionPromptHandler;
-import io.github.codingspeedup.tags.engine.TagsPromptHandler;
+import io.github.codingspeedup.tags.engine.SelectionHandler;
+import io.github.codingspeedup.tags.engine.TagsActionHandler;
 import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
 import io.github.codingspeedup.tags.utils.FileTypeModel;
 import io.github.codingspeedup.tags.utils.PromptDesc;
@@ -100,14 +100,14 @@ public class ExecuteAction extends AnAction {
                     Optional<TagsResult> tagsResult;
 
                     if (editorSelection != null) {
-                        tagsResult = new SelectionPromptHandler(editorFileName, editorSelection, promptDesc).process(project, indicator);
+                        tagsResult = new SelectionHandler(editorFileName, editorSelection, promptDesc).process(project, indicator);
                     } else {
                         if (TagsGroup.isChatMd(editorFileName)) {
-                            tagsResult = new ChatMdPromptHandler(documentText, documentOffset).process(project, indicator);
+                            tagsResult = new ChatMdHandler(editorFileName, documentText, documentOffset).process(project, indicator);
                         } else  if (ToolboxManagerService.isGroovy(editorFileName)) {
                             tagsResult = new GroovyScriptHandler(editorFileName, documentText).process(project, indicator);
                         } else {
-                            tagsResult = new TagsPromptHandler(editorFileName, documentText, documentOffset).process(project, indicator);
+                            tagsResult = new TagsActionHandler(editorFileName, documentText, documentOffset).process(project, indicator);
                         }
                     }
 

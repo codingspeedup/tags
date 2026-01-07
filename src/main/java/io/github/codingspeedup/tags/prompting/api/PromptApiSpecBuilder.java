@@ -1,7 +1,10 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.prompting.api;
 
+import com.intellij.openapi.project.Project;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
+import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
+import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,34 +41,47 @@ public class PromptApiSpecBuilder {
     private final StringBuilder md = new StringBuilder();
     private final Set<String> importPackages = new HashSet<>();
     private final Set<Class<?>> discoveredPojos = new HashSet<>();
+    private final Set<Class<?>> collectedPojos = new HashSet<>();
 
     private PromptApiSpecBuilder(Set<? extends Class<?>> tools) {
         this.tools = tools;
     }
 
-    public static Optional<String> of(String... toolkit) {
+    public static Optional<String> of(Project project, String... toolkit) {
         if (ArrayUtils.isEmpty(toolkit)) {
             return Optional.empty();
         }
-        return of(List.of(toolkit));
+        return of(project, List.of(toolkit));
     }
 
-    public static Optional<String> of(List<String> toolkit) {
+    public static Optional<String> of(Project project, List<String> toolkit) {
         if (CollectionUtils.isEmpty(toolkit)) {
             return Optional.empty();
         }
+
+        ClassLoader classLoader;
+        if (project == null) {
+            classLoader = PromptApiSpecBuilder.class.getClassLoader();
+        } else {
+            var toolbox = ToolboxManagerService.getInstance(project);
+            toolbox.reloadIfChanged();
+            classLoader = toolbox.getActiveLoader();
+        }
+
         var tools = toolkit.stream()
                 .map(StringUtils::trimToNull)
                 .map(toolFQN -> VAR_PLACEHOLDER.equals(toolFQN) ? null : toolFQN)
                 .filter(Objects::nonNull)
                 .map(toolFQN -> {
                     try {
-                        return Class.forName(toolFQN);
+                        return classLoader.loadClass(toolFQN);
                     } catch (ClassNotFoundException e) {
                         try {
-                            return Class.forName(TOOLS_PACKAGE_PREFIX + toolFQN);
+                            return classLoader.loadClass(TOOLS_PACKAGE_PREFIX + toolFQN);
                         } catch (ClassNotFoundException ex) {
-                            // Ignore
+                            if (project != null) {
+                                TagsConsoleService.getInstance(project).warn("Could not load `" + toolFQN + "'");
+                            }
                         }
                     }
                     return null;
@@ -81,6 +97,19 @@ public class PromptApiSpecBuilder {
     private StringBuilder build() {
         tools.forEach(this::collectMethods);
 
+        if (!discoveredPojos.isEmpty()) {
+            while (true) {
+                var diff = new HashSet<>(discoveredPojos);
+                diff.removeAll(collectedPojos);
+                if (diff.isEmpty()) {
+                    break;
+                }
+                var pojo = diff.iterator().next();
+                collectDataStructure(pojo);
+                collectedPojos.add(pojo);
+            }
+        }
+
         md.append("\n\n### Required Imports:\n```groovy\n");
         importPackages.stream()
                 .sorted()
@@ -88,6 +117,31 @@ public class PromptApiSpecBuilder {
         md.append("```");
 
         return md;
+    }
+
+    private void collectDataStructure(Class<?> pojoClass) {
+        md.append("\n\n### POJO: ").append(pojoClass.getSimpleName());
+
+        var superclass = pojoClass.getSuperclass();
+        if (superclass != null && !superclass.equals(Object.class)) {
+            md.append(" extends ").append(collectType(pojoClass.getGenericSuperclass()));
+        }
+
+        Arrays.stream(pojoClass.getDeclaredFields())
+                .filter(field -> field.getAnnotation(F.class) != null)
+                .sorted(Comparator.comparing(Field::getName))
+                .forEach(field -> {
+                    var f = field.getAnnotation(F.class);
+                    md.append("\n- ").append(field.getName());
+                    if (!f.required()) {
+                        md.append("?");
+                    }
+                    md.append(" : ").append(collectType(field.getGenericType()));
+                    var doc = StringUtils.trimToEmpty(f.value()).replaceAll("\\s+", " ");
+                    if (!doc.isEmpty()) {
+                        md.append(" // ").append(doc);
+                    }
+                });
     }
 
     private void collectMethods(Class<?> toolClass) {
@@ -150,11 +204,15 @@ public class PromptApiSpecBuilder {
         var isTool = packageName.equals(TOOLS_PACKAGE_NAME) || packageName.startsWith(TOOLS_PACKAGE_PREFIX);
         if (isTool) {
             discoveredPojos.add(javaType);
+            importPackages.add(packageName);
             return javaType.getSimpleName();
         }
-        return ERASABLE_PREFIXES.contains(javaType.getPackageName())
-                ? javaType.getSimpleName()
-                : javaType.getName();
+        if (ERASABLE_PREFIXES.contains(javaType.getPackageName())) {
+            return javaType.getSimpleName();
+        } else {
+            importPackages.add(packageName);
+            return javaType.getName();
+        }
     }
 
     private String collectParameter(Parameter param, List<String> paramDocs) {

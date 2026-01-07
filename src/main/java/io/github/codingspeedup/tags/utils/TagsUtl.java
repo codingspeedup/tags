@@ -318,18 +318,17 @@ public final class TagsUtl {
         if (StringUtils.isEmpty(message) && ex != null) {
             message = ex.getClass().getName();
         }
-        var logMessage = String.format("%s: %s", MyMessageBundle.message("plugin.label"), message);
 
         switch (level) {
             case ERROR -> {
                 if (ex == null) {
-                    TagsConsoleService.getInstance(project).error(logMessage);
+                    TagsConsoleService.getInstance(project).error(message);
                 } else {
-                    TagsConsoleService.getInstance(project).error(logMessage, ex);
+                    TagsConsoleService.getInstance(project).error(message, ex);
                 }
             }
-            case WARNING -> TagsConsoleService.getInstance(project).warn(logMessage);
-            default -> TagsConsoleService.getInstance(project).info(logMessage);
+            case WARNING -> TagsConsoleService.getInstance(project).warn(message);
+            default -> TagsConsoleService.getInstance(project).info(message);
         }
 
         var notificationMessage = message;

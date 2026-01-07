@@ -24,7 +24,6 @@ import static io.github.codingspeedup.tags.utils.PromptDesc.VAR_PLACEHOLDER;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PromptUtl {
 
-
     public static final List<String> LLM_PARAMETERS_NAMES = List.of(
             "modelName",
             "temperature",
