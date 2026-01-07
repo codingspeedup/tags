@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import io.github.codingspeedup.tags.integration.groovy.ScriptExecutor;
 import io.github.codingspeedup.tags.utils.ChatUtl;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,10 +13,6 @@ public class TagsGroup extends DefaultActionGroup {
 
     public static boolean isChatMd(String fileName) {
         return fileName.toLowerCase(Locale.ROOT).endsWith(ChatUtl.CHAT_MD_EXTENSION);
-    }
-
-    public static boolean isGroovy(String fileName) {
-        return fileName.toLowerCase(Locale.ROOT).endsWith(ScriptExecutor.GROOVY_EXTENSION);
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.actions.TagsGroup;
+import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
 import io.github.codingspeedup.tags.utils.FileTypeModel;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,7 +44,7 @@ public class TagsPromptIntention implements IntentionAction, HighPriorityAction 
             isAvailable = !editor.getSelectionModel().hasSelection();
             if (isAvailable) {
                 isAvailable = TagsGroup.isChatMd(file.getName())
-                        || TagsGroup.isGroovy(file.getName())
+                        || ToolboxManagerService.isGroovy(file.getName())
                         || FileTypeModel.of(file.getName()).isPresent();
             }
         }

@@ -12,6 +12,7 @@ import io.github.codingspeedup.tags.engine.ChatMdPromptHandler;
 import io.github.codingspeedup.tags.engine.GroovyScriptHandler;
 import io.github.codingspeedup.tags.engine.SelectionPromptHandler;
 import io.github.codingspeedup.tags.engine.TagsPromptHandler;
+import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
 import io.github.codingspeedup.tags.utils.FileTypeModel;
 import io.github.codingspeedup.tags.utils.PromptDesc;
 import io.github.codingspeedup.tags.utils.TagsResult;
@@ -47,7 +48,7 @@ public class ExecuteAction extends AnAction {
                 if (isAvailable) {
                     isAvailable = editor.getSelectionModel().hasSelection()
                             || TagsGroup.isChatMd(file.getName())
-                            || TagsGroup.isGroovy(file.getName())
+                            || ToolboxManagerService.isGroovy(file.getName())
                             || FileTypeModel.of(file.getName()).isPresent();
                 }
             }
@@ -103,7 +104,7 @@ public class ExecuteAction extends AnAction {
                     } else {
                         if (TagsGroup.isChatMd(editorFileName)) {
                             tagsResult = new ChatMdPromptHandler(documentText, documentOffset).process(project, indicator);
-                        } else  if (TagsGroup.isGroovy(editorFileName)) {
+                        } else  if (ToolboxManagerService.isGroovy(editorFileName)) {
                             tagsResult = new GroovyScriptHandler(documentText).process(project, indicator);
                         } else {
                             tagsResult = new TagsPromptHandler(editorFileName, documentText, documentOffset).process(project, indicator);
@@ -116,7 +117,6 @@ public class ExecuteAction extends AnAction {
                                     case CHAT -> TagsUtl.openChatBuffer(project, tr);
                                     case CLIPBOARD -> TagsUtl.sendToClipboard(project, tr);
                                     case CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, tr);
-                                    case INFO -> TagsUtl.reportInfo(project, tr.getContent());
                                 }
                             }, ModalityState.defaultModalityState()),
                             () -> reportInfo(project, "Prompt execution produced no result")

@@ -4,6 +4,7 @@ import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import io.github.codingspeedup.tags.integration.groovy.ScriptExecutor;
+import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
 import io.github.codingspeedup.tags.plugin.console.ConsoleOutputStream;
 import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
 import io.github.codingspeedup.tags.utils.ActionResultGateway;
@@ -22,18 +23,24 @@ public class GroovyScriptHandler implements PromptHandler {
     }
 
     @Override
+    @SuppressWarnings("ExtractMethodRecommender")
     public Optional<TagsResult> process(Project project, ProgressIndicator indicator) throws Exception {
         var pluginConsole = TagsConsoleService.getInstance(project);
         try (
                 var outStream = new PrintStream(new ConsoleOutputStream(pluginConsole, ConsoleViewContentType.NORMAL_OUTPUT));
                 var errStream = new PrintStream(new ConsoleOutputStream(pluginConsole, ConsoleViewContentType.ERROR_OUTPUT))
         ) {
-            var executor = new ScriptExecutor(outStream, errStream);
+            var toolboxManager = ToolboxManagerService.getInstance(project);
+            toolboxManager.reloadIfChanged();
+
+            var executor = new ScriptExecutor(outStream, errStream, toolboxManager.getActiveLoader());
+
             var result = executor.execute(script);
             if (result instanceof Exception e) {
                 throw e;
             }
-            var tagsResult = new TagsResult(ActionResultGateway.INFO);
+
+            var tagsResult = new TagsResult(ActionResultGateway.IGNORE);
             if (result != null) {
                 tagsResult.setContent(String.valueOf(result));
             } else {

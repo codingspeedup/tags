@@ -8,8 +8,6 @@ import java.io.PrintStream;
 
 public class ScriptExecutor {
 
-    public static final String GROOVY_EXTENSION = ".groovy";
-
     @Getter
     private final PrintStream stdOut;
     @Getter
@@ -17,12 +15,16 @@ public class ScriptExecutor {
     private final GroovyShell shell;
 
     public ScriptExecutor(PrintStream stdOut, PrintStream stdErr) {
+        this(stdOut, stdErr, null);
+    }
+
+    public ScriptExecutor(PrintStream stdOut, PrintStream stdErr, ClassLoader classLoader) {
         this.stdOut = stdOut == null ? System.out : stdOut;
         this.stdErr = stdErr == null ? System.err : stdErr;
         var binding = new Binding();
         binding.setProperty("out", this.stdOut);
         binding.setProperty("err", this.stdErr);
-        shell = new GroovyShell(binding);
+        shell = new GroovyShell(classLoader, binding);
     }
 
     public Object execute(String script) {
