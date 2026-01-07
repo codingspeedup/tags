@@ -1,6 +1,7 @@
 package io.github.codingspeedup.tags.integration.groovy;
 
 import groovy.lang.Binding;
+import groovy.lang.GroovyCodeSource;
 import groovy.lang.GroovyShell;
 import lombok.Getter;
 
@@ -28,11 +29,17 @@ public class ScriptExecutor {
     }
 
     public Object execute(String script) {
+        return execute(script, null);
+    }
+
+    public Object execute(String script, String scriptName) {
         var originalOut = System.out;
         var originalErr = System.err;
         try {
+            var codeSource = new GroovyCodeSource(script, scriptName, GroovyShell.DEFAULT_CODE_BASE);
+            codeSource.setCachable(false);
             System.setErr(stdErr);
-            return shell.evaluate(script);
+            return shell.evaluate(codeSource);
         } catch (Exception ex) {
             return ex;
         } finally {

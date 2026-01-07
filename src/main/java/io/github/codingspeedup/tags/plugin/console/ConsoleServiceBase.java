@@ -13,19 +13,34 @@ public abstract class ConsoleServiceBase {
     protected record DelayedMessage(String message, ConsoleViewContentType type) {
     }
 
-    private ConsoleView consoleView;
+    private volatile ConsoleView consoleView;
     private final List<TagsConsoleService.DelayedMessage> buffer = new ArrayList<>();
 
-
-    @SuppressWarnings("unused")
     public void setConsoleView(ConsoleView consoleView) {
-        this.consoleView = consoleView;
         synchronized (buffer) {
+            this.consoleView = consoleView;
             for (TagsConsoleService.DelayedMessage dm : buffer) {
                 printToConsole(this.consoleView, dm.message, dm.type);
             }
             buffer.clear();
         }
+    }
+
+    public void log(String message, ConsoleViewContentType type) {
+        synchronized (buffer) {
+            if (this.consoleView == null) {
+                buffer.add(new DelayedMessage(message, type));
+            } else {
+                printToConsole(this.consoleView, message, type);
+            }
+        }
+    }
+
+    private static void printToConsole(ConsoleView view, String message, ConsoleViewContentType type) {
+        if (view == null) {
+            return;
+        }
+        ApplicationManager.getApplication().invokeLater(() -> view.print(message + "\n", type));
     }
 
     public void clearConsole() {
@@ -50,25 +65,6 @@ public abstract class ConsoleServiceBase {
     public void error(String message, Throwable throwable) {
         error(message);
         error(ExceptionUtil.getThrowableText(throwable));
-    }
-
-    public void log(String message, ConsoleViewContentType type) {
-        var currentView = this.consoleView;
-        if (currentView == null) {
-            synchronized (buffer) {
-                buffer.add(new DelayedMessage(message, type));
-            }
-        } else {
-            printToConsole(currentView, message, type);
-        }
-    }
-
-    private static void printToConsole(ConsoleView view, String message, ConsoleViewContentType type) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            if (view != null && view.getComponent().isDisplayable()) {
-                view.print(message + "\n", type);
-            }
-        });
     }
 
 }

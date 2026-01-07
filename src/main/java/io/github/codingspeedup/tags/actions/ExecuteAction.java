@@ -105,7 +105,7 @@ public class ExecuteAction extends AnAction {
                         if (TagsGroup.isChatMd(editorFileName)) {
                             tagsResult = new ChatMdPromptHandler(documentText, documentOffset).process(project, indicator);
                         } else  if (ToolboxManagerService.isGroovy(editorFileName)) {
-                            tagsResult = new GroovyScriptHandler(documentText).process(project, indicator);
+                            tagsResult = new GroovyScriptHandler(editorFileName, documentText).process(project, indicator);
                         } else {
                             tagsResult = new TagsPromptHandler(editorFileName, documentText, documentOffset).process(project, indicator);
                         }
@@ -117,6 +117,9 @@ public class ExecuteAction extends AnAction {
                                     case CHAT -> TagsUtl.openChatBuffer(project, tr);
                                     case CLIPBOARD -> TagsUtl.sendToClipboard(project, tr);
                                     case CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, tr);
+                                    case INFO -> TagsUtl.reportInfo(project, tr.getContent());
+                                    case WARN -> TagsUtl.reportWarning(project, tr.getContent());
+                                    case ERROR -> TagsUtl.reportError(project, tr.getContent());
                                 }
                             }, ModalityState.defaultModalityState()),
                             () -> reportInfo(project, "Prompt execution produced no result")

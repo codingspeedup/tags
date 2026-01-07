@@ -16,10 +16,12 @@ import java.util.Optional;
 
 public class GroovyScriptHandler implements PromptHandler {
 
-    private final String script;
+    private final String scriptName;
+    private final String scriptContent;
 
-    public GroovyScriptHandler(String script) {
-        this.script = script;
+    public GroovyScriptHandler(String scriptName, String scriptContent) {
+        this.scriptName = scriptName;
+        this.scriptContent = scriptContent;
     }
 
     @Override
@@ -27,6 +29,7 @@ public class GroovyScriptHandler implements PromptHandler {
         var groovyConsole = GroovyConsoleService.getInstance(project);
         groovyConsole.clearConsole();
 
+        TagsResult tagsResult;
         try (
                 var outStream = new PrintStream(new ConsoleOutputStream(groovyConsole, ConsoleViewContentType.NORMAL_OUTPUT));
                 var errStream = new PrintStream(new ConsoleOutputStream(groovyConsole, ConsoleViewContentType.ERROR_OUTPUT))
@@ -36,7 +39,7 @@ public class GroovyScriptHandler implements PromptHandler {
 
             var executor = new ScriptExecutor(outStream, errStream, toolboxManager.getActiveLoader());
 
-            var result = executor.execute(script);
+            var result = executor.execute(scriptContent, scriptName);
             if (result instanceof Exception e) {
                 throw e;
             }
@@ -44,12 +47,15 @@ public class GroovyScriptHandler implements PromptHandler {
             if (result != null) {
                 groovyConsole.info(String.format("Groovy script result:\n%s", result));
             }
+
+            tagsResult = new TagsResult(ActionResultGateway.INFO);
+            tagsResult.setContent("Groovy script completed successfully.");
         } catch (Exception e) {
             groovyConsole.error("Groovy script error:", e);
+            tagsResult = new TagsResult(ActionResultGateway.ERROR);
+            tagsResult.setContent("Groovy script completed error:\n" + e.getMessage());
         }
-
-        groovyConsole.info("Done!");
-        return Optional.of(new TagsResult(ActionResultGateway.IGNORE));
+        return Optional.of(tagsResult);
     }
 
 }
