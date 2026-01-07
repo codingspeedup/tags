@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.plugin;
+package io.github.codingspeedup.tags.plugin.settings;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,9 +8,9 @@ import java.util.Objects;
 
 @AllArgsConstructor
 @Getter
-public class ComboEntry {
+public class SettingsComboEntry {
 
-    public static final ComboEntry EMPTY_VALUE = new ComboEntry(StringUtils.EMPTY, "-- None --");
+    public static final SettingsComboEntry EMPTY_VALUE = new SettingsComboEntry(StringUtils.EMPTY, "-- None --");
 
     private final String code;
     private final String description;
@@ -22,7 +22,7 @@ public class ComboEntry {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ComboEntry that)) return false;
+        if (!(o instanceof SettingsComboEntry that)) return false;
         return Objects.equals(code, that.code);
     }
 

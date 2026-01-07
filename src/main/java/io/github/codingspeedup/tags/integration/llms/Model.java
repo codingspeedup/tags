@@ -1,6 +1,6 @@
 package io.github.codingspeedup.tags.integration.llms;
 
-import io.github.codingspeedup.tags.plugin.TagsSettings;
+import io.github.codingspeedup.tags.plugin.settings.TagsSettings;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Optional;

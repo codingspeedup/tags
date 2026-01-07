@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.plugin;
+package io.github.codingspeedup.tags.plugin.management;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  * Explicitly defines the JSON Codec for LangChain4j to avoid ServiceLoader conflicts
  * with IntelliJ's bundled Jackson/Kotlin modules.
  */
-public class TagsJsonCodecFactory implements JsonCodecFactory {
+public class LangChain4JsonCodecFactory implements JsonCodecFactory {
 
     @Override
     public Json.JsonCodec create() {

@@ -4,7 +4,7 @@ import com.azure.ai.openai.OpenAIServiceVersion;
 import dev.langchain4j.model.azure.AzureOpenAiChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import io.github.codingspeedup.tags.plugin.TagsSettings;
+import io.github.codingspeedup.tags.plugin.settings.TagsSettings;
 
 import java.util.Arrays;
 import java.util.Optional;

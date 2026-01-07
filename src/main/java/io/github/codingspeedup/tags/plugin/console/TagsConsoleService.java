@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.plugin;
+package io.github.codingspeedup.tags.plugin.console;
 
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;

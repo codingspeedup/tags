@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.plugin;
+package io.github.codingspeedup.tags.plugin.console;
 
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.openapi.project.Project;
@@ -8,7 +8,7 @@ import com.intellij.ui.content.ContentFactory;
 import io.github.codingspeedup.tags.utils.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
-public class TagsConsoleWindowFactory implements ToolWindowFactory {
+public class ConsoleWindowFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {

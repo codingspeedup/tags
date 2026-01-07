@@ -32,17 +32,17 @@
                     icon="/META-INF/toolIcon.svg"
                     anchor="bottom"
                     doNotActivateOnStart="true"
-                    factoryClass="io.github.codingspeedup.tags.plugin.TagsConsoleWindowFactory"/>
+                    factoryClass="io.github.codingspeedup.tags.plugin.console.ConsoleWindowFactory"/>
 
-        <postStartupActivity implementation="io.github.codingspeedup.tags.plugin.TagsInitializer"/>
+        <postStartupActivity implementation="io.github.codingspeedup.tags.plugin.management.TagsInitializer"/>
 
         <applicationConfigurable
-                id="io.github.codingspeedup.tags.plugin.TagsSettingsConfigurable"
-                instance="io.github.codingspeedup.tags.plugin.TagsSettingsConfigurable"
+                id="io.github.codingspeedup.tags.plugin.settings.SettingsConfigurable"
+                instance="io.github.codingspeedup.tags.plugin.settings.SettingsConfigurable"
                 groupId="tools"
                 key="plugin.label"/>
 
-        <applicationService serviceImplementation="io.github.codingspeedup.tags.plugin.TagsSettingsState"/>
+        <applicationService serviceImplementation="io.github.codingspeedup.tags.plugin.settings.SettingsState"/>
 
         <intentionAction order="first">
             <language/>

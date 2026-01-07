@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.plugin;
+package io.github.codingspeedup.tags.plugin.settings;
 
 import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.ai.openai.models.ChatCompletionsOptions;
@@ -26,18 +26,18 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.github.codingspeedup.tags.integration.llms.AzureOpenAI.identifyVersion;
-import static io.github.codingspeedup.tags.plugin.TagsSettingsSecretManager.AZURE_OPEN_AI_API_KEY;
-import static io.github.codingspeedup.tags.plugin.TagsSettingsSecretManager.GEMINI_API_KEY;
+import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.AZURE_OPEN_AI_API_KEY;
+import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.GEMINI_API_KEY;
 
 
-public class TagsSettingsConfigurable implements Configurable {
-    private static final Logger LOG = Logger.getInstance(TagsSettingsConfigurable.class);
+public class SettingsConfigurable implements Configurable {
+    private static final Logger LOG = Logger.getInstance(SettingsConfigurable.class);
 
     private final HttpClient client = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
             .build();
 
-    private TagsSettingsPanel settingsComponent;
+    private SettingsPanel settingsComponent;
 
     @Override
     public String getDisplayName() {
@@ -46,8 +46,8 @@ public class TagsSettingsConfigurable implements Configurable {
 
     @Override
     public JComponent createComponent() {
-        var settings = TagsSettingsState.getInstance();
-        settingsComponent = new TagsSettingsPanel();
+        var settings = SettingsState.getInstance();
+        settingsComponent = new SettingsPanel();
         if (settings.isUseAzureOpenAiModel()) {
             validateAzureOpenAiConnection(
                     settings.getAzureOpenAiApiKey(),
@@ -62,7 +62,7 @@ public class TagsSettingsConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-        var settings = TagsSettingsState.getInstance();
+        var settings = SettingsState.getInstance();
 
         var modified = settings.isUseAzureOpenAiModel() != settingsComponent.isUseAzureOpenAiModel();
         modified = modified || !StringUtils.equals(settings.getAzureOpenAiApiKey(), settingsComponent.getAzureOpenAiApiKey());
@@ -82,15 +82,15 @@ public class TagsSettingsConfigurable implements Configurable {
     public void apply() {
         validateComponent();
 
-        var settings = TagsSettingsState.getInstance();
+        var settings = SettingsState.getInstance();
 
         settings.useAzureOpenAiModel = settingsComponent.isUseAzureOpenAiModel();
-        TagsSettingsSecretManager.saveSecret(AZURE_OPEN_AI_API_KEY, settingsComponent.getAzureOpenAiApiKey());
+        SettingsSecretManager.saveSecret(AZURE_OPEN_AI_API_KEY, settingsComponent.getAzureOpenAiApiKey());
         settings.azureOpenAiUrl = settingsComponent.getAzureOpenAiUrl();
         settings.azureOpenAiDeployment = settingsComponent.getAzureOpenAiDeployment();
         settings.azureOpenAiApiVersion = settingsComponent.getAzureOpenAiApiVersion();
 
-        TagsSettingsSecretManager.saveSecret(GEMINI_API_KEY, settingsComponent.getGeminiApiKey());
+        SettingsSecretManager.saveSecret(GEMINI_API_KEY, settingsComponent.getGeminiApiKey());
         settings.geminiModel = settingsComponent.getGeminiModel();
 
         settings.ollamaUrl = settingsComponent.getOllamaUrl();
@@ -99,7 +99,7 @@ public class TagsSettingsConfigurable implements Configurable {
 
     @Override
     public void reset() {
-        var settings = TagsSettingsState.getInstance();
+        var settings = SettingsState.getInstance();
 
         settingsComponent.setUseAzureOpenAiModel(settings.isUseAzureOpenAiModel());
         settingsComponent.setAzureOpenAiApiKey(settings.getAzureOpenAiApiKey());
@@ -123,7 +123,7 @@ public class TagsSettingsConfigurable implements Configurable {
     }
 
     private void validateComponent() {
-        var settings = TagsSettingsState.getInstance();
+        var settings = SettingsState.getInstance();
         if (settingsComponent.isUseAzureOpenAiModel()) {
             validateAzureOpenAiConnection(
                     settingsComponent.getAzureOpenAiApiKey(),
@@ -161,15 +161,15 @@ public class TagsSettingsConfigurable implements Configurable {
         }
     }
 
-    private Collection<ComboEntry> readGeminiModels(String geminiApiKey) {
+    private Collection<SettingsComboEntry> readGeminiModels(String geminiApiKey) {
         settingsComponent.setGeminiError(null);
-        var comboEntries = new ArrayList<ComboEntry>();
+        var comboEntries = new ArrayList<SettingsComboEntry>();
         if (StringUtils.isNotBlank(geminiApiKey)) {
             try {
                 var modelCatalog = GoogleAiGeminiModelCatalog.builder().apiKey(geminiApiKey).build();
                 modelCatalog.listModels().stream()
                         .filter(item -> ModelType.CHAT.equals(item.type()))
-                        .map(item -> new ComboEntry(item.name(), item.displayName() + " (" + item.name() + ")"))
+                        .map(item -> new SettingsComboEntry(item.name(), item.displayName() + " (" + item.name() + ")"))
                         .forEach(comboEntries::add);
             } catch (Exception e) {
                 LOG.error("Reading Gemini models", e);
@@ -178,13 +178,13 @@ public class TagsSettingsConfigurable implements Configurable {
                 settingsComponent.setGeminiError("No models could be extracted");
             }
         }
-        comboEntries.add(0, ComboEntry.EMPTY_VALUE);
+        comboEntries.add(0, SettingsComboEntry.EMPTY_VALUE);
         return comboEntries;
     }
 
-    private Collection<ComboEntry> readOllamaModels(String ollamaURL) {
+    private Collection<SettingsComboEntry> readOllamaModels(String ollamaURL) {
         settingsComponent.setOllamaError(null);
-        var comboEntries = new ArrayList<ComboEntry>();
+        var comboEntries = new ArrayList<SettingsComboEntry>();
         if (StringUtils.isNotBlank(ollamaURL)) {
             try {
                 var request = HttpRequest.newBuilder()
@@ -197,7 +197,7 @@ public class TagsSettingsConfigurable implements Configurable {
                     jsonBody.getAsJsonArray("models").forEach(jsonModel -> {
                         var name = jsonModel.getAsJsonObject().get("name").getAsString();
                         var model = jsonModel.getAsJsonObject().get("model").getAsString();
-                        comboEntries.add(new ComboEntry(model, name + " (" + model + ")"));
+                        comboEntries.add(new SettingsComboEntry(model, name + " (" + model + ")"));
                     });
                 }
             } catch (Exception e) {
@@ -207,7 +207,7 @@ public class TagsSettingsConfigurable implements Configurable {
                 settingsComponent.setOllamaError("No models could be extracted");
             }
         }
-        comboEntries.add(0, ComboEntry.EMPTY_VALUE);
+        comboEntries.add(0, SettingsComboEntry.EMPTY_VALUE);
         return comboEntries;
     }
 

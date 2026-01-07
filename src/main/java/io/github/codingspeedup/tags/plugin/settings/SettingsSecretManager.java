@@ -1,10 +1,10 @@
-package io.github.codingspeedup.tags.plugin;
+package io.github.codingspeedup.tags.plugin.settings;
 
 import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 
-public class TagsSettingsSecretManager {
+public class SettingsSecretManager {
 
     public static final String AZURE_OPEN_AI_API_KEY = "azureOpenAiApiKey";
     public static final String GEMINI_API_KEY = "geminiApiKey";

@@ -18,8 +18,8 @@ class TypeGenerator {
     @Tool("Generates a standard Java Class")
     static String generateClass(
             @P("className") String className,
-            @P(value = "extendsClass -- - the parent class name", required = false) @Nullable String extendsClass = null,
-            @P(value = "implementsList", required = false) @Nullable List<String> implementsList = null
+            @P(value = "extendsClass -- - the parent class name", required = false) @Nullable String extendsClass,
+            @P(value = "implementsList", required = false) @Nullable List<String> implementsList
     ) {
         var cu = createCU()
         var type = cu.addClass(className, Modifier.Keyword.PUBLIC)
@@ -33,7 +33,7 @@ class TypeGenerator {
     @Tool("Generates a Java Interface")
     static String generateInterface(
             @P("interfaceName") String interfaceName,
-            @P(value = "extendsList", required = false) @Nullable List<String> extendsList = null
+            @P(value = "extendsList", required = false) @Nullable List<String> extendsList
     ) {
         var cu = createCU()
         var type = cu.addInterface(interfaceName, Modifier.Keyword.PUBLIC)
@@ -44,7 +44,7 @@ class TypeGenerator {
     @Tool("Generates a Java Record")
     static String generateRecord(
             @P("recordName") String recordName,
-            @P(value = "implementsList", required = false) @Nullable List<String> implementsList = null
+            @P(value = "implementsList", required = false) @Nullable List<String> implementsList
     ) {
         var cu = createCU()
         var record = new RecordDeclaration()
@@ -59,7 +59,7 @@ class TypeGenerator {
     @Tool("Generates a Java Enum")
     static String generateEnum(
             @P("enumName") String enumName,
-            @P(value = "implementsList", required = false) @Nullable List<String> implementsList = null
+            @P(value = "implementsList", required = false) @Nullable List<String> implementsList
     ) {
         var cu = createCU()
         var type = cu.addEnum(enumName, Modifier.Keyword.PUBLIC)
@@ -81,8 +81,8 @@ class TypeGenerator {
 
     @Tool("Generates a Java Exception class")
     static String generateException(
-            @P("exceptionName") String exceptionName = null,
-            @P(value = "baseException", required = false) @Nullable String baseException = null
+            @P("exceptionName") String exceptionName,
+            @P(value = "baseException", required = false) @Nullable String baseException
     ) {
         var cu = createCU()
         var type = cu.addClass(exceptionName, Modifier.Keyword.PUBLIC)

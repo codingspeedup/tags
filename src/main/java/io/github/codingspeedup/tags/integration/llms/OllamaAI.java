@@ -3,7 +3,7 @@ package io.github.codingspeedup.tags.integration.llms;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.ollama.OllamaChatModel;
-import io.github.codingspeedup.tags.plugin.TagsSettings;
+import io.github.codingspeedup.tags.plugin.settings.TagsSettings;
 
 import java.time.Duration;
 

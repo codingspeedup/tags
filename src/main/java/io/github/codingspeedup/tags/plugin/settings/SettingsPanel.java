@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.plugin;
+package io.github.codingspeedup.tags.plugin.settings;
 
 import com.azure.ai.openai.OpenAIServiceVersion;
 import com.intellij.openapi.Disposable;
@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 
-public class TagsSettingsPanel implements Disposable {
+public class SettingsPanel implements Disposable {
 
     private final JPanel mainPanel;
 
@@ -30,14 +30,14 @@ public class TagsSettingsPanel implements Disposable {
     private final ComboBox<String> azureOpenAiApiVersionField = new ComboBox<>(azureOpenAiApiVersionComboModel);
 
     private final JBPasswordField geminiApiKeyField = new JBPasswordField();
-    private final DefaultComboBoxModel<ComboEntry> geminiModelsComboModel = new DefaultComboBoxModel<>(new ComboEntry[]{ComboEntry.EMPTY_VALUE});
-    private final ComboBox<ComboEntry> geminiModelField = new ComboBox<>(geminiModelsComboModel);
+    private final DefaultComboBoxModel<SettingsComboEntry> geminiModelsComboModel = new DefaultComboBoxModel<>(new SettingsComboEntry[]{SettingsComboEntry.EMPTY_VALUE});
+    private final ComboBox<SettingsComboEntry> geminiModelField = new ComboBox<>(geminiModelsComboModel);
 
     private final JBTextField ollamaUrlField = new JBTextField();
-    private final DefaultComboBoxModel<ComboEntry> ollamaModelsComboModel = new DefaultComboBoxModel<>(new ComboEntry[]{ComboEntry.EMPTY_VALUE});
-    private final ComboBox<ComboEntry> ollamaModelField = new ComboBox<>(ollamaModelsComboModel);
+    private final DefaultComboBoxModel<SettingsComboEntry> ollamaModelsComboModel = new DefaultComboBoxModel<>(new SettingsComboEntry[]{SettingsComboEntry.EMPTY_VALUE});
+    private final ComboBox<SettingsComboEntry> ollamaModelField = new ComboBox<>(ollamaModelsComboModel);
 
-    public TagsSettingsPanel() {
+    public SettingsPanel() {
         Arrays.stream(OpenAIServiceVersion.values())
                 .map(OpenAIServiceVersion::getVersion)
                 .sorted(Comparator.reverseOrder())
@@ -157,9 +157,9 @@ public class TagsSettingsPanel implements Disposable {
     }
 
     public String getGeminiModel() {
-        var selectedItem = (ComboEntry) geminiModelField.getSelectedItem();
+        var selectedItem = (SettingsComboEntry) geminiModelField.getSelectedItem();
         if (selectedItem != null) {
-            if (!ComboEntry.EMPTY_VALUE.equals(selectedItem)) {
+            if (!SettingsComboEntry.EMPTY_VALUE.equals(selectedItem)) {
                 return selectedItem.getCode();
             }
         }
@@ -170,11 +170,11 @@ public class TagsSettingsPanel implements Disposable {
         if (StringUtils.isEmpty(text)) {
             geminiModelField.setSelectedIndex(0);
         } else {
-            geminiModelField.setSelectedItem(new ComboEntry(text, null));
+            geminiModelField.setSelectedItem(new SettingsComboEntry(text, null));
         }
     }
 
-    public void setGeminiModels(Collection<ComboEntry> comboEntries) {
+    public void setGeminiModels(Collection<SettingsComboEntry> comboEntries) {
         geminiModelsComboModel.removeAllElements();
         comboEntries.forEach(geminiModelsComboModel::addElement);
     }
@@ -196,9 +196,9 @@ public class TagsSettingsPanel implements Disposable {
     }
 
     public String getOllamaModel() {
-        var selectedItem = (ComboEntry) ollamaModelField.getSelectedItem();
+        var selectedItem = (SettingsComboEntry) ollamaModelField.getSelectedItem();
         if (selectedItem != null) {
-            if (!ComboEntry.EMPTY_VALUE.equals(selectedItem)) {
+            if (!SettingsComboEntry.EMPTY_VALUE.equals(selectedItem)) {
                 return selectedItem.getCode();
             }
         }
@@ -209,11 +209,11 @@ public class TagsSettingsPanel implements Disposable {
         if (StringUtils.isEmpty(text)) {
             ollamaModelField.setSelectedIndex(0);
         } else {
-            ollamaModelField.setSelectedItem(new ComboEntry(text, null));
+            ollamaModelField.setSelectedItem(new SettingsComboEntry(text, null));
         }
     }
 
-    public void setOllamaModels(Collection<ComboEntry> comboEntries) {
+    public void setOllamaModels(Collection<SettingsComboEntry> comboEntries) {
         ollamaModelsComboModel.removeAllElements();
         comboEntries.forEach(ollamaModelsComboModel::addElement);
     }

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.codingspeedup"
-version = "2026-01-06"
+version = "2026-01-07"
 
 repositories {
     mavenCentral()
@@ -77,6 +77,10 @@ intellijPlatform {
 }
 
 tasks {
+
+    processResources {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
 
     withType<Jar> {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE

@@ -20,7 +20,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
 import io.github.codingspeedup.tags.MyMessageBundle;
-import io.github.codingspeedup.tags.plugin.TagsConsoleService;
+import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.FilenameUtils;

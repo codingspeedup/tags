@@ -1,11 +1,11 @@
-package io.github.codingspeedup.tags.plugin;
+package io.github.codingspeedup.tags.plugin.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 
 public interface TagsSettings {
 
     static TagsSettings getInstance() {
-        return ApplicationManager.getApplication().getService(TagsSettingsState.class);
+        return ApplicationManager.getApplication().getService(SettingsState.class);
     }
 
     boolean isUseAzureOpenAiModel();
