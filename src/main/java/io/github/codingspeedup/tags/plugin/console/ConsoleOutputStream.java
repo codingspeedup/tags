@@ -7,11 +7,11 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 public class ConsoleOutputStream extends OutputStream {
-    private final TagsConsoleService consoleService;
+    private final ConsoleServiceBase consoleService;
     private final ConsoleViewContentType contentType;
     private final StringBuilder buffer = new StringBuilder();
 
-    public ConsoleOutputStream(TagsConsoleService consoleService, ConsoleViewContentType contentType) {
+    public ConsoleOutputStream(ConsoleServiceBase consoleService, ConsoleViewContentType contentType) {
         this.consoleService = consoleService;
         this.contentType = contentType;
     }

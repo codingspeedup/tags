@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project;
 import io.github.codingspeedup.tags.integration.groovy.ScriptExecutor;
 import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
 import io.github.codingspeedup.tags.plugin.console.ConsoleOutputStream;
-import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
+import io.github.codingspeedup.tags.plugin.console.GroovyConsoleService;
 import io.github.codingspeedup.tags.utils.ActionResultGateway;
 import io.github.codingspeedup.tags.utils.PromptHandler;
 import io.github.codingspeedup.tags.utils.TagsResult;
@@ -23,12 +23,13 @@ public class GroovyScriptHandler implements PromptHandler {
     }
 
     @Override
-    @SuppressWarnings("ExtractMethodRecommender")
-    public Optional<TagsResult> process(Project project, ProgressIndicator indicator) throws Exception {
-        var pluginConsole = TagsConsoleService.getInstance(project);
+    public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
+        var groovyConsole = GroovyConsoleService.getInstance(project);
+        groovyConsole.clearConsole();
+
         try (
-                var outStream = new PrintStream(new ConsoleOutputStream(pluginConsole, ConsoleViewContentType.NORMAL_OUTPUT));
-                var errStream = new PrintStream(new ConsoleOutputStream(pluginConsole, ConsoleViewContentType.ERROR_OUTPUT))
+                var outStream = new PrintStream(new ConsoleOutputStream(groovyConsole, ConsoleViewContentType.NORMAL_OUTPUT));
+                var errStream = new PrintStream(new ConsoleOutputStream(groovyConsole, ConsoleViewContentType.ERROR_OUTPUT))
         ) {
             var toolboxManager = ToolboxManagerService.getInstance(project);
             toolboxManager.reloadIfChanged();
@@ -40,14 +41,15 @@ public class GroovyScriptHandler implements PromptHandler {
                 throw e;
             }
 
-            var tagsResult = new TagsResult(ActionResultGateway.IGNORE);
             if (result != null) {
-                tagsResult.setContent(String.valueOf(result));
-            } else {
-                tagsResult.setContent("Groovy script execution succeeded");
+                groovyConsole.info(String.format("Groovy script result:\n%s", result));
             }
-            return Optional.of(tagsResult);
+        } catch (Exception e) {
+            groovyConsole.error("Groovy script error:", e);
         }
+
+        groovyConsole.info("Done!");
+        return Optional.of(new TagsResult(ActionResultGateway.IGNORE));
     }
 
 }

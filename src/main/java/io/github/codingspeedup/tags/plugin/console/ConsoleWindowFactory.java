@@ -11,11 +11,20 @@ public class ConsoleWindowFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        var consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
-        TagsConsoleService.getInstance(project).setConsoleView(consoleView);
         var contentFactory = ContentFactory.getInstance();
-        var content = contentFactory.createContent(consoleView.getComponent(), "Plugin", false);
-        toolWindow.getContentManager().addContent(content);
+        var contentManager = toolWindow.getContentManager();
+
+        // 1. Setup Plugin Console Tab
+        var pluginConsoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
+        TagsConsoleService.getInstance(project).setConsoleView(pluginConsoleView);
+        var pluginContent = contentFactory.createContent(pluginConsoleView.getComponent(), "Plugin", false);
+        contentManager.addContent(pluginContent);
+
+        // 2. Setup Groovy Console Tab
+        var groovyConsoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
+        GroovyConsoleService.getInstance(project).setConsoleView(groovyConsoleView);
+        var groovyContent = contentFactory.createContent(groovyConsoleView.getComponent(), "Groovy", false);
+        contentManager.addContent(groovyContent);
     }
 
 }
