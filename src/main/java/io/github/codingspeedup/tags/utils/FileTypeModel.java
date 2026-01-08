@@ -68,7 +68,7 @@ public abstract class FileTypeModel {
                 block.setTemplate(content.substring(currentOffset + tPrefix.length(), eolOffset));
                 templates.add(block);
             }
-            currentOffset = content.indexOf(sPrefix, eolOffset);
+            currentOffset = content.indexOf(tPrefix, eolOffset);
         }
 
         return templates;

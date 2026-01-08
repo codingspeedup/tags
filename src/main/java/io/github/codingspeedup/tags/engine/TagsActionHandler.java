@@ -51,14 +51,15 @@ public class TagsActionHandler implements ActionHandler {
     }
 
     public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
-        var block = ftModel.identifyTemplates(fileContent).stream()
-                .filter(t -> t.contains(fileOffset))
-                .findFirst();
-        if (block.isEmpty()) {
+        var blocks = ftModel.identifyTemplates(fileContent);
+        if (blocks.isEmpty()) {
             return Optional.empty();
         }
 
-        var templateBlock = block.get();
+        var templateBlock = blocks.stream()
+                .filter(t -> t.contains(fileOffset))
+                .findFirst()
+                .orElse(blocks.get(0));
         ftModel.fillTemplate(templateBlock, fileContent);
 
         var chatRequest = compileLlmRequest(project, templateBlock).orElseThrow();

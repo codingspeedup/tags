@@ -14,6 +14,6 @@ public abstract class PromptBlock {
         if (offset < fromOffset) {
             return false;
         }
-        return toOffset < 0 || offset <= toOffset;
+        return toOffset < 0 || offset < toOffset;
     }
 }
