@@ -1,7 +1,6 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.prompting.tags;
 
-import io.github.codingspeedup.tags.prompting.template.SectionBlock;
-import io.github.codingspeedup.tags.prompting.template.TemplateBlock;
+import io.github.codingspeedup.tags.prompting.chat.PromptUtl;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -9,12 +8,25 @@ import org.apache.commons.lang.StringUtils;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.github.codingspeedup.tags.utils.PromptDesc.*;
-
 @Getter
-public abstract class FileTypeModel {
+public abstract class TemplateModel {
 
-    private static final Map<String, FileTypeModel> MODEL_REGISTRY = new ConcurrentHashMap<>();
+    public static final String TEMPLATE_PREFIX = "@";
+
+    public static final String VAR_SEPARATOR = "=";
+    public static final String VAR_PLACEHOLDER = "∅";
+
+    public static final String SECTION_NAME_START = "<";
+    public static final String SECTION_NAME_END = ">";
+    public static final String SECTION_CLOSE = "/";
+
+    public static final String SECTION_ROOT_ID = "tags+";
+
+    public static final String SECTION_REF_MARKER = "#";
+    public static final String FILE_REF_MARKER = "file://";
+    public static final String LINE_REF_MARKER = ":";
+
+    private static final Map<String, TemplateModel> MODEL_REGISTRY = new ConcurrentHashMap<>();
 
     private final String lineCommentPrefix;
     private final String lineCommentSuffix;
@@ -24,7 +36,7 @@ public abstract class FileTypeModel {
     private final String sPrefix;
     private final String plusPrefix;
 
-    protected FileTypeModel(String lineCommentPrefix, String lineCommentSuffix) {
+    protected TemplateModel(String lineCommentPrefix, String lineCommentSuffix) {
         this.lineCommentPrefix = lineCommentPrefix;
         this.lineCommentSuffix = lineCommentSuffix;
         this.tPrefix = this.lineCommentPrefix + "T: ";
@@ -34,16 +46,15 @@ public abstract class FileTypeModel {
         this.plusPrefix = this.lineCommentPrefix + "+: ";
     }
 
-
     public record S(String name, boolean closing) {
     }
 
-    public static Optional<FileTypeModel> of(String fileName) {
+    public static Optional<TemplateModel> of(String fileName) {
         var fileExtension = StringUtils.trimToEmpty(FilenameUtils.getExtension(fileName)).toLowerCase(Locale.ROOT);
         var fileModel = MODEL_REGISTRY.computeIfAbsent(fileExtension, (key) -> switch (key) {
-            case "txt" -> new FileTypeModel(StringUtils.EMPTY, StringUtils.EMPTY) {
+            case "txt" -> new TemplateModel(StringUtils.EMPTY, StringUtils.EMPTY) {
             };
-            case "java", "cs" -> new FileTypeModel("// ", StringUtils.EMPTY) {
+            case "java", "cs" -> new TemplateModel("// ", StringUtils.EMPTY) {
             };
             default -> null;
         });
@@ -96,7 +107,7 @@ public abstract class FileTypeModel {
             }
         });
         template.setArguments(PromptUtl.parseProperties(arguments.toString()));
-        template.setPlus(plus.toString());
+        template.setPlus(plus.toString().trim());
     }
 
 

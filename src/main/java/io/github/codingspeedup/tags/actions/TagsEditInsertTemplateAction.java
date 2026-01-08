@@ -5,24 +5,25 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.engine.TagsEditHandler;
-import io.github.codingspeedup.tags.utils.FileTypeModel;
-import io.github.codingspeedup.tags.utils.PromptDesc;
-import io.github.codingspeedup.tags.utils.TagsUtl;
+import io.github.codingspeedup.tags.plugin.core.TagsUtl;
+import io.github.codingspeedup.tags.prompting.plib.PromptLibUtl;
+import io.github.codingspeedup.tags.prompting.plib.PromptRef;
+import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.codingspeedup.tags.utils.TagsUtl.reportError;
+import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
 
 public class TagsEditInsertTemplateAction extends TagsEditActionBase {
 
-    private final PromptDesc promptDesc;
+    private final PromptRef promptRef;
 
     @SuppressWarnings("unused")
     public TagsEditInsertTemplateAction() {
-        this.promptDesc = new PromptDesc(String.format("%s.Explain", TagsUtl.PLUGIN_PROMPT_LIBRARY_REF));
+        this.promptRef = new PromptRef(String.format("%s.Explain", PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME));
     }
 
-    public TagsEditInsertTemplateAction(String text, PromptDesc promptDesc) {
-        this.promptDesc = promptDesc;
+    public TagsEditInsertTemplateAction(String text, PromptRef promptRef) {
+        this.promptRef = promptRef;
         getTemplatePresentation().setText(text);
     }
 
@@ -47,7 +48,7 @@ public class TagsEditInsertTemplateAction extends TagsEditActionBase {
 
         var editorFileName = editorFile.getName();
 
-        var ftModel = FileTypeModel.of(editorFileName).orElse(null);
+        var ftModel = TemplateModel.of(editorFileName).orElse(null);
         if (ftModel == null) {
             reportError(project, String.format("Unrecognized file model for `%s'", editorFileName));
             return;
@@ -63,7 +64,7 @@ public class TagsEditInsertTemplateAction extends TagsEditActionBase {
                 indicator.setIndeterminate(true);
                 try {
                     var tagsEditor = new TagsEditHandler(ftModel, documentText);
-                    var gr = tagsEditor.insertNewTemplate(project, documentOffset, promptDesc);
+                    var gr = tagsEditor.insertNewTemplate(project, documentOffset, promptRef);
                     TagsUtl.updateEditorDocument(project, editor, document, gr);
                 } catch (Exception e) {
                     reportError(project, "Error processing file", e);

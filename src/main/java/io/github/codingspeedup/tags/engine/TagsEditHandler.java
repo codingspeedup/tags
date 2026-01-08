@@ -1,39 +1,41 @@
 package io.github.codingspeedup.tags.engine;
 
 import com.intellij.openapi.project.Project;
-import io.github.codingspeedup.tags.prompting.template.PromptBlock;
-import io.github.codingspeedup.tags.utils.*;
+import io.github.codingspeedup.tags.prompting.plib.PromptRef;
+import io.github.codingspeedup.tags.prompting.tags.PromptBlock;
+import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
 import lombok.AllArgsConstructor;
 
-import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static io.github.codingspeedup.tags.utils.PromptDesc.*;
 
 @AllArgsConstructor
 public class TagsEditHandler {
 
-    private final FileTypeModel ftModel;
+    private final TemplateModel ftModel;
     private final String fileContent;
 
-    public TagsResult insertNewTemplate(Project project, int offset, PromptDesc promptDesc) {
+    public TagsResult insertNewTemplate(Project project, int offset, PromptRef promptRef) {
         int tOffset = ftModel.getSections(fileContent).values().stream()
                 .filter(section -> section.contains(offset))
                 .findFirst()
                 .map(PromptBlock::getFromOffset)
-                .orElse(FileTypeModel.indexOfBol(fileContent, offset));
+                .orElse(TemplateModel.indexOfBol(fileContent, offset));
 
-        var pLib = promptDesc.getLibrary(project);
+        var pLib = promptRef.getLibrary(project);
 
         var newContent = new StringBuilder(fileContent.length() + 1024);
         newContent.append(fileContent, 0, tOffset);
-        newContent.append(ftModel.getTPrefix()).append(promptDesc.templateRef()).append("\n");
-        for (var varName : pLib.getVariables(promptDesc.getId())) {
-            newContent.append(ftModel.getAPrefix()).append(varName).append(VAR_SEPARATOR).append(PromptDesc.VAR_PLACEHOLDER).append("\n");
+        newContent.append(ftModel.getTPrefix()).append(promptRef.templateRef()).append("\n");
+        for (var varName : pLib.getVariables(promptRef.getId())) {
+            var varValue = TemplateModel.VAR_PLACEHOLDER;
+            if (pLib.getDefaults().containsKey(varName)) {
+                varValue = String.valueOf(pLib.getDefaults().get(varName));
+            }
+            newContent.append(ftModel.getAPrefix()).append(varName).append(TemplateModel.VAR_SEPARATOR).append(varValue).append("\n");
         }
-        newContent.append(ftModel.getGPrefix()).append(ActionResultGateway.CHAT.name().toLowerCase(Locale.ROOT)).append("\n");
-        newContent.append(ftModel.getPlusPrefix()).append(PromptDesc.VAR_PLACEHOLDER).append("\n");
+        // newContent.append(ftModel.getGPrefix()).append(ActionResultGateway.CHAT.name().toLowerCase(Locale.ROOT)).append("\n");
+        newContent.append(ftModel.getPlusPrefix()).append(TemplateModel.VAR_PLACEHOLDER).append("\n");
         newContent.append(fileContent, tOffset, fileContent.length());
 
         var tagsResult = new TagsResult(ActionResultGateway.CONTENT);
@@ -48,21 +50,21 @@ public class TagsEditHandler {
         var existingSections = ftModel.getSections(fileContent).keySet();
 
         var sectionIndex = 1;
-        var newSectionName = SECTION_ROOT_ID + sectionIndex;
+        var newSectionName = TemplateModel.SECTION_ROOT_ID + sectionIndex;
         while (existingSections.contains(newSectionName)) {
-            newSectionName = SECTION_ROOT_ID + (++sectionIndex);
+            newSectionName = TemplateModel.SECTION_ROOT_ID + (++sectionIndex);
         }
 
-        fromOffset = FileTypeModel.indexOfBol(fileContent, fromOffset);
-        toOffset = FileTypeModel.indexOfEol(fileContent, toOffset);
+        fromOffset = TemplateModel.indexOfBol(fileContent, fromOffset);
+        toOffset = TemplateModel.indexOfEol(fileContent, toOffset);
 
         var newContent = new StringBuilder(fileContent.length() + 64);
         newContent.append(fileContent, 0, fromOffset);
-        newContent.append(sPrefix).append(SECTION_NAME_START).append(newSectionName).append(SECTION_NAME_END).append("\n");
+        newContent.append(sPrefix).append(TemplateModel.SECTION_NAME_START).append(newSectionName).append(TemplateModel.SECTION_NAME_END).append("\n");
         var startOffset = newContent.length();
         newContent.append(fileContent, fromOffset, toOffset);
         var endOffset = newContent.length();
-        newContent.append("\n").append(sPrefix).append(SECTION_NAME_START).append(SECTION_CLOSE).append(newSectionName).append(SECTION_NAME_END).append("\n");
+        newContent.append("\n").append(sPrefix).append(TemplateModel.SECTION_NAME_START).append(TemplateModel.SECTION_CLOSE).append(newSectionName).append(TemplateModel.SECTION_NAME_END).append("\n");
         newContent.append(fileContent, toOffset, fileContent.length());
 
         var tagsResult = new TagsResult(ActionResultGateway.CONTENT);

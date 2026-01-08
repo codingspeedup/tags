@@ -34,7 +34,7 @@
                     doNotActivateOnStart="true"
                     factoryClass="io.github.codingspeedup.tags.plugin.console.ConsoleWindowFactory"/>
 
-        <postStartupActivity implementation="io.github.codingspeedup.tags.plugin.management.TagsInitializer"/>
+        <postStartupActivity implementation="io.github.codingspeedup.tags.plugin.core.TagsInitializer"/>
 
         <applicationConfigurable
                 id="io.github.codingspeedup.tags.plugin.settings.SettingsConfigurable"
@@ -61,6 +61,10 @@
 
         <action id="NewChatMd"
                 class="io.github.codingspeedup.tags.actions.NewChatMdAction">
+            <add-to-group group-id="NewGroup" anchor="last"/>
+        </action>
+        <action id="NewPromptLibrary"
+                class="io.github.codingspeedup.tags.actions.NewPromptLibraryAction">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
 

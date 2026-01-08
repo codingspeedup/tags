@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.engine;
 
 import lombok.Getter;
 import lombok.Setter;

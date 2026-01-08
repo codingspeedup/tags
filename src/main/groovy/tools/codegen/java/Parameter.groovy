@@ -1,7 +1,7 @@
 package tools.codegen.java
 
 import groovy.transform.Canonical
-import io.github.codingspeedup.tags.prompting.api.F
+import io.github.codingspeedup.tags.prompting.tools.F
 
 @Canonical
 class Parameter {

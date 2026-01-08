@@ -7,8 +7,6 @@ import io.github.codingspeedup.tags.integration.groovy.ScriptExecutor;
 import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
 import io.github.codingspeedup.tags.plugin.console.ConsoleOutputStream;
 import io.github.codingspeedup.tags.plugin.console.GroovyConsoleService;
-import io.github.codingspeedup.tags.utils.ActionResultGateway;
-import io.github.codingspeedup.tags.utils.TagsResult;
 
 import java.io.PrintStream;
 import java.util.Optional;

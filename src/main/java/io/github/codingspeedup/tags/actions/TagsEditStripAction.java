@@ -5,11 +5,11 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.engine.TagsEditHandler;
-import io.github.codingspeedup.tags.utils.FileTypeModel;
-import io.github.codingspeedup.tags.utils.TagsUtl;
+import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
+import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.codingspeedup.tags.utils.TagsUtl.reportError;
+import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
 
 public class TagsEditStripAction extends TagsEditActionBase {
 
@@ -34,7 +34,7 @@ public class TagsEditStripAction extends TagsEditActionBase {
 
         var editorFileName = editorFile.getName();
 
-        var ftModel = FileTypeModel.of(editorFileName).orElse(null);
+        var ftModel = TemplateModel.of(editorFileName).orElse(null);
         if (ftModel == null) {
             reportError(project, String.format("Unrecognized file model for `%s'", editorFileName));
             return;

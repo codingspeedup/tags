@@ -1,15 +1,14 @@
-package io.github.codingspeedup.tags.plugin.management;
+package io.github.codingspeedup.tags.plugin.core;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
 import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
-import io.github.codingspeedup.tags.utils.TagsUtl;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static io.github.codingspeedup.tags.utils.TagsUtl.reportError;
+import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
 
 public class TagsInitializer implements ProjectActivity {
 

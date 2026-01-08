@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.prompting.chat;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.agent.tool.ToolSpecifications;
@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.utils.PromptDesc.VAR_PLACEHOLDER;
+import static io.github.codingspeedup.tags.prompting.tags.TemplateModel.VAR_PLACEHOLDER;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PromptUtl {

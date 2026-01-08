@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import io.github.codingspeedup.tags.utils.FileTypeModel;
+import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +17,7 @@ public abstract class TagsEditActionBase extends AnAction {
             var file = e.getData(CommonDataKeys.VIRTUAL_FILE);
             isAvailable = file != null;
             if (isAvailable) {
-                isAvailable = FileTypeModel.of(file.getName()).isPresent();
+                isAvailable = TemplateModel.of(file.getName()).isPresent();
             }
         }
         return isAvailable;

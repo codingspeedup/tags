@@ -7,7 +7,7 @@ import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
 import groovy.lang.GroovyClassLoader;
-import io.github.codingspeedup.tags.utils.TagsUtl;
+import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

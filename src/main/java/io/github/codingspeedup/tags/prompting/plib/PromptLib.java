@@ -1,8 +1,10 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.prompting.plib;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.model.input.PromptTemplate;
+import io.github.codingspeedup.tags.plugin.core.TagsUtl;
+import io.github.codingspeedup.tags.prompting.chat.PromptUtl;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -15,22 +17,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static io.github.codingspeedup.tags.prompting.plib.PromptLibUtl.mergeToProperties;
+
 @Getter
-public class PromptLibrary {
+public class PromptLib {
 
     private final String name;
     private final Properties parameters = new Properties();
+    private final Properties defaults = new Properties();
     private final PromptTemplate systemTemplate;
     private final Map<String, PromptTemplate> prompts = new LinkedHashMap<>();
 
     @SuppressWarnings("unchecked")
-    private PromptLibrary(String name, Map<String, Object> data) {
+    private PromptLib(String name, Map<String, Object> data) {
         this.name = name;
 
-        var parameters = (Map<String, Object>) data.get("parameters");
-        if (parameters != null) {
-            this.parameters.putAll(parameters);
-        }
+        mergeToProperties(this.parameters, (Map<String, Object>) data.get("parameters"));
+
+        mergeToProperties(this.defaults, (Map<String, Object>) data.get("defaults"));
 
         systemTemplate = PromptTemplate.from(StringUtils.trimToEmpty((String) data.get("system")), this.name);
 
@@ -56,28 +60,28 @@ public class PromptLibrary {
         return vars;
     }
 
-    public static PromptLibrary of(Path libraryPath) throws IOException {
+    public static PromptLib of(Path libraryPath) throws IOException {
         var name = StringUtils.trimToEmpty(FilenameUtils.getBaseName(libraryPath.getFileName().toString()));
         try (var inputStream = Files.newInputStream(libraryPath)) {
             var loaderOptions = new LoaderOptions();
             var yaml = new Yaml(new SafeConstructor(loaderOptions));
             @SuppressWarnings("unchecked")
             var data = (Map<String, Object>) yaml.load(inputStream);
-            return new PromptLibrary(name, data);
+            return new PromptLib(name, data);
         }
     }
 
-    public static PromptLibrary of(Project project, VirtualFile libraryFile) {
+    public static PromptLib of(Project project, VirtualFile libraryFile) {
         var name = StringUtils.trimToEmpty(FilenameUtils.getBaseName(libraryFile.getName()));
         var loaderOptions = new LoaderOptions();
         var yaml = new Yaml(new SafeConstructor(loaderOptions));
         @SuppressWarnings("unchecked")
         var data = (Map<String, Object>) yaml.load(TagsUtl.readText(project, libraryFile).orElseThrow());
-        return new PromptLibrary(name, data);
+        return new PromptLib(name, data);
     }
 
-    public static PromptLibrary of(Project project) {
-        return PromptLibrary.of(project, TagsUtl.resolvePromptLibrary(project).orElseThrow());
+    public static PromptLib of(Project project) {
+        return PromptLib.of(project, TagsUtl.resolvePromptLibrary(project).orElseThrow());
     }
 
 

@@ -1,8 +1,8 @@
 package io.github.codingspeedup.tags.actions;
 
 import com.intellij.openapi.actionSystem.*;
-import io.github.codingspeedup.tags.utils.PromptLibrary;
-import io.github.codingspeedup.tags.utils.TagsUtl;
+import io.github.codingspeedup.tags.prompting.plib.PromptLib;
+import io.github.codingspeedup.tags.prompting.plib.PromptLibUtl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,11 +36,11 @@ public class ExecuteAsPromptGroup extends DefaultActionGroup {
         if (e == null) {
             return AnAction.EMPTY_ARRAY;
         }
-        var builtinLib = PromptLibrary.of(e.getProject());
+        var builtinLib = PromptLib.of(e.getProject());
         return builtinLib.getPrompts().keySet().stream()
                 .filter(promptId -> builtinLib.getVariables(promptId).size() == 1)
                 .map(promptId ->
-                        new ExecuteAction(TagsUtl.PLUGIN_PROMPT_LIBRARY_REF + "." + promptId, promptId))
+                        new ExecuteAction(PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME + "." + promptId, promptId))
                 .toArray(AnAction[]::new);
     }
 

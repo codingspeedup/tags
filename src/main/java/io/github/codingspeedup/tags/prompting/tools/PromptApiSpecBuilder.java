@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.prompting.api;
+package io.github.codingspeedup.tags.prompting.tools;
 
 import com.intellij.openapi.project.Project;
 import dev.langchain4j.agent.tool.P;
@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.utils.PromptDesc.VAR_PLACEHOLDER;
+import static io.github.codingspeedup.tags.prompting.tags.TemplateModel.VAR_PLACEHOLDER;
 
 public class PromptApiSpecBuilder {
 

@@ -13,27 +13,28 @@ import io.github.codingspeedup.tags.engine.GroovyScriptHandler;
 import io.github.codingspeedup.tags.engine.SelectionHandler;
 import io.github.codingspeedup.tags.engine.TagsActionHandler;
 import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
-import io.github.codingspeedup.tags.utils.FileTypeModel;
-import io.github.codingspeedup.tags.utils.PromptDesc;
-import io.github.codingspeedup.tags.utils.TagsResult;
-import io.github.codingspeedup.tags.utils.TagsUtl;
+import io.github.codingspeedup.tags.prompting.plib.PromptLibUtl;
+import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
+import io.github.codingspeedup.tags.prompting.plib.PromptRef;
+import io.github.codingspeedup.tags.engine.TagsResult;
+import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-import static io.github.codingspeedup.tags.utils.TagsUtl.*;
+import static io.github.codingspeedup.tags.plugin.core.TagsUtl.*;
 
 public class ExecuteAction extends AnAction {
 
-    private final PromptDesc promptDesc;
+    private final PromptRef promptRef;
 
     @SuppressWarnings("unused")
     public ExecuteAction() {
-        this.promptDesc = new PromptDesc(TagsUtl.PLUGIN_PROMPT_LIBRARY_REF + ".");
+        this.promptRef = new PromptRef(PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME + ".");
     }
 
     public ExecuteAction(String promptRef, String text) {
-        this.promptDesc = new PromptDesc(promptRef);
+        this.promptRef = new PromptRef(promptRef);
         getTemplatePresentation().setText(text);
     }
 
@@ -49,7 +50,7 @@ public class ExecuteAction extends AnAction {
                     isAvailable = editor.getSelectionModel().hasSelection()
                             || TagsGroup.isChatMd(file.getName())
                             || ToolboxManagerService.isGroovy(file.getName())
-                            || FileTypeModel.of(file.getName()).isPresent();
+                            || TemplateModel.of(file.getName()).isPresent();
                 }
             }
         }
@@ -100,7 +101,7 @@ public class ExecuteAction extends AnAction {
                     Optional<TagsResult> tagsResult;
 
                     if (editorSelection != null) {
-                        tagsResult = new SelectionHandler(editorFileName, editorSelection, promptDesc).process(project, indicator);
+                        tagsResult = new SelectionHandler(editorFileName, editorSelection, promptRef).process(project, indicator);
                     } else {
                         if (TagsGroup.isChatMd(editorFileName)) {
                             tagsResult = new ChatMdHandler(editorFileName, documentText, documentOffset).process(project, indicator);

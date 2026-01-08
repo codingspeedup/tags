@@ -10,7 +10,7 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.Disposer;
 import dev.langchain4j.model.catalog.ModelType;
 import dev.langchain4j.model.googleai.GoogleAiGeminiModelCatalog;
-import io.github.codingspeedup.tags.plugin.management.TagsMessageBundle;
+import io.github.codingspeedup.tags.plugin.core.TagsMessageBundle;
 import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;

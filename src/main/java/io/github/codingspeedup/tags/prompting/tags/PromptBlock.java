@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.prompting.template;
+package io.github.codingspeedup.tags.prompting.tags;
 
 import lombok.Getter;
 import lombok.Setter;

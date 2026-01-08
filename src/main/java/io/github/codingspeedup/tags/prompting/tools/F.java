@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.prompting.api;
+package io.github.codingspeedup.tags.prompting.tools;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

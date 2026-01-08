@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.plugin.management;
+package io.github.codingspeedup.tags.plugin.core;
 
 
 import com.intellij.DynamicBundle;

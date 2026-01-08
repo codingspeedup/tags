@@ -9,10 +9,12 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
 import io.github.codingspeedup.tags.integration.llms.LLM;
-import io.github.codingspeedup.tags.prompting.api.PromptApiSpecBuilder;
-import io.github.codingspeedup.tags.prompting.template.SectionBlock;
-import io.github.codingspeedup.tags.prompting.template.TemplateBlock;
-import io.github.codingspeedup.tags.utils.*;
+import io.github.codingspeedup.tags.prompting.plib.PromptRef;
+import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
+import io.github.codingspeedup.tags.prompting.chat.PromptUtl;
+import io.github.codingspeedup.tags.prompting.tools.PromptApiSpecBuilder;
+import io.github.codingspeedup.tags.prompting.tags.SectionBlock;
+import io.github.codingspeedup.tags.prompting.tags.TemplateBlock;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -20,10 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.github.codingspeedup.tags.utils.ChatUtl.*;
-import static io.github.codingspeedup.tags.utils.PromptDesc.SECTION_REF_MARKER;
-import static io.github.codingspeedup.tags.utils.PromptUtl.fillArguments;
-import static io.github.codingspeedup.tags.utils.PromptUtl.toProperties;
+import static io.github.codingspeedup.tags.prompting.chat.ChatMdUtl.*;
+import static io.github.codingspeedup.tags.prompting.tags.TemplateModel.SECTION_REF_MARKER;
+import static io.github.codingspeedup.tags.prompting.chat.PromptUtl.fillArguments;
+import static io.github.codingspeedup.tags.prompting.chat.PromptUtl.toProperties;
 
 public class TagsActionHandler implements ActionHandler {
 
@@ -33,14 +35,14 @@ public class TagsActionHandler implements ActionHandler {
     private final String fileName;
     private final String fileContent;
     private final int fileOffset;
-    private final FileTypeModel ftModel;
+    private final TemplateModel ftModel;
     private Map<String, SectionBlock> contentSections;
 
     public TagsActionHandler(String fileName, String fileContent, int fileOffset) {
         this.fileName = fileName;
         this.fileContent = fileContent;
         this.fileOffset = fileOffset;
-        this.ftModel = FileTypeModel.of(fileName).orElseThrow();
+        this.ftModel = TemplateModel.of(fileName).orElseThrow();
     }
 
     private Map<String, SectionBlock> getContentSections() {
@@ -68,14 +70,12 @@ public class TagsActionHandler implements ActionHandler {
 
         var tagsResult = new TagsResult(resolveGateway(templateBlock.getGateway()));
         switch (tagsResult.getGateway()) {
-            case CHAT: {
-                var bc = buildChatBuffer(chatRequest, chatResponse);
-                tagsResult.setBufferName(nextBufferName(project, fileName));
-                tagsResult.setContent(bc.content());
-                tagsResult.setStartOffset(bc.offset());
-                tagsResult.setEndOffset(bc.offset());
+
+            case CLIPBOARD: {
+                tagsResult.setContent(chatResponse.aiMessage().text());
                 break;
             }
+
             case CONTENT: {
                 var bc = buildNewContent(parseSectionName(templateBlock.getGateway()), chatResponse);
                 tagsResult.setContent(bc.content());
@@ -83,10 +83,16 @@ public class TagsActionHandler implements ActionHandler {
                 tagsResult.setEndOffset(bc.offset());
                 break;
             }
-            case CLIPBOARD:
+
+            case CHAT:
             default: {
-                tagsResult.setContent(chatResponse.aiMessage().text());
+                var bc = buildChatBuffer(chatRequest, chatResponse);
+                tagsResult.setBufferName(nextChatMdBufferName(project, fileName));
+                tagsResult.setContent(bc.content());
+                tagsResult.setStartOffset(bc.offset());
+                tagsResult.setEndOffset(bc.offset());
             }
+
         }
         return Optional.of(tagsResult);
     }
@@ -106,9 +112,9 @@ public class TagsActionHandler implements ActionHandler {
 
         var chatMessages = new ArrayList<ChatMessage>();
 
-        if (templateText.startsWith(PromptDesc.TEMPLATE_PREFIX)) {
+        if (templateText.startsWith(TemplateModel.TEMPLATE_PREFIX)) {
 
-            var pDesc = new PromptDesc(templateText);
+            var pDesc = new PromptRef(templateText);
             var pLib = pDesc.getLibrary(project);
 
             var promptVariables = pLib.getVariables(pDesc.getId());
@@ -141,10 +147,10 @@ public class TagsActionHandler implements ActionHandler {
         if (gateway.startsWith(SECTION_REF_MARKER)) {
             return ActionResultGateway.CONTENT;
         }
-        if (StringUtils.endsWithIgnoreCase(ActionResultGateway.CHAT.name(), gateway)) {
-            return ActionResultGateway.CHAT;
+        if (StringUtils.equalsIgnoreCase(ActionResultGateway.CLIPBOARD.name(), gateway)) {
+            return ActionResultGateway.CLIPBOARD;
         }
-        return ActionResultGateway.CLIPBOARD;
+        return ActionResultGateway.CHAT;
     }
 
     private String resolveArgument(String value) {
@@ -180,8 +186,8 @@ public class TagsActionHandler implements ActionHandler {
 
     private Buffer buildNewContent(String sectionName, ChatResponse chatResponse) {
         var sectionBlock = getContentSections().get(sectionName);
-        var sectionStart = FileTypeModel.indexOfEol(fileContent, sectionBlock.getFromOffset());
-        var sectionEnd = FileTypeModel.indexOfBol(fileContent, sectionBlock.getToOffset());
+        var sectionStart = TemplateModel.indexOfEol(fileContent, sectionBlock.getFromOffset());
+        var sectionEnd = TemplateModel.indexOfBol(fileContent, sectionBlock.getToOffset());
 
         @SuppressWarnings("all")
         var bufferContent = new StringBuilder();

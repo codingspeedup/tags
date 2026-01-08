@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.plugin.core;
 
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
@@ -19,8 +19,9 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
-import io.github.codingspeedup.tags.plugin.management.TagsMessageBundle;
+import io.github.codingspeedup.tags.engine.TagsResult;
 import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
+import io.github.codingspeedup.tags.prompting.plib.PromptLibUtl;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
@@ -38,11 +39,11 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static io.github.codingspeedup.tags.prompting.plib.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_EXTENSION;
+import static io.github.codingspeedup.tags.prompting.plib.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TagsUtl {
-
-    public static final String PLUGIN_PROMPT_LIBRARY_REF = "~";
-    public static final String PLUGIN_PROMPT_LIBRARY = "plugin-internal-prompts-library";
 
     public static void saveAllDocuments() {
         var application = ApplicationManager.getApplication();
@@ -125,13 +126,10 @@ public final class TagsUtl {
                     .forEach(folders::add);
         }
 
-        var fileName = PLUGIN_PROMPT_LIBRARY;
+        var fileName = PLUGIN_PROMPT_LIBRARY_NAME;
         if (folders.size() > 1) {
             fileName = folders.get(folders.size() - 1);
             folders.remove(folders.size() - 1);
-            if (PLUGIN_PROMPT_LIBRARY_REF.equals(fileName)) {
-                fileName = PLUGIN_PROMPT_LIBRARY;
-            }
         }
 
         var folder = resolvePluginFolder(project, folders.toArray(new String[]{}));
@@ -139,8 +137,8 @@ public final class TagsUtl {
             return Optional.empty();
         }
 
-        if (!fileName.toLowerCase().endsWith(".yaml")) {
-            fileName = fileName + ".yaml";
+        if (!fileName.toLowerCase().endsWith(PLUGIN_PROMPT_LIBRARY_EXTENSION)) {
+            fileName = fileName + PLUGIN_PROMPT_LIBRARY_EXTENSION;
         }
 
         var libraryFile = folder.get().findChild(fileName);
@@ -152,7 +150,7 @@ public final class TagsUtl {
                     var yamlFile = folder.get().createChildData(project, finalFileName);
 
                     var yamlContent = StringUtils.EMPTY;
-                    if (finalFileName.equals(PLUGIN_PROMPT_LIBRARY + ".yaml")) {
+                    if (finalFileName.equals(PLUGIN_PROMPT_LIBRARY_NAME + PLUGIN_PROMPT_LIBRARY_EXTENSION)) {
                         var resourcePath = "tags/prompts/" + finalFileName;
                         try (var inputStream = TagsUtl.class.getClassLoader().getResourceAsStream(resourcePath)) {
                             if (inputStream == null) {
@@ -161,19 +159,7 @@ public final class TagsUtl {
                             yamlContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                         }
                     } else {
-                        yamlContent = """
-                                parameters: {}
-                                
-                                system: |
-                                  You are a helpful and precise AI assistant.
-                                  Provide clear, accurate, and direct responses to the user's instructions.
-                                
-                                prompts:
-                                  - id: "LoremIpsum"
-                                    template: |
-                                      Lorem ipsum...
-                                
-                                """;
+                        yamlContent = PromptLibUtl.SAMPLE_LIBRARY_CONTENT;
                     }
                     writeText(project, yamlFile, yamlContent);
 

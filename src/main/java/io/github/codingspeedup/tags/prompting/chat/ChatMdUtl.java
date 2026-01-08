@@ -1,9 +1,11 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.prompting.chat;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -11,9 +13,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
-import static io.github.codingspeedup.tags.utils.TagsUtl.getOpenTabNames;
+import static io.github.codingspeedup.tags.plugin.core.TagsUtl.getOpenTabNames;
 
-public class ChatUtl {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ChatMdUtl {
 
     public static final String CHAT_MD_EXTENSION = ".chat.md";
     private static final String CHAT_MD_VERSION = "-v";
@@ -24,16 +27,16 @@ public class ChatUtl {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
 
-    public static VirtualFile nextBufferName(VirtualFile chatFolder) throws IOException {
+    public static VirtualFile nextChatMdFile(VirtualFile chatFolder) throws IOException {
         var version = 1;
         var bufferName = String.format("Chat%s%d%s", CHAT_MD_VERSION, version, CHAT_MD_EXTENSION);
         while (chatFolder.findChild(bufferName) != null) {
             bufferName = String.format("Chat%s%d%s", CHAT_MD_VERSION, ++version, CHAT_MD_EXTENSION);
         }
-        return chatFolder.createChildData(ChatUtl.class, bufferName);
+        return chatFolder.createChildData(ChatMdUtl.class, bufferName);
     }
 
-    public static String nextBufferName(Project project, String fileName) {
+    public static String nextChatMdBufferName(Project project, String fileName) {
         var vPos = fileName.lastIndexOf(CHAT_MD_VERSION);
 
         var bufferPrefix = vPos < 0
@@ -145,6 +148,7 @@ public class ChatUtl {
         return message.replaceAll("\\r\\n|\\r", "\n");
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean endsWith(StringBuilder sb, String text) {
         if (sb == null) {
             return text == null;

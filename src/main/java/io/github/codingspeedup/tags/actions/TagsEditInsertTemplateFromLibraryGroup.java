@@ -5,9 +5,9 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.vfs.VirtualFile;
-import io.github.codingspeedup.tags.utils.PromptDesc;
-import io.github.codingspeedup.tags.utils.PromptLibrary;
-import io.github.codingspeedup.tags.utils.TagsUtl;
+import io.github.codingspeedup.tags.plugin.core.TagsUtl;
+import io.github.codingspeedup.tags.prompting.plib.PromptLib;
+import io.github.codingspeedup.tags.prompting.plib.PromptRef;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,9 +16,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.StreamSupport;
-
-import static io.github.codingspeedup.tags.utils.TagsUtl.PLUGIN_PROMPT_LIBRARY;
-import static io.github.codingspeedup.tags.utils.TagsUtl.PLUGIN_PROMPT_LIBRARY_REF;
 
 public class TagsEditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
 
@@ -71,10 +68,10 @@ public class TagsEditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
                     .map(Path::toString)
                     .toArray(String[]::new);
 
-            var pLib = PromptLibrary.of(project, libFile);
+            var pLib = PromptLib.of(project, libFile);
             return pLib.getPrompts().keySet().stream()
                     .sorted()
-                    .map(promptId -> new TagsEditInsertTemplateAction(promptId, new PromptDesc(path, promptId)))
+                    .map(promptId -> new TagsEditInsertTemplateAction(promptId, new PromptRef(path, promptId)))
                     .toArray(AnAction[]::new);
         }
     }
@@ -96,9 +93,6 @@ public class TagsEditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
 
         libraries.forEach(libFile -> {
             var libName = FilenameUtils.getBaseName(libFile.getName());
-            if (PLUGIN_PROMPT_LIBRARY.equals(libName)) {
-                libName = PLUGIN_PROMPT_LIBRARY_REF;
-            }
             actions.add(new TagsEditInsertTemplateFromLibraryGroup(libName, libFile));
         });
 
