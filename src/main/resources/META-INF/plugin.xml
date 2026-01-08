@@ -44,7 +44,8 @@
 
         <applicationService serviceImplementation="io.github.codingspeedup.tags.plugin.settings.SettingsState"/>
 
-        <intentionAction order="first">
+        <intentionAction order="first"
+                         icon="icons/processIcon.svg">
             <language/>
             <className>io.github.codingspeedup.tags.intentions.TagsPromptIntention</className>
             <!--            <categoryKey>intention.TagsPromptIntention.text</categoryKey>-->
@@ -59,21 +60,19 @@
     <actions>
 
         <action id="NewChatMd"
-                class="io.github.codingspeedup.tags.actions.NewChatMdAction"
-                icon="/META-INF/toolIcon.svg">
+                class="io.github.codingspeedup.tags.actions.NewChatMdAction">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
 
         <action id="Execute"
                 class="io.github.codingspeedup.tags.actions.ExecuteAction"
-                icon="/META-INF/toolIcon.svg">
+                icon="/META-INF/processIcon.svg">
             <add-to-group group-id="EditorPopupMenu.Run" anchor="last"/>
         </action>
 
         <group id="SendToLLMAs"
                class="io.github.codingspeedup.tags.actions.ExecuteAsPromptGroup"
                popup="true">
-            icon="/META-INF/toolIcon.svg">
             <add-to-group group-id="EditorPopupMenu.Run" anchor="last"/>
         </group>
 
