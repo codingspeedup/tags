@@ -179,8 +179,12 @@ public final class TagsUtl {
         return resolvePluginFolder(project, "tools");
     }
 
+    public static VirtualFile resolveProjectRoot(@NotNull Project project) {
+        return ProjectUtil.guessProjectDir(project);
+    }
+
     public static Optional<VirtualFile> resolvePluginFolder(@NotNull Project project, String... path) {
-        var projectRoot = ProjectUtil.guessProjectDir(project);
+        var projectRoot = resolveProjectRoot(project);
         if (projectRoot == null) {
             return Optional.empty();
         }

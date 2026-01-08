@@ -108,7 +108,7 @@ public class ExecuteAction extends AnAction {
                         } else  if (ToolboxManagerService.isGroovy(editorFileName)) {
                             tagsResult = new GroovyScriptHandler(editorFileName, documentText).process(project, indicator);
                         } else {
-                            tagsResult = new TagsActionHandler(editorFileName, documentText, documentOffset).process(project, indicator);
+                            tagsResult = new TagsActionHandler(editorFile.getParent(), editorFileName, documentText, documentOffset).process(project, indicator);
                         }
                     }
 

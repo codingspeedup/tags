@@ -2,6 +2,8 @@ package io.github.codingspeedup.tags.engine;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -9,36 +11,38 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
 import io.github.codingspeedup.tags.integration.llms.LLM;
-import io.github.codingspeedup.tags.prompting.plib.PromptRef;
-import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
+import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import io.github.codingspeedup.tags.prompting.chat.PromptUtl;
-import io.github.codingspeedup.tags.prompting.tools.PromptApiSpecBuilder;
+import io.github.codingspeedup.tags.prompting.plib.PromptRef;
 import io.github.codingspeedup.tags.prompting.tags.SectionBlock;
 import io.github.codingspeedup.tags.prompting.tags.TemplateBlock;
+import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
+import io.github.codingspeedup.tags.prompting.tools.PromptApiSpecBuilder;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static io.github.codingspeedup.tags.prompting.chat.ChatMdUtl.*;
-import static io.github.codingspeedup.tags.prompting.tags.TemplateModel.SECTION_REF_MARKER;
 import static io.github.codingspeedup.tags.prompting.chat.PromptUtl.fillArguments;
 import static io.github.codingspeedup.tags.prompting.chat.PromptUtl.toProperties;
+import static io.github.codingspeedup.tags.prompting.tags.TemplateModel.*;
 
 public class TagsActionHandler implements ActionHandler {
 
     private record Buffer(String content, int offset) {
     }
 
+    private final VirtualFile fileParent;
     private final String fileName;
     private final String fileContent;
     private final int fileOffset;
     private final TemplateModel ftModel;
     private Map<String, SectionBlock> contentSections;
 
-    public TagsActionHandler(String fileName, String fileContent, int fileOffset) {
+    public TagsActionHandler(VirtualFile fileParent, String fileName, String fileContent, int fileOffset) {
+        this.fileParent = fileParent;
         this.fileName = fileName;
         this.fileContent = fileContent;
         this.fileOffset = fileOffset;
@@ -106,7 +110,7 @@ public class TagsActionHandler implements ActionHandler {
         var templateArgs = new HashMap<String, Object>();
         templateBlock.getArguments().stringPropertyNames()
                 .forEach(key ->
-                        templateArgs.put(key, resolveArgument(templateBlock.getArguments().getProperty(key))));
+                        templateArgs.put(key, resolveArgument(project, templateBlock.getArguments().getProperty(key))));
 
         var chatRequestBuilder = ChatRequest.builder();
 
@@ -153,20 +157,89 @@ public class TagsActionHandler implements ActionHandler {
         return ActionResultGateway.CHAT;
     }
 
-    private String resolveArgument(String value) {
+    private String resolveArgument(Project project, String value) {
         value = value.trim();
         if (value.startsWith(SECTION_REF_MARKER)) {
             value = parseSectionName(value);
             var sectionBlock = getContentSections().get(value);
-            if (sectionBlock != null) {
-                value = sectionBlock.getContent(fileContent);
+            Optional.ofNullable(sectionBlock).orElseThrow();
+            value = sectionBlock.getContent(fileContent);
+        } else if (value.startsWith(FILE_REF_MARKER)) {
+            value = value.substring(FILE_REF_MARKER.length());
+
+            var sectionName = StringUtils.EMPTY;
+            var sectionIndex = value.indexOf(SECTION_REF_MARKER);
+            if (sectionIndex >= 0) {
+                sectionName = parseSectionName(value.substring(sectionIndex));
+                value = value.substring(0, sectionIndex);
             }
+
+            var linesSelection = StringUtils.EMPTY;
+            var linesSelectionIndex = value.indexOf(LINES_REF_MARKER);
+            if (linesSelectionIndex >= 0) {
+                linesSelection = value.substring(linesSelectionIndex + LINES_REF_MARKER.length());
+                value = value.substring(0, linesSelectionIndex);
+            }
+
+            value = collectFileSelection(project, value.trim(), linesSelection, sectionName);
         }
         return value;
     }
 
     private static String parseSectionName(String value) {
         return value.substring(1).trim();
+    }
+
+    private String collectFileSelection(Project project, String fileRef, String linesSelection, String sectionName) {
+        fileRef = fileRef.replace('\\', '/').replaceAll("[ \t]*/[ \t/]*", "/");
+
+        VirtualFile thatVirtualFile;
+        if (fileRef.startsWith("/")) {
+            thatVirtualFile = LocalFileSystem.getInstance().findFileByPath(fileRef);
+        } else if (fileRef.startsWith("./") || fileRef.startsWith("../")) {
+            thatVirtualFile = fileParent.findFileByRelativePath(fileRef);
+        } else {
+            var projectRoot = TagsUtl.resolveProjectRoot(project);
+            thatVirtualFile = (projectRoot == null) ? null : projectRoot.findFileByRelativePath(fileRef);
+        }
+        Optional.ofNullable(thatVirtualFile).orElseThrow();
+
+        var thatFileContent = TagsUtl.readText(project, thatVirtualFile).orElseThrow();
+
+        var value = new StringBuilder();
+
+        if (StringUtils.isNotBlank(linesSelection)) {
+            var allLines = thatFileContent.lines().toList();
+
+            Arrays.stream(linesSelection.split(","))
+                    .map(String::trim)
+                    .filter(StringUtils::isNotEmpty)
+                    .flatMap(spec -> {
+                        if (spec.contains("-")) {
+                            var boundaries = spec.split("-", 2);
+                            var start = Integer.parseInt(boundaries[0].trim());
+                            var end = Integer.parseInt(boundaries[1].trim());
+                            return IntStream.rangeClosed(start, end).boxed();
+                        } else {
+                            return Stream.of(Integer.parseInt(spec));
+                        }
+                    })
+                    .forEach(idx -> {
+                        var zeroIdx = idx - 1;
+                        if (zeroIdx >= 0 && zeroIdx < allLines.size()) {
+                            value.append(allLines.get(zeroIdx)).append("\n");
+                        }
+                    });
+        }
+
+        if (StringUtils.isNotBlank(sectionName)) {
+            var thatFtModel = TemplateModel.of(thatVirtualFile.getName()).orElseThrow();
+            var thatFileSectionBlock = thatFtModel.getSections(thatFileContent).get(sectionName);
+            Optional.ofNullable(thatFileSectionBlock).orElseThrow();
+            value.append(thatFileSectionBlock.getContent(thatFileContent));
+        }
+
+        return value.toString().trim();
     }
 
     private Buffer buildChatBuffer(ChatRequest chatRequest, ChatResponse chatResponse) {

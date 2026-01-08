@@ -24,7 +24,7 @@ public abstract class TemplateModel {
 
     public static final String SECTION_REF_MARKER = "#";
     public static final String FILE_REF_MARKER = "file://";
-    public static final String LINE_REF_MARKER = ":";
+    public static final String LINES_REF_MARKER = ":";
 
     private static final Map<String, TemplateModel> MODEL_REGISTRY = new ConcurrentHashMap<>();
 
