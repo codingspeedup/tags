@@ -2,7 +2,6 @@ package io.github.codingspeedup.tags.plugin.management;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
-import io.github.codingspeedup.tags.MyMessageBundle;
 import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
 import io.github.codingspeedup.tags.utils.TagsUtl;
 import kotlin.Unit;
@@ -19,14 +18,14 @@ public class TagsInitializer implements ProjectActivity {
     public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         var logger = TagsConsoleService.getInstance(project);
         logger.info(String.format("%s: Initializing plugin for project `%s' ...",
-                MyMessageBundle.message("plugin.label"),
+                TagsMessageBundle.message("plugin.label"),
                 project.getName()));
         try {
             TagsUtl.resolveToolsFolder(project).orElseThrow();
             TagsUtl.resolvePromptLibrary(project).orElseThrow();
             TagsUtl.saveAllDocuments();
             logger.info(String.format("%s: Plugin initialized.",
-                    MyMessageBundle.message("plugin.label")));
+                    TagsMessageBundle.message("plugin.label")));
         } catch (Exception e) {
             reportError(project, "Plugin initialization failure", e);
         }

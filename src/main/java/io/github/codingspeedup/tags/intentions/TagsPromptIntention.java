@@ -10,7 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.Iconable;
 import com.intellij.psi.PsiFile;
-import io.github.codingspeedup.tags.MyMessageBundle;
+import io.github.codingspeedup.tags.plugin.management.TagsMessageBundle;
 import io.github.codingspeedup.tags.actions.TagsGroup;
 import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
 import io.github.codingspeedup.tags.utils.FileTypeModel;
@@ -24,12 +24,12 @@ public class TagsPromptIntention implements IntentionAction, HighPriorityAction,
 
     @Override
     public @NotNull String getFamilyName() {
-        return MyMessageBundle.message("plugin.label");
+        return TagsMessageBundle.message("plugin.label");
     }
 
     @Override
     public @NotNull String getText() {
-        return MyMessageBundle.message("action.Execute.text");
+        return TagsMessageBundle.message("action.Execute.text");
     }
 
     @Override
@@ -39,7 +39,7 @@ public class TagsPromptIntention implements IntentionAction, HighPriorityAction,
 
     @Override
     public @NotNull IntentionPreviewInfo generatePreview(@NotNull Project project, @NotNull Editor editor, @NotNull PsiFile file) {
-        var description = MyMessageBundle.message("action.Execute.description");
+        var description = TagsMessageBundle.message("action.Execute.description");
         return new IntentionPreviewInfo.Html(description);
     }
 

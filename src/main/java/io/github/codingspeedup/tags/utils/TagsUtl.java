@@ -19,7 +19,7 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
-import io.github.codingspeedup.tags.MyMessageBundle;
+import io.github.codingspeedup.tags.plugin.management.TagsMessageBundle;
 import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -257,7 +257,7 @@ public final class TagsUtl {
         var notification = NotificationGroupManager.getInstance()
                 .getNotificationGroup("TAGS+Group")
                 .createNotification(
-                        MyMessageBundle.message("plugin.label"),
+                        TagsMessageBundle.message("plugin.label"),
                         "Content successfully sent to system clipboard.",
                         NotificationType.INFORMATION
                 );
@@ -344,7 +344,7 @@ public final class TagsUtl {
         NotificationGroupManager.getInstance()
                 .getNotificationGroup("TAGS+Group")
                 .createNotification(
-                        MyMessageBundle.message("plugin.label"),
+                        TagsMessageBundle.message("plugin.label"),
                         notificationMessage,
                         level
                 ).notify(project);

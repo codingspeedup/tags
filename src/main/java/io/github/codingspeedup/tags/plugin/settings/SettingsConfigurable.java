@@ -10,7 +10,7 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.Disposer;
 import dev.langchain4j.model.catalog.ModelType;
 import dev.langchain4j.model.googleai.GoogleAiGeminiModelCatalog;
-import io.github.codingspeedup.tags.MyMessageBundle;
+import io.github.codingspeedup.tags.plugin.management.TagsMessageBundle;
 import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
@@ -41,7 +41,7 @@ public class SettingsConfigurable implements Configurable {
 
     @Override
     public String getDisplayName() {
-        return MyMessageBundle.message("plugin.label") + " Settings";
+        return TagsMessageBundle.message("plugin.label") + " Settings";
     }
 
     @Override

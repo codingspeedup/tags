@@ -2,7 +2,7 @@ package io.github.codingspeedup.tags.plugin.console;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
-import io.github.codingspeedup.tags.MyMessageBundle;
+import io.github.codingspeedup.tags.plugin.management.TagsMessageBundle;
 
 @Service(Service.Level.PROJECT)
 public final class TagsConsoleService extends ConsoleServiceBase {
@@ -11,7 +11,7 @@ public final class TagsConsoleService extends ConsoleServiceBase {
         return project.getService(TagsConsoleService.class);
     }
 
-    private final String prefix = MyMessageBundle.message("plugin.label") + ": ";
+    private final String prefix = TagsMessageBundle.message("plugin.label") + ": ";
 
     public void info(String message) {
         super.info(prefix + message);

@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags;
+package io.github.codingspeedup.tags.plugin.management;
 
 
 import com.intellij.DynamicBundle;
@@ -9,11 +9,11 @@ import org.jetbrains.annotations.PropertyKey;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
-public final class MyMessageBundle {
-    public static final String BUNDLE = "messages.MyMessageBundle";
-    private static final DynamicBundle INSTANCE = new DynamicBundle(MyMessageBundle.class, BUNDLE);
+public final class TagsMessageBundle {
+    public static final String BUNDLE = "messages.TagsMessageBundle";
+    private static final DynamicBundle INSTANCE = new DynamicBundle(TagsMessageBundle.class, BUNDLE);
 
-    private MyMessageBundle() {
+    private TagsMessageBundle() {
     }
 
     @NotNull
