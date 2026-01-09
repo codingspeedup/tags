@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import org.jetbrains.annotations.NotNull;
 
-public class TagsEditInsertTemplateGroup extends DefaultActionGroup {
+public class EditInsertTemplateGroup extends DefaultActionGroup {
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
@@ -14,7 +14,7 @@ public class TagsEditInsertTemplateGroup extends DefaultActionGroup {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        e.getPresentation().setEnabledAndVisible(TagsEditActionBase.isAvailable(e));
+        e.getPresentation().setEnabledAndVisible(EditActionBase.isAvailable(e));
     }
 
 }

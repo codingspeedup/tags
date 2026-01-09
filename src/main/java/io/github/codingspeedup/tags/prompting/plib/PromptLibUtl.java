@@ -4,6 +4,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import io.github.codingspeedup.tags.prompting.chat.ChatMdUtl;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.util.Map;
@@ -42,11 +43,15 @@ public final class PromptLibUtl {
 
     public static VirtualFile nextPromptLibraryFile(VirtualFile pLibFolder) throws IOException {
         var version = 1;
-        var bufferName = String.format("plib%d%s", version, PLUGIN_PROMPT_LIBRARY_EXTENSION);
-        while (pLibFolder.findChild(bufferName) != null) {
-            bufferName = String.format("plib%d%s", version, PLUGIN_PROMPT_LIBRARY_EXTENSION);
+        var fileName = buildPromptLibraryFileName(version);
+        while (pLibFolder.findChild(fileName) != null) {
+            fileName = buildPromptLibraryFileName(++version);
         }
-        return pLibFolder.createChildData(ChatMdUtl.class, bufferName);
+        return pLibFolder.createChildData(ChatMdUtl.class, fileName);
+    }
+
+    private static @NonNull String buildPromptLibraryFileName(int version) {
+        return String.format("plib%d%s", version, PLUGIN_PROMPT_LIBRARY_EXTENSION);
     }
 
     public static void mergeToProperties(Properties target, Map<String, Object> source) {

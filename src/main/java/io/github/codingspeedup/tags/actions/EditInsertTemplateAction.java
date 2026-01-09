@@ -13,16 +13,16 @@ import org.jetbrains.annotations.NotNull;
 
 import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
 
-public class TagsEditInsertTemplateAction extends TagsEditActionBase {
+public class EditInsertTemplateAction extends EditActionBase {
 
     private final PromptRef promptRef;
 
     @SuppressWarnings("unused")
-    public TagsEditInsertTemplateAction() {
+    public EditInsertTemplateAction() {
         this.promptRef = new PromptRef(String.format("%s.Explain", PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME));
     }
 
-    public TagsEditInsertTemplateAction(String text, PromptRef promptRef) {
+    public EditInsertTemplateAction(String text, PromptRef promptRef) {
         this.promptRef = promptRef;
         getTemplatePresentation().setText(text);
     }

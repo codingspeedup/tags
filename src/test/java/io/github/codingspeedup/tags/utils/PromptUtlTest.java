@@ -2,10 +2,10 @@ package io.github.codingspeedup.tags.utils;
 
 import dev.langchain4j.internal.Json;
 import io.github.codingspeedup.tags.prompting.chat.PromptUtl;
-import io.github.codingspeedup.tags.prompting.tools.PromptApiSpecBuilder;
+import io.github.codingspeedup.tags.prompting.toolbox.ToolboxApiSpecBuilder;
 import org.junit.jupiter.api.Test;
-import tools.codegen.java.TypeAugmenter;
-import tools.codegen.java.TypeGenerator;
+import tools.builtin.codegen.java.TypeAugmenter;
+import tools.builtin.codegen.java.TypeGenerator;
 
 class PromptUtlTest {
 
@@ -18,7 +18,7 @@ class PromptUtlTest {
 
     @Test
     void buildToolMarkdown() {
-        var md = PromptApiSpecBuilder.of(null, TypeAugmenter.class.getName(), TypeGenerator.class.getName()).orElseThrow();
+        var md = ToolboxApiSpecBuilder.of(null, TypeAugmenter.class.getName(), TypeGenerator.class.getName()).orElseThrow();
         System.out.printf(md);
     }
 

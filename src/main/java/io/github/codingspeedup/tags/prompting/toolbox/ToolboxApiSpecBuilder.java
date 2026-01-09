@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.prompting.tools;
+package io.github.codingspeedup.tags.prompting.toolbox;
 
 import com.intellij.openapi.project.Project;
 import dev.langchain4j.agent.tool.P;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import static io.github.codingspeedup.tags.prompting.tags.TemplateModel.VAR_PLACEHOLDER;
 
-public class PromptApiSpecBuilder {
+public class ToolboxApiSpecBuilder {
 
     private static final String TOOLS_PACKAGE_NAME = "tools";
     private static final String TOOLS_PACKAGE_PREFIX = TOOLS_PACKAGE_NAME + ".";
@@ -43,7 +43,7 @@ public class PromptApiSpecBuilder {
     private final Set<Class<?>> discoveredPojos = new HashSet<>();
     private final Set<Class<?>> collectedPojos = new HashSet<>();
 
-    private PromptApiSpecBuilder(Set<? extends Class<?>> tools) {
+    private ToolboxApiSpecBuilder(Set<? extends Class<?>> tools) {
         this.tools = tools;
     }
 
@@ -61,7 +61,7 @@ public class PromptApiSpecBuilder {
 
         ClassLoader classLoader;
         if (project == null) {
-            classLoader = PromptApiSpecBuilder.class.getClassLoader();
+            classLoader = ToolboxApiSpecBuilder.class.getClassLoader();
         } else {
             var toolbox = ToolboxManagerService.getInstance(project);
             toolbox.reloadIfChanged();
@@ -91,7 +91,7 @@ public class PromptApiSpecBuilder {
         if (CollectionUtils.isEmpty(tools)) {
             return Optional.empty();
         }
-        return Optional.of(new PromptApiSpecBuilder(tools).build().toString());
+        return Optional.of(new ToolboxApiSpecBuilder(tools).build().toString());
     }
 
     private StringBuilder build() {

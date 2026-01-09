@@ -39,7 +39,7 @@ public final class ToolboxManagerService {
 
     private void initializeLoader() {
         this.toolboxClassLoader = new GroovyClassLoader(getClass().getClassLoader());
-        var toolsVirtualFile = TagsUtl.resolveToolsFolder(project).orElseThrow().getParent();
+        var toolsVirtualFile = TagsUtl.resolveToolboxFolder(project).orElseThrow().getParent();
         var toolsFile = VfsUtil.virtualToIoFile(toolsVirtualFile);
         this.toolboxClassLoader.addClasspath(toolsFile.getAbsolutePath());
     }
@@ -48,7 +48,7 @@ public final class ToolboxManagerService {
         lock.writeLock().lock();
         try {
             var groovyFiles = new ArrayList<VirtualFile>();
-            collectGroovyFiles(TagsUtl.resolveToolsFolder(project).orElseThrow(), groovyFiles);
+            collectGroovyFiles(TagsUtl.resolveToolboxFolder(project).orElseThrow(), groovyFiles);
             var dirty = groovyFiles.size() != fileTimestamps.size();
             if (!dirty) {
                 for (VirtualFile file : groovyFiles) {

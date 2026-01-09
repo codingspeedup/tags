@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
 
-public class TagsEditInsertSectionAction extends TagsEditActionBase {
+public class EditInsertSectionAction extends EditActionBase {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {

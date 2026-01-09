@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 @NoArgsConstructor
-public abstract class TagsEditActionBase extends AnAction {
+public abstract class EditActionBase extends AnAction {
 
     public static boolean isAvailable(@NotNull AnActionEvent e) {
         var isAvailable = e.getProject() != null;

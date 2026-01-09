@@ -17,16 +17,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.StreamSupport;
 
-public class TagsEditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
+public class EditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
 
     private final VirtualFile libFile;
 
     @SuppressWarnings("unused")
-    public TagsEditInsertTemplateFromLibraryGroup() {
+    public EditInsertTemplateFromLibraryGroup() {
         this.libFile = null;
     }
 
-    public TagsEditInsertTemplateFromLibraryGroup(String name, VirtualFile libFile) {
+    public EditInsertTemplateFromLibraryGroup(String name, VirtualFile libFile) {
         super(name, true);
         this.libFile = libFile;
     }
@@ -38,7 +38,7 @@ public class TagsEditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
-        e.getPresentation().setEnabledAndVisible(TagsEditActionBase.isAvailable(e));
+        e.getPresentation().setEnabledAndVisible(EditActionBase.isAvailable(e));
     }
 
     @Override
@@ -71,7 +71,7 @@ public class TagsEditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
             var pLib = PromptLib.of(project, libFile);
             return pLib.getPrompts().keySet().stream()
                     .sorted()
-                    .map(promptId -> new TagsEditInsertTemplateAction(promptId, new PromptRef(path, promptId)))
+                    .map(promptId -> new EditInsertTemplateAction(promptId, new PromptRef(path, promptId)))
                     .toArray(AnAction[]::new);
         }
     }
@@ -93,10 +93,10 @@ public class TagsEditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
 
         libraries.forEach(libFile -> {
             var libName = FilenameUtils.getBaseName(libFile.getName());
-            actions.add(new TagsEditInsertTemplateFromLibraryGroup(libName, libFile));
+            actions.add(new EditInsertTemplateFromLibraryGroup(libName, libFile));
         });
 
-        subFolders.forEach(libFile -> actions.add(new TagsEditInsertTemplateFromLibraryGroup("* " + libFile.getName(), libFile)));
+        subFolders.forEach(libFile -> actions.add(new EditInsertTemplateFromLibraryGroup("* " + libFile.getName(), libFile)));
 
         return actions.toArray(new AnAction[]{});
     }

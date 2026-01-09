@@ -24,16 +24,16 @@ import java.util.Optional;
 
 import static io.github.codingspeedup.tags.plugin.core.TagsUtl.*;
 
-public class ExecuteAction extends AnAction {
+public class ProcessAction extends AnAction {
 
     private final PromptRef promptRef;
 
     @SuppressWarnings("unused")
-    public ExecuteAction() {
+    public ProcessAction() {
         this.promptRef = new PromptRef(PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME + ".");
     }
 
-    public ExecuteAction(String promptRef, String text) {
+    public ProcessAction(String promptRef, String text) {
         this.promptRef = new PromptRef(promptRef);
         getTemplatePresentation().setText(text);
     }

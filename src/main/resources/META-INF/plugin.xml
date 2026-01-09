@@ -67,15 +67,19 @@
                 class="io.github.codingspeedup.tags.actions.NewPromptLibraryAction">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
+        <action id="NewToolbox"
+                class="io.github.codingspeedup.tags.actions.NewToolboxAction">
+            <add-to-group group-id="NewGroup" anchor="last"/>
+        </action>
 
         <action id="Execute"
-                class="io.github.codingspeedup.tags.actions.ExecuteAction"
+                class="io.github.codingspeedup.tags.actions.ProcessAction"
                 icon="/META-INF/processIcon.svg">
             <add-to-group group-id="EditorPopupMenu.Run" anchor="last"/>
         </action>
 
         <group id="SendToLLMAs"
-               class="io.github.codingspeedup.tags.actions.ExecuteAsPromptGroup"
+               class="io.github.codingspeedup.tags.actions.ProcessAsGroup"
                popup="true">
             <add-to-group group-id="EditorPopupMenu.Run" anchor="last"/>
         </group>
@@ -87,24 +91,24 @@
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
 
             <group id="InsertTagsTemplate"
-                   class="io.github.codingspeedup.tags.actions.TagsEditInsertTemplateGroup"
+                   class="io.github.codingspeedup.tags.actions.EditInsertTemplateGroup"
                    popup="true">
                 <action id="InsertTagsTemplateBlank"
-                        class="io.github.codingspeedup.tags.actions.TagsEditInsertTemplateAction"
+                        class="io.github.codingspeedup.tags.actions.EditInsertTemplateAction"
                 />
                 <group id="InsertTagsTemplateFromLibrary"
-                       class="io.github.codingspeedup.tags.actions.TagsEditInsertTemplateFromLibraryGroup"
+                       class="io.github.codingspeedup.tags.actions.EditInsertTemplateFromLibraryGroup"
                        popup="true"/>
             </group>
 
             <action id="InsertTagsSection"
-                    class="io.github.codingspeedup.tags.actions.TagsEditInsertSectionAction"
+                    class="io.github.codingspeedup.tags.actions.EditInsertSectionAction"
             />
 
             <separator/>
 
             <action id="StripTags"
-                    class="io.github.codingspeedup.tags.actions.TagsEditStripAction"
+                    class="io.github.codingspeedup.tags.actions.EditStripAction"
             />
 
         </group>

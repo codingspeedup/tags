@@ -175,12 +175,16 @@ public final class TagsUtl {
         return Optional.ofNullable(libraryFile);
     }
 
-    public static Optional<VirtualFile> resolveToolsFolder(@NotNull Project project) {
-        return resolvePluginFolder(project, "tools");
-    }
-
     public static VirtualFile resolveProjectRoot(@NotNull Project project) {
         return ProjectUtil.guessProjectDir(project);
+    }
+
+    public static Optional<VirtualFile> resolveChatFolder(@NotNull Project project) {
+        return resolvePluginFolder(project, "chat");
+    }
+
+    public static Optional<VirtualFile> resolveToolboxFolder(@NotNull Project project) {
+        return resolvePluginFolder(project, "tools");
     }
 
     public static Optional<VirtualFile> resolvePluginFolder(@NotNull Project project, String... path) {

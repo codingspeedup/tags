@@ -11,14 +11,15 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import io.github.codingspeedup.tags.plugin.core.TagsUtl;
-import io.github.codingspeedup.tags.prompting.plib.PromptLibUtl;
+import io.github.codingspeedup.tags.prompting.toolbox.ToolboxUtl;
+import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
 import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
 
-public class NewPromptLibraryAction extends AnAction {
+public class NewToolboxAction extends AnAction {
 
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
@@ -33,7 +34,7 @@ public class NewPromptLibraryAction extends AnAction {
             var location = e.getData(CommonDataKeys.VIRTUAL_FILE);
             isAvailable = location != null;
             if (isAvailable) {
-                var pLibRoot = TagsUtl.resolvePromptLibrary(project).orElseThrow().getParent();
+                var pLibRoot = TagsUtl.resolveToolboxFolder(project).orElseThrow();
                 isAvailable = VfsUtilCore.isAncestor(pLibRoot, location, false);
             }
         }
@@ -53,21 +54,24 @@ public class NewPromptLibraryAction extends AnAction {
         if (location == null) {
             return;
         }
-        var pLibFolder = location;
-        var pLibContent = PromptLibUtl.SAMPLE_LIBRARY_CONTENT;
+        var toolboxFolder = location;
 
-        new Task.Backgroundable(project, "Creating new prompt library") {
+        new Task.Backgroundable(project, "Creating new toolbox") {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
                 indicator.setIndeterminate(true);
                 ApplicationManager.getApplication().invokeLater(() ->
                         WriteCommandAction.runWriteCommandAction(project, () -> {
                             try {
-                                var pLibFile = PromptLibUtl.nextPromptLibraryFile(pLibFolder);
-                                TagsUtl.writeText(project, pLibFile, pLibContent);
-                                FileEditorManager.getInstance(project).openFile(pLibFile, true);
+                                var toolboxFile = ToolboxUtl.nextToolboxFile(toolboxFolder);
+                                var packageName = VfsUtilCore.getRelativePath(toolboxFolder,
+                                        TagsUtl.resolveToolboxFolder(project).orElseThrow().getParent(), '.');
+                                var toolboxName = FilenameUtils.getBaseName(toolboxFile.getName());
+                                var toolboxSource = ToolboxUtl.buildSampleToolbox(packageName, toolboxName);
+                                TagsUtl.writeText(project, toolboxFile, toolboxSource);
+                                FileEditorManager.getInstance(project).openFile(toolboxFile, true);
                             } catch (IOException e) {
-                                reportError(project, "Error creating new prompt library", e);
+                                reportError(project, "Error creating new toolbox", e);
                             }
                         }), project.getDisposed());
             }

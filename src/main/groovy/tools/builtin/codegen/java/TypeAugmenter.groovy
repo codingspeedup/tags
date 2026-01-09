@@ -1,4 +1,4 @@
-package tools.codegen.java
+package tools.builtin.codegen.java
 
 import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser

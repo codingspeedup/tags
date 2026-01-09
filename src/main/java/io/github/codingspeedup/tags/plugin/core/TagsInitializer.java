@@ -20,8 +20,9 @@ public class TagsInitializer implements ProjectActivity {
                 TagsMessageBundle.message("plugin.label"),
                 project.getName()));
         try {
-            TagsUtl.resolveToolsFolder(project).orElseThrow();
+            TagsUtl.resolveChatFolder(project).orElseThrow();
             TagsUtl.resolvePromptLibrary(project).orElseThrow();
+            TagsUtl.resolveToolboxFolder(project).orElseThrow();
             TagsUtl.saveAllDocuments();
             logger.info(String.format("%s: Plugin initialized.",
                     TagsMessageBundle.message("plugin.label")));

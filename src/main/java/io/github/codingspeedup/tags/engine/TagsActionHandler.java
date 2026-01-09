@@ -17,7 +17,7 @@ import io.github.codingspeedup.tags.prompting.plib.PromptRef;
 import io.github.codingspeedup.tags.prompting.tags.SectionBlock;
 import io.github.codingspeedup.tags.prompting.tags.TemplateBlock;
 import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
-import io.github.codingspeedup.tags.prompting.tools.PromptApiSpecBuilder;
+import io.github.codingspeedup.tags.prompting.toolbox.ToolboxApiSpecBuilder;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
@@ -69,7 +69,7 @@ public class TagsActionHandler implements ActionHandler {
         ftModel.fillTemplate(templateBlock, fileContent);
 
         var chatRequest = compileLlmRequest(project, templateBlock).orElseThrow();
-        var apiSpec = PromptApiSpecBuilder.of(project, templateBlock.getPlus().lines().toList());
+        var apiSpec = ToolboxApiSpecBuilder.of(project, templateBlock.getPlus().lines().toList());
         var chatResponse = LLM.doChat(chatRequest, apiSpec.orElse(null));
 
         var tagsResult = new TagsResult(resolveGateway(templateBlock.getGateway()));

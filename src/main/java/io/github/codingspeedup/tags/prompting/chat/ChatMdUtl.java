@@ -7,6 +7,7 @@ import dev.langchain4j.data.message.UserMessage;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang.StringUtils;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -29,11 +30,15 @@ public final class ChatMdUtl {
 
     public static VirtualFile nextChatMdFile(VirtualFile chatFolder) throws IOException {
         var version = 1;
-        var bufferName = String.format("Chat%s%d%s", CHAT_MD_VERSION, version, CHAT_MD_EXTENSION);
-        while (chatFolder.findChild(bufferName) != null) {
-            bufferName = String.format("Chat%s%d%s", CHAT_MD_VERSION, ++version, CHAT_MD_EXTENSION);
+        var fileName = buildChatMdFileName(version);
+        while (chatFolder.findChild(fileName) != null) {
+            fileName = buildChatMdFileName(++version);
         }
-        return chatFolder.createChildData(ChatMdUtl.class, bufferName);
+        return chatFolder.createChildData(ChatMdUtl.class, fileName);
+    }
+
+    private static @NonNull String buildChatMdFileName(int version) {
+        return String.format("Chat%s%d%s", CHAT_MD_VERSION, version, CHAT_MD_EXTENSION);
     }
 
     public static String nextChatMdBufferName(Project project, String fileName) {
