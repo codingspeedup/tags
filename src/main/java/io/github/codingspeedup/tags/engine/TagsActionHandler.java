@@ -16,7 +16,7 @@ import io.github.codingspeedup.tags.prompting.chat.PromptUtl;
 import io.github.codingspeedup.tags.prompting.plib.PromptRef;
 import io.github.codingspeedup.tags.prompting.tags.SectionBlock;
 import io.github.codingspeedup.tags.prompting.tags.TemplateBlock;
-import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
+import io.github.codingspeedup.tags.prompting.tags.FileTypeModel;
 import io.github.codingspeedup.tags.prompting.toolbox.ToolboxApiSpecBuilder;
 import org.apache.commons.lang.StringUtils;
 
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import static io.github.codingspeedup.tags.prompting.chat.ChatMdUtl.*;
 import static io.github.codingspeedup.tags.prompting.chat.PromptUtl.fillArguments;
 import static io.github.codingspeedup.tags.prompting.chat.PromptUtl.toProperties;
-import static io.github.codingspeedup.tags.prompting.tags.TemplateModel.*;
+import static io.github.codingspeedup.tags.prompting.tags.FileTypeModel.*;
 
 public class TagsActionHandler implements ActionHandler {
 
@@ -38,7 +38,7 @@ public class TagsActionHandler implements ActionHandler {
     private final String fileName;
     private final String fileContent;
     private final int fileOffset;
-    private final TemplateModel ftModel;
+    private final FileTypeModel ftModel;
     private Map<String, SectionBlock> contentSections;
 
     public TagsActionHandler(VirtualFile fileParent, String fileName, String fileContent, int fileOffset) {
@@ -46,7 +46,7 @@ public class TagsActionHandler implements ActionHandler {
         this.fileName = fileName;
         this.fileContent = fileContent;
         this.fileOffset = fileOffset;
-        this.ftModel = TemplateModel.of(fileName).orElseThrow();
+        this.ftModel = FileTypeModel.of(fileName).orElseThrow();
     }
 
     private Map<String, SectionBlock> getContentSections() {
@@ -116,7 +116,7 @@ public class TagsActionHandler implements ActionHandler {
 
         var chatMessages = new ArrayList<ChatMessage>();
 
-        if (templateText.startsWith(TemplateModel.TEMPLATE_PREFIX)) {
+        if (templateText.startsWith(FileTypeModel.TEMPLATE_PREFIX)) {
 
             var pDesc = new PromptRef(templateText);
             var pLib = pDesc.getLibrary(project);
@@ -233,7 +233,7 @@ public class TagsActionHandler implements ActionHandler {
         }
 
         if (StringUtils.isNotBlank(sectionName)) {
-            var thatFtModel = TemplateModel.of(thatVirtualFile.getName()).orElseThrow();
+            var thatFtModel = FileTypeModel.of(thatVirtualFile.getName()).orElseThrow();
             var thatFileSectionBlock = thatFtModel.getSections(thatFileContent).get(sectionName);
             Optional.ofNullable(thatFileSectionBlock).orElseThrow();
             value.append(thatFileSectionBlock.getContent(thatFileContent));
@@ -259,8 +259,8 @@ public class TagsActionHandler implements ActionHandler {
 
     private Buffer buildNewContent(String sectionName, ChatResponse chatResponse) {
         var sectionBlock = getContentSections().get(sectionName);
-        var sectionStart = TemplateModel.indexOfEol(fileContent, sectionBlock.getFromOffset());
-        var sectionEnd = TemplateModel.indexOfBol(fileContent, sectionBlock.getToOffset());
+        var sectionStart = FileTypeModel.indexOfEol(fileContent, sectionBlock.getFromOffset());
+        var sectionEnd = FileTypeModel.indexOfBol(fileContent, sectionBlock.getToOffset());
 
         @SuppressWarnings("all")
         var bufferContent = new StringBuilder();

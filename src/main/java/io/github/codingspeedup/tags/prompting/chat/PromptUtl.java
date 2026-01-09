@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.prompting.tags.TemplateModel.VAR_PLACEHOLDER;
+import static io.github.codingspeedup.tags.prompting.tags.FileTypeModel.VAR_PLACEHOLDER;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PromptUtl {

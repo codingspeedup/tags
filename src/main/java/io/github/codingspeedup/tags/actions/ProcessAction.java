@@ -14,7 +14,7 @@ import io.github.codingspeedup.tags.engine.SelectionHandler;
 import io.github.codingspeedup.tags.engine.TagsActionHandler;
 import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
 import io.github.codingspeedup.tags.prompting.plib.PromptLibUtl;
-import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
+import io.github.codingspeedup.tags.prompting.tags.FileTypeModel;
 import io.github.codingspeedup.tags.prompting.plib.PromptRef;
 import io.github.codingspeedup.tags.engine.TagsResult;
 import io.github.codingspeedup.tags.plugin.core.TagsUtl;
@@ -50,7 +50,7 @@ public class ProcessAction extends AnAction {
                     isAvailable = editor.getSelectionModel().hasSelection()
                             || TagsGroup.isChatMd(file.getName())
                             || ToolboxManagerService.isGroovy(file.getName())
-                            || TemplateModel.of(file.getName()).isPresent();
+                            || FileTypeModel.of(file.getName()).isPresent();
                 }
             }
         }

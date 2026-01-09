@@ -13,14 +13,14 @@ import com.intellij.psi.PsiFile;
 import io.github.codingspeedup.tags.plugin.core.TagsMessageBundle;
 import io.github.codingspeedup.tags.actions.TagsGroup;
 import io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService;
-import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
+import io.github.codingspeedup.tags.prompting.tags.FileTypeModel;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
 public class TagsPromptIntention implements IntentionAction, HighPriorityAction, Iconable {
 
-    private static final Icon MY_ICON = IconLoader.getIcon("/META-INF/processIcon.svg", TagsPromptIntention.class);
+    private static final Icon MY_ICON = IconLoader.getIcon("/META-INF/toolIcon.svg", TagsPromptIntention.class);
 
     @Override
     public @NotNull String getFamilyName() {
@@ -56,7 +56,7 @@ public class TagsPromptIntention implements IntentionAction, HighPriorityAction,
             if (isAvailable) {
                 isAvailable = TagsGroup.isChatMd(file.getName())
                         || ToolboxManagerService.isGroovy(file.getName())
-                        || TemplateModel.of(file.getName()).isPresent();
+                        || FileTypeModel.of(file.getName()).isPresent();
             }
         }
         return isAvailable;

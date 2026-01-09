@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
-public abstract class TemplateModel {
+public abstract class FileTypeModel {
 
     public static final String TEMPLATE_PREFIX = "@";
 
@@ -26,7 +26,7 @@ public abstract class TemplateModel {
     public static final String FILE_REF_MARKER = "file://";
     public static final String LINES_REF_MARKER = ":";
 
-    private static final Map<String, TemplateModel> MODEL_REGISTRY = new ConcurrentHashMap<>();
+    private static final Map<String, FileTypeModel> MODEL_REGISTRY = new ConcurrentHashMap<>();
 
     private final String lineCommentPrefix;
     private final String lineCommentSuffix;
@@ -36,7 +36,7 @@ public abstract class TemplateModel {
     private final String sPrefix;
     private final String plusPrefix;
 
-    protected TemplateModel(String lineCommentPrefix, String lineCommentSuffix) {
+    protected FileTypeModel(String lineCommentPrefix, String lineCommentSuffix) {
         this.lineCommentPrefix = lineCommentPrefix;
         this.lineCommentSuffix = lineCommentSuffix;
         this.tPrefix = this.lineCommentPrefix + "T: ";
@@ -49,12 +49,12 @@ public abstract class TemplateModel {
     public record S(String name, boolean closing) {
     }
 
-    public static Optional<TemplateModel> of(String fileName) {
+    public static Optional<FileTypeModel> of(String fileName) {
         var fileExtension = StringUtils.trimToEmpty(FilenameUtils.getExtension(fileName)).toLowerCase(Locale.ROOT);
         var fileModel = MODEL_REGISTRY.computeIfAbsent(fileExtension, (key) -> switch (key) {
-            case "txt" -> new TemplateModel(StringUtils.EMPTY, StringUtils.EMPTY) {
+            case "txt" -> new FileTypeModel(StringUtils.EMPTY, StringUtils.EMPTY) {
             };
-            case "java", "cs" -> new TemplateModel("// ", StringUtils.EMPTY) {
+            case "java", "go", "groovy", "cs" -> new FileTypeModel("// ", StringUtils.EMPTY) {
             };
             default -> null;
         });

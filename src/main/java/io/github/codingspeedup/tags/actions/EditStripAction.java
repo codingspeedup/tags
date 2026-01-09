@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.engine.TagsEditHandler;
-import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
+import io.github.codingspeedup.tags.prompting.tags.FileTypeModel;
 import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ public class EditStripAction extends EditActionBase {
 
         var editorFileName = editorFile.getName();
 
-        var ftModel = TemplateModel.of(editorFileName).orElse(null);
+        var ftModel = FileTypeModel.of(editorFileName).orElse(null);
         if (ftModel == null) {
             reportError(project, String.format("Unrecognized file model for `%s'", editorFileName));
             return;

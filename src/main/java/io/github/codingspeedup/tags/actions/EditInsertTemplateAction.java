@@ -8,7 +8,7 @@ import io.github.codingspeedup.tags.engine.TagsEditHandler;
 import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import io.github.codingspeedup.tags.prompting.plib.PromptLibUtl;
 import io.github.codingspeedup.tags.prompting.plib.PromptRef;
-import io.github.codingspeedup.tags.prompting.tags.TemplateModel;
+import io.github.codingspeedup.tags.prompting.tags.FileTypeModel;
 import org.jetbrains.annotations.NotNull;
 
 import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
@@ -48,7 +48,7 @@ public class EditInsertTemplateAction extends EditActionBase {
 
         var editorFileName = editorFile.getName();
 
-        var ftModel = TemplateModel.of(editorFileName).orElse(null);
+        var ftModel = FileTypeModel.of(editorFileName).orElse(null);
         if (ftModel == null) {
             reportError(project, String.format("Unrecognized file model for `%s'", editorFileName));
             return;
