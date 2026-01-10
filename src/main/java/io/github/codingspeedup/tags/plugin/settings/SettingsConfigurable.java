@@ -156,7 +156,7 @@ public class SettingsConfigurable implements Configurable {
             var chatCompletions = client.getChatCompletions(deploymentName, chatCompletionsOptions);
             Objects.nonNull(chatCompletions.getChoices().get(0).getMessage().getContent());
         } catch (Exception e) {
-            LOG.error("Checking Azure OpenAI connection", e);
+            LOG.error("Checking Azure OpenAI connection", e.getMessage());
             settingsComponent.setAzureOpenAiError(e.getMessage());
         }
     }
@@ -172,7 +172,7 @@ public class SettingsConfigurable implements Configurable {
                         .map(item -> new SettingsComboEntry(item.name(), item.displayName() + " (" + item.name() + ")"))
                         .forEach(comboEntries::add);
             } catch (Exception e) {
-                LOG.error("Reading Gemini models", e);
+                LOG.error("Reading Gemini models", e.getMessage());
             }
             if (comboEntries.isEmpty()) {
                 settingsComponent.setGeminiError("No models could be extracted");
@@ -201,7 +201,7 @@ public class SettingsConfigurable implements Configurable {
                     });
                 }
             } catch (Exception e) {
-                LOG.error("Reading Ollama models", e);
+                LOG.error("Reading Ollama models", e.getMessage());
             }
             if (comboEntries.isEmpty()) {
                 settingsComponent.setOllamaError("No models could be extracted");
