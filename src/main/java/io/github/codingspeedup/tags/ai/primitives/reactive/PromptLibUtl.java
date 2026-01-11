@@ -1,12 +1,8 @@
 package io.github.codingspeedup.tags.ai.primitives.reactive;
 
-import com.intellij.openapi.vfs.VirtualFile;
-import io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.jspecify.annotations.NonNull;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -41,16 +37,7 @@ public final class PromptLibUtl {
             
             """;
 
-    public static VirtualFile nextPromptLibraryFile(VirtualFile pLibFolder) throws IOException {
-        var version = 1;
-        var fileName = buildPromptLibraryFileName(version);
-        while (pLibFolder.findChild(fileName) != null) {
-            fileName = buildPromptLibraryFileName(++version);
-        }
-        return pLibFolder.createChildData(ChatMdUtl.class, fileName);
-    }
-
-    private static @NonNull String buildPromptLibraryFileName(int version) {
+    public static String buildPromptLibraryFileName(int version) {
         return String.format("plib%d%s", version, PLUGIN_PROMPT_LIBRARY_EXTENSION);
     }
 

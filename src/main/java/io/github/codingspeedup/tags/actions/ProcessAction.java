@@ -17,12 +17,12 @@ import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
 import io.github.codingspeedup.tags.handlers.TagsResult;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
+import io.github.codingspeedup.tags.minions.PluginUtl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-import static io.github.codingspeedup.tags.plugin.core.TagsUtl.*;
+import static io.github.codingspeedup.tags.minions.PluginUtl.*;
 
 public class ProcessAction extends AnAction {
 
@@ -115,12 +115,12 @@ public class ProcessAction extends AnAction {
                     tagsResult.ifPresentOrElse(
                             tr -> ApplicationManager.getApplication().invokeLater(() -> {
                                 switch (tr.getGateway()) {
-                                    case CHAT -> TagsUtl.openChatBuffer(project, tr);
-                                    case CLIPBOARD -> TagsUtl.sendToClipboard(project, tr);
-                                    case CONTENT -> TagsUtl.updateEditorDocument(project, editor, document, tr);
-                                    case INFO -> TagsUtl.reportInfo(project, tr.getContent());
-                                    case WARN -> TagsUtl.reportWarning(project, tr.getContent());
-                                    case ERROR -> TagsUtl.reportError(project, tr.getContent());
+                                    case CHAT -> PluginUtl.openChatBuffer(project, tr);
+                                    case CLIPBOARD -> PluginUtl.sendToClipboard(project, tr);
+                                    case CONTENT -> PluginUtl.updateEditorDocument(project, editor, document, tr);
+                                    case INFO -> PluginUtl.reportInfo(project, tr.getContent());
+                                    case WARN -> PluginUtl.reportWarning(project, tr.getContent());
+                                    case ERROR -> PluginUtl.reportError(project, tr.getContent());
                                 }
                             }, ModalityState.defaultModalityState()),
                             () -> reportInfo(project, "Prompt execution produced no result")

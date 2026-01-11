@@ -10,13 +10,13 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.vfs.VfsUtilCore;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
+import io.github.codingspeedup.tags.minions.PluginUtl;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
+import static io.github.codingspeedup.tags.minions.PluginUtl.reportError;
 
 public class NewPromptLibraryAction extends AnAction {
 
@@ -33,7 +33,7 @@ public class NewPromptLibraryAction extends AnAction {
             var location = e.getData(CommonDataKeys.VIRTUAL_FILE);
             isAvailable = location != null;
             if (isAvailable) {
-                var pLibRoot = TagsUtl.resolvePromptLibrary(project).orElseThrow().getParent();
+                var pLibRoot = PluginUtl.resolvePromptLibrary(project).orElseThrow().getParent();
                 isAvailable = VfsUtilCore.isAncestor(pLibRoot, location, false);
             }
         }
@@ -63,8 +63,8 @@ public class NewPromptLibraryAction extends AnAction {
                 ApplicationManager.getApplication().invokeLater(() ->
                         WriteCommandAction.runWriteCommandAction(project, () -> {
                             try {
-                                var pLibFile = PromptLibUtl.nextPromptLibraryFile(pLibFolder);
-                                TagsUtl.writeText(project, pLibFile, pLibContent);
+                                var pLibFile = PluginUtl.nextFile(pLibFolder, PromptLibUtl::buildPromptLibraryFileName);
+                                PluginUtl.writeText(project, pLibFile, pLibContent);
                                 FileEditorManager.getInstance(project).openFile(pLibFile, true);
                             } catch (IOException e) {
                                 reportError(project, "Error creating new prompt library", e);

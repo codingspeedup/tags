@@ -1,17 +1,18 @@
 package io.github.codingspeedup.tags.handlers;
 
 import com.intellij.openapi.project.Project;
-import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferRange;
+import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
+import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
+import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import lombok.AllArgsConstructor;
 
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.github.codingspeedup.tags.utils.Minions.endsWith;
+import static io.github.codingspeedup.tags.minions.Minions.endsWith;
 
 @AllArgsConstructor
 public class TagsEditHandler {
@@ -26,11 +27,11 @@ public class TagsEditHandler {
                 .map(BufferRange::getFromOffset)
                 .orElse(BufferModel.indexOfBol(fileContent, offset));
 
-        var pLib = promptRef.getLibrary(project);
+        var pLib = new ProjectPromptLibraryProvider(project).load(promptRef).orElseThrow();
 
         var newContent = new StringBuilder(fileContent.length() + 1024);
         newContent.append(fileContent, 0, tOffset);
-        newContent.append(ftModel.getTPrefix()).append(promptRef.templateRef()).append("\n");
+        newContent.append(ftModel.getTPrefix()).append(promptRef).append("\n");
         for (var varName : pLib.getVariables(promptRef.getId())) {
             var varValue = BufferModel.ARG_PLACEHOLDER;
             if (pLib.getDefaults().containsKey(varName)) {

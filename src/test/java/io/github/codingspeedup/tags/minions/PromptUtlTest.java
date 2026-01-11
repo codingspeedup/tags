@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.minions;
 
 import dev.langchain4j.internal.Json;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl;

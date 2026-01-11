@@ -6,10 +6,10 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.handlers.TagsEditHandler;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
+import io.github.codingspeedup.tags.minions.PluginUtl;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
+import static io.github.codingspeedup.tags.minions.PluginUtl.reportError;
 
 public class EditInsertSectionAction extends EditActionBase {
 
@@ -54,7 +54,7 @@ public class EditInsertSectionAction extends EditActionBase {
                 try {
                     var tagsEditor = new TagsEditHandler(ftModel, documentText);
                     var tagsResult = tagsEditor.insertNewSection(fromOffset, toOffset);
-                    TagsUtl.updateEditorDocument(project, editor, document, tagsResult);
+                    PluginUtl.updateEditorDocument(project, editor, document, tagsResult);
                 } catch (Exception e) {
                     reportError(project, "Error processing file", e);
                 }

@@ -9,14 +9,15 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLib;
+import io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl;
+import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
+import io.github.codingspeedup.tags.minions.PluginUtl;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
+import static io.github.codingspeedup.tags.minions.PluginUtl.reportError;
 import static io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl.*;
 
 public class NewChatMdAction extends AnAction {
@@ -41,7 +42,7 @@ public class NewChatMdAction extends AnAction {
         }
         var chatMdFolder = location;
 
-        var pLib = PromptLib.of(project, TagsUtl.resolvePromptLibrary(project).orElseThrow());
+        var pLib = new ProjectPromptLibraryProvider(project).load().orElseThrow();
 
         @SuppressWarnings("all")
         var chatMdContent = new StringBuilder();
@@ -56,8 +57,8 @@ public class NewChatMdAction extends AnAction {
                 ApplicationManager.getApplication().invokeLater(() ->
                         WriteCommandAction.runWriteCommandAction(project, () -> {
                             try {
-                                var chatMdFile = nextChatMdFile(chatMdFolder);
-                                TagsUtl.writeText(project, chatMdFile, chatMdContent.toString());
+                                var chatMdFile = PluginUtl.nextFile(chatMdFolder, ChatMdUtl::buildChatMdFileName);
+                                PluginUtl.writeText(project, chatMdFile, chatMdContent.toString());
                                 FileEditorManager.getInstance(project).openFile(chatMdFile, true);
                             } catch (IOException e) {
                                 reportError(project, "Error opening new chat buffer", e);

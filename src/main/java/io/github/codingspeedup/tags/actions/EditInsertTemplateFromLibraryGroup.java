@@ -5,8 +5,8 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.vfs.VirtualFile;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLib;
+import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
+import io.github.codingspeedup.tags.minions.PluginUtl;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +51,7 @@ public class EditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
         if (project == null) {
             return AnAction.EMPTY_ARRAY;
         }
-        var libRoot = TagsUtl.resolvePromptLibrary(project).orElse(null);
+        var libRoot = PluginUtl.resolvePromptLibrary(project).orElse(null);
         if (libRoot == null) {
             return AnAction.EMPTY_ARRAY;
         }
@@ -68,7 +68,7 @@ public class EditInsertTemplateFromLibraryGroup extends DefaultActionGroup {
                     .map(Path::toString)
                     .toArray(String[]::new);
 
-            var pLib = PromptLib.of(project, libFile);
+            var pLib = new ProjectPromptLibraryProvider(project).load(path).orElseThrow();
             return pLib.getPrompts().keySet().stream()
                     .sorted()
                     .map(promptId -> new EditInsertTemplateAction(promptId, new PromptRef(path, promptId)))

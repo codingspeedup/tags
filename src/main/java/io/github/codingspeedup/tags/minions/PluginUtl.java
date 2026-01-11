@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.plugin.core;
+package io.github.codingspeedup.tags.minions;
 
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
@@ -19,9 +19,10 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
+import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
 import io.github.codingspeedup.tags.handlers.TagsResult;
 import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
+import io.github.codingspeedup.tags.plugin.core.TagsMessageBundle;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
@@ -37,13 +38,14 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_EXTENSION;
 import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class TagsUtl {
+public final class PluginUtl {
 
     public static void saveAllDocuments() {
         var application = ApplicationManager.getApplication();
@@ -152,7 +154,7 @@ public final class TagsUtl {
                     var yamlContent = StringUtils.EMPTY;
                     if (finalFileName.equals(PLUGIN_PROMPT_LIBRARY_NAME + PLUGIN_PROMPT_LIBRARY_EXTENSION)) {
                         var resourcePath = "tags/prompts/" + finalFileName;
-                        try (var inputStream = TagsUtl.class.getClassLoader().getResourceAsStream(resourcePath)) {
+                        try (var inputStream = PluginUtl.class.getClassLoader().getResourceAsStream(resourcePath)) {
                             if (inputStream == null) {
                                 throw new RuntimeException("Resource not found: " + resourcePath);
                             }
@@ -238,7 +240,7 @@ public final class TagsUtl {
 
     private static VirtualFile getOrCreateChild(VirtualFile parent, String name) throws IOException {
         var child = parent.findChild(name);
-        return (child != null) ? child : parent.createChildDirectory(TagsUtl.class, name);
+        return (child != null) ? child : parent.createChildDirectory(PluginUtl.class, name);
     }
 
     private static void generateGitignore(Project project, VirtualFile tagsRoot) throws IOException {
@@ -344,5 +346,13 @@ public final class TagsUtl {
                 ).notify(project);
     }
 
+    public static VirtualFile nextFile(VirtualFile folder, Function<Integer, String> nameGenerator) throws IOException {
+        var version = 1;
+        var fileName = nameGenerator.apply(version);
+        while (folder.findChild(fileName) != null) {
+            fileName = nameGenerator.apply(++version);
+        }
+        return folder.createChildData(PluginUtl.class, fileName);
+    }
 
 }

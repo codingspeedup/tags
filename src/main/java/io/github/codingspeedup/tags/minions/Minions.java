@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.minions;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

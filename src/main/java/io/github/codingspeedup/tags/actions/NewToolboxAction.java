@@ -10,14 +10,14 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.vfs.VfsUtilCore;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import io.github.codingspeedup.tags.ai.composition.reactive.ToolboxUtl;
+import io.github.codingspeedup.tags.minions.PluginUtl;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
+import static io.github.codingspeedup.tags.minions.PluginUtl.reportError;
 
 public class NewToolboxAction extends AnAction {
 
@@ -34,7 +34,7 @@ public class NewToolboxAction extends AnAction {
             var location = e.getData(CommonDataKeys.VIRTUAL_FILE);
             isAvailable = location != null;
             if (isAvailable) {
-                var pLibRoot = TagsUtl.resolveToolboxFolder(project).orElseThrow();
+                var pLibRoot = PluginUtl.resolveToolboxFolder(project).orElseThrow();
                 isAvailable = VfsUtilCore.isAncestor(pLibRoot, location, false);
             }
         }
@@ -63,12 +63,12 @@ public class NewToolboxAction extends AnAction {
                 ApplicationManager.getApplication().invokeLater(() ->
                         WriteCommandAction.runWriteCommandAction(project, () -> {
                             try {
-                                var toolboxFile = ToolboxUtl.nextToolboxFile(toolboxFolder);
+                                var toolboxFile = PluginUtl.nextFile(toolboxFolder, ToolboxUtl::buildToolboxFileName);
                                 var packageName = VfsUtilCore.getRelativePath(toolboxFolder,
-                                        TagsUtl.resolveToolboxFolder(project).orElseThrow().getParent(), '.');
+                                        PluginUtl.resolveToolboxFolder(project).orElseThrow().getParent(), '.');
                                 var toolboxName = FilenameUtils.getBaseName(toolboxFile.getName());
                                 var toolboxSource = ToolboxUtl.buildSampleToolbox(packageName, toolboxName);
-                                TagsUtl.writeText(project, toolboxFile, toolboxSource);
+                                PluginUtl.writeText(project, toolboxFile, toolboxSource);
                                 FileEditorManager.getInstance(project).openFile(toolboxFile, true);
                             } catch (IOException e) {
                                 reportError(project, "Error creating new toolbox", e);

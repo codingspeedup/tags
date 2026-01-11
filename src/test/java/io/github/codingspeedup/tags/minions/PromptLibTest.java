@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.utils;
+package io.github.codingspeedup.tags.minions;
 
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLib;
 import org.junit.jupiter.api.Test;

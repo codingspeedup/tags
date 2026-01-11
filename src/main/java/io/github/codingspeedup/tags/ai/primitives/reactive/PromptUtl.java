@@ -24,8 +24,10 @@ import static io.github.codingspeedup.tags.ai.composition.orchestration.core.Buf
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PromptUtl {
 
+    public static final String LLM_PARAM_MODEL_NAME = "modelName";
+
     public static final List<String> LLM_PARAMETERS_NAMES = List.of(
-            "modelName",
+            LLM_PARAM_MODEL_NAME,
             "temperature",
             "topP",
             "topK",

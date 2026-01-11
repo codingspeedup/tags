@@ -5,13 +5,13 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.handlers.TagsEditHandler;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
+import io.github.codingspeedup.tags.minions.PluginUtl;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
+import static io.github.codingspeedup.tags.minions.PluginUtl.reportError;
 
 public class EditInsertTemplateAction extends EditActionBase {
 
@@ -65,7 +65,7 @@ public class EditInsertTemplateAction extends EditActionBase {
                 try {
                     var tagsEditor = new TagsEditHandler(ftModel, documentText);
                     var gr = tagsEditor.insertNewTemplate(project, documentOffset, promptRef);
-                    TagsUtl.updateEditorDocument(project, editor, document, gr);
+                    PluginUtl.updateEditorDocument(project, editor, document, gr);
                 } catch (Exception e) {
                     reportError(project, "Error processing file", e);
                 }

@@ -12,7 +12,8 @@ import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.input.PromptTemplate;
 import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
 import io.github.codingspeedup.tags.ai.primitives.models.LLM;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
+import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
+import io.github.codingspeedup.tags.minions.PluginUtl;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.SectionModel;
@@ -120,7 +121,7 @@ public class TagsActionHandler implements ActionHandler {
         if (templateText.startsWith(BufferModel.PROMPT_REF_PREFIX)) {
 
             var pDesc = new PromptRef(templateText);
-            var pLib = pDesc.getLibrary(project);
+            var pLib = new ProjectPromptLibraryProvider(project).load(pDesc).orElseThrow();
 
             var promptVariables = pLib.getVariables(pDesc.getId());
             fillArguments(templateArgs, promptVariables);
@@ -187,10 +188,6 @@ public class TagsActionHandler implements ActionHandler {
         return value;
     }
 
-    private static String parseSectionName(String value) {
-        return value.substring(1).trim();
-    }
-
     private String collectFileSelection(Project project, String fileRef, String linesSelection, String sectionName) {
         fileRef = fileRef.replace('\\', '/').replaceAll("[ \t]*/[ \t/]*", "/");
 
@@ -200,12 +197,12 @@ public class TagsActionHandler implements ActionHandler {
         } else if (fileRef.startsWith("./") || fileRef.startsWith("../")) {
             thatVirtualFile = fileParent.findFileByRelativePath(fileRef);
         } else {
-            var projectRoot = TagsUtl.resolveProjectRoot(project);
+            var projectRoot = PluginUtl.resolveProjectRoot(project);
             thatVirtualFile = (projectRoot == null) ? null : projectRoot.findFileByRelativePath(fileRef);
         }
         Optional.ofNullable(thatVirtualFile).orElseThrow();
 
-        var thatFileContent = TagsUtl.readText(project, thatVirtualFile).orElseThrow();
+        var thatFileContent = PluginUtl.readText(project, thatVirtualFile).orElseThrow();
 
         var value = new StringBuilder();
 

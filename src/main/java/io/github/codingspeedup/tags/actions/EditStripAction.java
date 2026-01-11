@@ -6,10 +6,10 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.handlers.TagsEditHandler;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
+import io.github.codingspeedup.tags.minions.PluginUtl;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
+import static io.github.codingspeedup.tags.minions.PluginUtl.reportError;
 
 public class EditStripAction extends EditActionBase {
 
@@ -52,7 +52,7 @@ public class EditStripAction extends EditActionBase {
                     var tagsEditor = new TagsEditHandler(ftModel, documentText);
                     var tagsResult = tagsEditor.stripTags(documentOffset);
                     tagsResult.ifPresent(result ->
-                            TagsUtl.updateEditorDocument(project, editor, document, result));
+                            PluginUtl.updateEditorDocument(project, editor, document, result));
                 } catch (Exception e) {
                     reportError(project, "Error processing file", e);
                 }

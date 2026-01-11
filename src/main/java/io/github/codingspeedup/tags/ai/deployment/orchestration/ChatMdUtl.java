@@ -1,21 +1,18 @@
 package io.github.codingspeedup.tags.ai.deployment.orchestration;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.ChatMdModel;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang.StringUtils;
-import org.jspecify.annotations.NonNull;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
-import static io.github.codingspeedup.tags.plugin.core.TagsUtl.getOpenTabNames;
+import static io.github.codingspeedup.tags.minions.PluginUtl.getOpenTabNames;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ChatMdUtl {
@@ -24,16 +21,7 @@ public final class ChatMdUtl {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
 
-    public static VirtualFile nextChatMdFile(VirtualFile chatFolder) throws IOException {
-        var version = 1;
-        var fileName = buildChatMdFileName(version);
-        while (chatFolder.findChild(fileName) != null) {
-            fileName = buildChatMdFileName(++version);
-        }
-        return chatFolder.createChildData(ChatMdUtl.class, fileName);
-    }
-
-    private static @NonNull String buildChatMdFileName(int version) {
+    public static String buildChatMdFileName(int version) {
         return String.format("Chat%s%d%s", CHAT_MD_VERSION, version, ChatMdModel.CHAT_MD_EXTENSION);
     }
 

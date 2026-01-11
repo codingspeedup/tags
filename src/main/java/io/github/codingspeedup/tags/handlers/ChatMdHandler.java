@@ -16,7 +16,9 @@ import io.github.codingspeedup.tags.ai.composition.reactive.ToolboxManagerServic
 import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
 import io.github.codingspeedup.tags.ai.primitives.models.LLM;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl;
-import io.github.codingspeedup.tags.utils.Minions;
+import io.github.codingspeedup.tags.ai.primitives.reactive.TagsPrompt;
+import io.github.codingspeedup.tags.minions.Minions;
+import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jspecify.annotations.NonNull;
@@ -86,7 +88,7 @@ public class ChatMdHandler extends ChatMdModel implements ActionHandler {
     public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
         var result = executeGroovy(project);
         if (result.isEmpty()) {
-            result = executeUserPrompt();
+            result = executeUserPrompt(project);
         }
         return result;
     }
@@ -159,23 +161,33 @@ public class ChatMdHandler extends ChatMdModel implements ActionHandler {
         return Optional.of(tagsResult);
     }
 
-    private @NonNull Optional<TagsResult> executeUserPrompt() {
+    private @NonNull Optional<TagsResult> executeUserPrompt(Project project) {
         var blockIndex = findUserBlock(userBlocks, contentOffset);
         if (blockIndex < 0) {
             return Optional.empty();
         }
 
-        var tagPlusModel = tagPlusModels.get(blockIndex);
-        fillTagPlusModel(tagPlusModel, content);
-        var userMessage = UserMessage.from(tagPlusModel.getTemplate());
-
-        var system = extractMessage(systemBlocks, contentOffset)
-                .map(SystemMessage::from);
-
-        var llmParameters = parametersBlocks.stream()
+        var llmParametersSpec =  parametersBlocks.stream()
                 .map(this::getContent)
                 .filter(StringUtils::isNotBlank)
-                .findFirst()
+                .findFirst();
+
+        var tagPlusModel = tagPlusModels.get(blockIndex);
+        fillTagPlusModel(tagPlusModel, content);
+
+
+        var promptBuilder = TagsPrompt.builder(new ProjectPromptLibraryProvider(project));
+        llmParametersSpec.map(promptBuilder::llmParameters);
+        extractMessage(systemBlocks, contentOffset).map(promptBuilder::systemMessage);
+        promptBuilder.tagPlus(tagPlusModel);
+        promptBuilder.build();
+
+        var system = extractMessage(systemBlocks, contentOffset).map(SystemMessage::from);
+
+        var userMessage = UserMessage.from(tagPlusModel.getTemplate());
+
+
+        var llmParameters = llmParametersSpec
                 .map(data -> toChatRequestParameters(PromptUtl.parseProperties(data)))
                 .orElse(ChatRequestParameters.builder().build());
 

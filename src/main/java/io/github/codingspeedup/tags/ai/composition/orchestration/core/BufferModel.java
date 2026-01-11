@@ -87,6 +87,10 @@ public abstract class BufferModel {
         return (eol == -1) ? 0 : eol + 1;
     }
 
+    public static String parseSectionName(String value) {
+        return value.substring(1).trim();
+    }
+
     public abstract List<TagPlusModel> locateTagPlusRanges(String content);
 
     public abstract void fillTagPlusModel(TagPlusModel tagPlus, String content);

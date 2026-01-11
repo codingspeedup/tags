@@ -1,30 +1,16 @@
 package io.github.codingspeedup.tags.ai.composition.reactive;
 
-import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.jspecify.annotations.NonNull;
-
-import java.io.IOException;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ToolboxUtl {
 
     public static final String TOOLBOX_EXTENSION = ".groovy";
 
-    public static VirtualFile nextToolboxFile(VirtualFile toolboxFolder) throws IOException {
-        var version = 1;
-        var fileName = buildToolboxFileName(version);
-        while (toolboxFolder.findChild(fileName) != null) {
-            fileName = buildToolboxFileName(++version);
-        }
-        return toolboxFolder.createChildData(ChatMdUtl.class, fileName);
-    }
-
-    private static @NonNull String buildToolboxFileName(int version) {
+    public static String buildToolboxFileName(int version) {
         return String.format("Toolbox%d%s", version, TOOLBOX_EXTENSION);
     }
 

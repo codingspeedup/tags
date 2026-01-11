@@ -1,9 +1,6 @@
 package io.github.codingspeedup.tags.ai.primitives.reactive;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import dev.langchain4j.model.input.PromptTemplate;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +25,7 @@ public class PromptLib {
     private final Map<String, PromptTemplate> prompts = new LinkedHashMap<>();
 
     @SuppressWarnings("unchecked")
-    private PromptLib(String name, Map<String, Object> data) {
+    public PromptLib(String name, Map<String, Object> data) {
         this.name = name;
 
         mergeToProperties(this.parameters, (Map<String, Object>) data.get("parameters"));
@@ -69,19 +66,5 @@ public class PromptLib {
             return new PromptLib(name, data);
         }
     }
-
-    public static PromptLib of(Project project, VirtualFile libraryFile) {
-        var name = StringUtils.trimToEmpty(FilenameUtils.getBaseName(libraryFile.getName()));
-        var loaderOptions = new LoaderOptions();
-        var yaml = new Yaml(new SafeConstructor(loaderOptions));
-        @SuppressWarnings("unchecked")
-        var data = (Map<String, Object>) yaml.load(TagsUtl.readText(project, libraryFile).orElseThrow());
-        return new PromptLib(name, data);
-    }
-
-    public static PromptLib of(Project project) {
-        return PromptLib.of(project, TagsUtl.resolvePromptLibrary(project).orElseThrow());
-    }
-
 
 }

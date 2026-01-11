@@ -1,7 +1,5 @@
 package io.github.codingspeedup.tags.ai.primitives.reactive;
 
-import com.intellij.openapi.project.Project;
-import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
@@ -14,6 +12,7 @@ import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl.P
 
 public class PromptRef {
 
+    @Getter
     private final String[] path;
 
     @Getter
@@ -43,11 +42,9 @@ public class PromptRef {
         this.path = (ref.endsWith(".") ? chunks : chunks.subList(0, chunks.size() - 1)).toArray(String[]::new);
     }
 
-    public PromptLib getLibrary(Project project) {
-        return PromptLib.of(project, TagsUtl.resolvePromptLibrary(project, path).orElseThrow());
-    }
 
-    public String templateRef() {
+    @Override
+    public String toString() {
         return BufferModel.PROMPT_REF_PREFIX + String.join(".", path) + "." + id;
     }
 

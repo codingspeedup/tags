@@ -7,6 +7,7 @@ import dev.langchain4j.data.message.UserMessage;
 import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
 import io.github.codingspeedup.tags.ai.primitives.models.LLM;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
+import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Map;
@@ -28,7 +29,7 @@ public class SelectionHandler implements ActionHandler {
     }
 
     public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
-        var promptLib = promptRef.getLibrary(project);
+        var promptLib = new ProjectPromptLibraryProvider(project).load().orElseThrow();
 
         var chatRequestParameters = toChatRequestParameters(promptLib.getParameters());
         var systemMessage = SystemMessage.from(promptLib.getSystemTemplate().template());
