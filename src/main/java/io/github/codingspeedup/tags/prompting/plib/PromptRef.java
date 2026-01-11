@@ -2,7 +2,7 @@ package io.github.codingspeedup.tags.prompting.plib;
 
 import com.intellij.openapi.project.Project;
 import io.github.codingspeedup.tags.plugin.core.TagsUtl;
-import io.github.codingspeedup.tags.prompting.tags.FileTypeModel;
+import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -32,7 +32,7 @@ public class PromptRef {
 
     public PromptRef(String ref) {
         ref = StringUtils.trimToEmpty(ref);
-        if (ref.startsWith(FileTypeModel.TEMPLATE_PREFIX)) {
+        if (ref.startsWith(BufferModel.PROMPT_REF_PREFIX)) {
             ref = ref.substring(1);
         }
         var chunks = Arrays.stream(ref.split("\\."))
@@ -48,7 +48,7 @@ public class PromptRef {
     }
 
     public String templateRef() {
-        return FileTypeModel.TEMPLATE_PREFIX + String.join(".", path) + "." + id;
+        return BufferModel.PROMPT_REF_PREFIX + String.join(".", path) + "." + id;
     }
 
 }

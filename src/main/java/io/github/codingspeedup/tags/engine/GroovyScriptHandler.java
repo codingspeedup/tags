@@ -50,7 +50,7 @@ public class GroovyScriptHandler implements ActionHandler {
         } catch (Exception e) {
             groovyConsole.error("Groovy script error:", e);
             tagsResult = new TagsResult(ActionResultGateway.ERROR);
-            tagsResult.setContent("Groovy script completed error:\n" + e.getMessage());
+            tagsResult.setContent("Groovy script completed with error:\n" + e.getMessage());
         }
         return Optional.of(tagsResult);
     }

@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.prompting.tags.FileTypeModel.VAR_PLACEHOLDER;
+import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.ARG_PLACEHOLDER;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PromptUtl {
@@ -178,14 +178,14 @@ public final class PromptUtl {
     public static void fillArguments(HashMap<String, Object> arguments, Set<String> requiredVariables) {
         requiredVariables.forEach(key -> {
             if (!arguments.containsKey(key)) {
-                arguments.put(key, VAR_PLACEHOLDER);
+                arguments.put(key, ARG_PLACEHOLDER);
             }
         });
     }
 
     public static Optional<List<ToolSpecification>> buildToolSpec(String toolkitClassFQN) {
         toolkitClassFQN = StringUtils.trimToEmpty(toolkitClassFQN);
-        if (StringUtils.isEmpty(toolkitClassFQN) || toolkitClassFQN.equals(VAR_PLACEHOLDER)) {
+        if (StringUtils.isEmpty(toolkitClassFQN) || toolkitClassFQN.equals(ARG_PLACEHOLDER)) {
             return Optional.of(List.of());
         }
         try {

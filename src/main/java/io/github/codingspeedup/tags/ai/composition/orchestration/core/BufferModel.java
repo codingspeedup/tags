@@ -1,5 +1,8 @@
-package io.github.codingspeedup.tags.prompting.tags;
+package io.github.codingspeedup.tags.ai.composition.orchestration.core;
 
+import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.ChatMdModel;
+import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.SourceCodeModel;
+import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.TextModel;
 import io.github.codingspeedup.tags.prompting.chat.PromptUtl;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
@@ -8,13 +11,16 @@ import org.apache.commons.lang.StringUtils;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.github.codingspeedup.tags.integration.groovy.ToolboxManagerService.GROOVY_EXTENSION;
+import static io.github.codingspeedup.tags.prompting.chat.ChatMdUtl.CHAT_MD_EXTENSION;
+
 @Getter
-public abstract class FileTypeModel {
+public abstract class BufferModel {
 
-    public static final String TEMPLATE_PREFIX = "@";
+    public static final String PROMPT_REF_PREFIX = "@";
 
-    public static final String VAR_SEPARATOR = "=";
-    public static final String VAR_PLACEHOLDER = "∅";
+    public static final String ARG_SEPARATOR = "=";
+    public static final String ARG_PLACEHOLDER = "∅";
 
     public static final String SECTION_NAME_START = "<";
     public static final String SECTION_NAME_END = ">";
@@ -23,46 +29,47 @@ public abstract class FileTypeModel {
     public static final String SECTION_ROOT_ID = "tags+";
 
     public static final String SECTION_REF_MARKER = "#";
+
     public static final String FILE_REF_MARKER = "file://";
     public static final String LINES_REF_MARKER = ":";
 
-    private static final Map<String, FileTypeModel> MODEL_REGISTRY = new ConcurrentHashMap<>();
+    private static final Map<String, BufferModel> MODEL_REGISTRY = new ConcurrentHashMap<>();
 
-    private final String lineCommentPrefix;
-    private final String lineCommentSuffix;
     private final String tPrefix;
     private final String aPrefix;
     private final String gPrefix;
     private final String sPrefix;
     private final String plusPrefix;
 
-    protected FileTypeModel(String lineCommentPrefix, String lineCommentSuffix) {
-        this.lineCommentPrefix = lineCommentPrefix;
-        this.lineCommentSuffix = lineCommentSuffix;
-        this.tPrefix = this.lineCommentPrefix + "T: ";
-        this.aPrefix = this.lineCommentPrefix + "A: ";
-        this.gPrefix = this.lineCommentPrefix + "G: ";
-        this.sPrefix = this.lineCommentPrefix + "S: ";
-        this.plusPrefix = this.lineCommentPrefix + "+: ";
+    protected BufferModel(String tPrefix, String aPrefix, String gPrefix, String sPrefix, String plusPrefix) {
+        this.tPrefix = tPrefix;
+        this.aPrefix = aPrefix;
+        this.gPrefix = gPrefix;
+        this.sPrefix = sPrefix;
+        this.plusPrefix = plusPrefix;
     }
 
-    public record S(String name, boolean closing) {
-    }
+    public static Optional<BufferModel> of(String fileName) {
+        fileName = fileName.toLowerCase(Locale.ROOT);
+        var fileExtension = "." + StringUtils.trimToEmpty(FilenameUtils.getExtension(fileName));
+        if (fileName.endsWith(CHAT_MD_EXTENSION)) {
+            fileExtension = CHAT_MD_EXTENSION;
+        }
 
-    public static Optional<FileTypeModel> of(String fileName) {
-        var fileExtension = StringUtils.trimToEmpty(FilenameUtils.getExtension(fileName)).toLowerCase(Locale.ROOT);
         var fileModel = MODEL_REGISTRY.computeIfAbsent(fileExtension, (key) -> switch (key) {
-            case "txt" -> new FileTypeModel(StringUtils.EMPTY, StringUtils.EMPTY) {
+            case ".java", ".go", GROOVY_EXTENSION, ".cs" -> new SourceCodeModel("// ") {
             };
-            case "java", "go", "groovy", "cs" -> new FileTypeModel("// ", StringUtils.EMPTY) {
+            case ".txt" -> new TextModel() {
+            };
+            case CHAT_MD_EXTENSION -> new ChatMdModel() {
             };
             default -> null;
         });
         return Optional.ofNullable(fileModel);
     }
 
-    public List<TemplateBlock> identifyTemplates(String content) {
-        var templates = new ArrayList<TemplateBlock>();
+    public List<TAGPlusModel> locateTemplates(String content) {
+        var templates = new ArrayList<TAGPlusModel>();
 
         var currentOffset = content.indexOf(tPrefix);
         while (currentOffset >= 0) {
@@ -73,7 +80,7 @@ public abstract class FileTypeModel {
                     templates.get(templates.size() - 1).setToOffset(currentOffset);
                 }
 
-                var block = new TemplateBlock();
+                var block = new TAGPlusModel();
                 block.setFromOffset(currentOffset);
                 block.setToOffset(content.length());
                 block.setTemplate(content.substring(currentOffset + tPrefix.length(), eolOffset));
@@ -85,7 +92,7 @@ public abstract class FileTypeModel {
         return templates;
     }
 
-    public void fillTemplate(TemplateBlock template, String content) {
+    public void fillTemplate(TAGPlusModel template, String content) {
         var arguments = new StringBuilder();
         var plus = new StringBuilder();
         content = content.substring(template.getFromOffset(), template.getToOffset());
@@ -111,8 +118,8 @@ public abstract class FileTypeModel {
     }
 
 
-    public Map<String, SectionBlock> getSections(String content) {
-        var sections = new HashMap<String, SectionBlock>();
+    public Map<String, SectionModel> getSections(String content) {
+        var sections = new HashMap<String, SectionModel>();
 
         var currentOffset = content.indexOf(sPrefix);
         while (currentOffset >= 0) {
@@ -134,7 +141,7 @@ public abstract class FileTypeModel {
                             throw new UnsupportedOperationException("Duplicate section block `" + name + "'");
                         }
 
-                        block = new SectionBlock();
+                        block = new SectionModel();
                         block.setName(name);
                         block.setFromOffset(currentOffset);
                         block.setToOffset(content.length());
@@ -148,14 +155,14 @@ public abstract class FileTypeModel {
         return sections;
     }
 
-    private S parseSectionLine(String line) {
+    private SectionMarker parseSectionLine(String line) {
         if (line.startsWith(SECTION_NAME_START) && line.endsWith(SECTION_NAME_END)) {
             line = line.substring(SECTION_NAME_START.length(), line.length() - SECTION_NAME_END.length());
             var closing = line.startsWith(SECTION_CLOSE);
             if (closing) {
                 line = StringUtils.trimToEmpty(line.substring(SECTION_CLOSE.length()));
             }
-            return new S(line, closing);
+            return new SectionMarker(line, closing);
         }
         return null;
     }
@@ -169,6 +176,5 @@ public abstract class FileTypeModel {
         int eol = content.lastIndexOf('\n', endIndex - 1);
         return (eol == -1) ? 0 : eol + 1;
     }
-
 
 }

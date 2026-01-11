@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.prompting.tags;
+package io.github.codingspeedup.tags.ai.composition.orchestration.core;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,7 @@ import java.util.Properties;
 
 @Getter
 @Setter
-public class TemplateBlock extends PromptBlock {
+public class TAGPlusModel extends BufferRange{
 
     private String template;
     private Properties arguments = new Properties();

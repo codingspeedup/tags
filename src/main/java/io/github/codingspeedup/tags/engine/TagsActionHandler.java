@@ -14,9 +14,9 @@ import io.github.codingspeedup.tags.integration.llms.LLM;
 import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import io.github.codingspeedup.tags.prompting.chat.PromptUtl;
 import io.github.codingspeedup.tags.prompting.plib.PromptRef;
-import io.github.codingspeedup.tags.prompting.tags.SectionBlock;
-import io.github.codingspeedup.tags.prompting.tags.TemplateBlock;
-import io.github.codingspeedup.tags.prompting.tags.FileTypeModel;
+import io.github.codingspeedup.tags.ai.composition.orchestration.core.SectionModel;
+import io.github.codingspeedup.tags.ai.composition.orchestration.core.TAGPlusModel;
+import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import io.github.codingspeedup.tags.prompting.toolbox.ToolboxApiSpecBuilder;
 import org.apache.commons.lang.StringUtils;
 
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import static io.github.codingspeedup.tags.prompting.chat.ChatMdUtl.*;
 import static io.github.codingspeedup.tags.prompting.chat.PromptUtl.fillArguments;
 import static io.github.codingspeedup.tags.prompting.chat.PromptUtl.toProperties;
-import static io.github.codingspeedup.tags.prompting.tags.FileTypeModel.*;
+import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.*;
 
 public class TagsActionHandler implements ActionHandler {
 
@@ -38,18 +38,18 @@ public class TagsActionHandler implements ActionHandler {
     private final String fileName;
     private final String fileContent;
     private final int fileOffset;
-    private final FileTypeModel ftModel;
-    private Map<String, SectionBlock> contentSections;
+    private final BufferModel ftModel;
+    private Map<String, SectionModel> contentSections;
 
     public TagsActionHandler(VirtualFile fileParent, String fileName, String fileContent, int fileOffset) {
         this.fileParent = fileParent;
         this.fileName = fileName;
         this.fileContent = fileContent;
         this.fileOffset = fileOffset;
-        this.ftModel = FileTypeModel.of(fileName).orElseThrow();
+        this.ftModel = BufferModel.of(fileName).orElseThrow();
     }
 
-    private Map<String, SectionBlock> getContentSections() {
+    private Map<String, SectionModel> getContentSections() {
         if (contentSections == null) {
             contentSections = ftModel.getSections(fileContent);
         }
@@ -57,7 +57,7 @@ public class TagsActionHandler implements ActionHandler {
     }
 
     public Optional<TagsResult> process(Project project, ProgressIndicator indicator) {
-        var blocks = ftModel.identifyTemplates(fileContent);
+        var blocks = ftModel.locateTemplates(fileContent);
         if (blocks.isEmpty()) {
             return Optional.empty();
         }
@@ -101,22 +101,22 @@ public class TagsActionHandler implements ActionHandler {
         return Optional.of(tagsResult);
     }
 
-    private Optional<ChatRequest> compileLlmRequest(Project project, TemplateBlock templateBlock) {
-        var templateText = templateBlock.getTemplate();
+    private Optional<ChatRequest> compileLlmRequest(Project project, TAGPlusModel tagPlusModel) {
+        var templateText = tagPlusModel.getTemplate();
         if (StringUtils.isBlank(templateText)) {
             return Optional.empty();
         }
 
         var templateArgs = new HashMap<String, Object>();
-        templateBlock.getArguments().stringPropertyNames()
+        tagPlusModel.getArguments().stringPropertyNames()
                 .forEach(key ->
-                        templateArgs.put(key, resolveArgument(project, templateBlock.getArguments().getProperty(key))));
+                        templateArgs.put(key, resolveArgument(project, tagPlusModel.getArguments().getProperty(key))));
 
         var chatRequestBuilder = ChatRequest.builder();
 
         var chatMessages = new ArrayList<ChatMessage>();
 
-        if (templateText.startsWith(FileTypeModel.TEMPLATE_PREFIX)) {
+        if (templateText.startsWith(BufferModel.PROMPT_REF_PREFIX)) {
 
             var pDesc = new PromptRef(templateText);
             var pLib = pDesc.getLibrary(project);
@@ -134,7 +134,7 @@ public class TagsActionHandler implements ActionHandler {
 
         } else {
 
-            var userTemplate = PromptTemplate.from(templateBlock.getTemplate());
+            var userTemplate = PromptTemplate.from(tagPlusModel.getTemplate());
 
             var promptVariables = PromptUtl.findVariables(userTemplate);
             fillArguments(templateArgs, promptVariables);
@@ -233,7 +233,7 @@ public class TagsActionHandler implements ActionHandler {
         }
 
         if (StringUtils.isNotBlank(sectionName)) {
-            var thatFtModel = FileTypeModel.of(thatVirtualFile.getName()).orElseThrow();
+            var thatFtModel = BufferModel.of(thatVirtualFile.getName()).orElseThrow();
             var thatFileSectionBlock = thatFtModel.getSections(thatFileContent).get(sectionName);
             Optional.ofNullable(thatFileSectionBlock).orElseThrow();
             value.append(thatFileSectionBlock.getContent(thatFileContent));
@@ -259,8 +259,8 @@ public class TagsActionHandler implements ActionHandler {
 
     private Buffer buildNewContent(String sectionName, ChatResponse chatResponse) {
         var sectionBlock = getContentSections().get(sectionName);
-        var sectionStart = FileTypeModel.indexOfEol(fileContent, sectionBlock.getFromOffset());
-        var sectionEnd = FileTypeModel.indexOfBol(fileContent, sectionBlock.getToOffset());
+        var sectionStart = BufferModel.indexOfEol(fileContent, sectionBlock.getFromOffset());
+        var sectionEnd = BufferModel.indexOfBol(fileContent, sectionBlock.getToOffset());
 
         @SuppressWarnings("all")
         var bufferContent = new StringBuilder();

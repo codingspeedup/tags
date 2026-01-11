@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.prompting.tags.FileTypeModel.VAR_PLACEHOLDER;
+import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.ARG_PLACEHOLDER;
 
 public class ToolboxApiSpecBuilder {
 
@@ -70,7 +70,7 @@ public class ToolboxApiSpecBuilder {
 
         var tools = toolkit.stream()
                 .map(StringUtils::trimToNull)
-                .map(toolFQN -> VAR_PLACEHOLDER.equals(toolFQN) ? null : toolFQN)
+                .map(toolFQN -> ARG_PLACEHOLDER.equals(toolFQN) ? null : toolFQN)
                 .filter(Objects::nonNull)
                 .map(toolFQN -> {
                     try {

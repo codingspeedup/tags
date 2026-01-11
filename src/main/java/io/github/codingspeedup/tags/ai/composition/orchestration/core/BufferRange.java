@@ -1,11 +1,11 @@
-package io.github.codingspeedup.tags.prompting.tags;
+package io.github.codingspeedup.tags.ai.composition.orchestration.core;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class PromptBlock {
+public abstract class BufferRange {
 
     private int fromOffset;
     private int toOffset = -1;

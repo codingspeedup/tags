@@ -2,8 +2,8 @@ package io.github.codingspeedup.tags.engine;
 
 import com.intellij.openapi.project.Project;
 import io.github.codingspeedup.tags.prompting.plib.PromptRef;
-import io.github.codingspeedup.tags.prompting.tags.FileTypeModel;
-import io.github.codingspeedup.tags.prompting.tags.PromptBlock;
+import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
+import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferRange;
 import lombok.AllArgsConstructor;
 
 import java.util.Locale;
@@ -15,15 +15,15 @@ import static io.github.codingspeedup.tags.prompting.chat.ChatMdUtl.endsWith;
 @AllArgsConstructor
 public class TagsEditHandler {
 
-    private final FileTypeModel ftModel;
+    private final BufferModel ftModel;
     private final String fileContent;
 
     public TagsResult insertNewTemplate(Project project, int offset, PromptRef promptRef) {
         int tOffset = ftModel.getSections(fileContent).values().stream()
                 .filter(section -> section.contains(offset))
                 .findFirst()
-                .map(PromptBlock::getFromOffset)
-                .orElse(FileTypeModel.indexOfBol(fileContent, offset));
+                .map(BufferRange::getFromOffset)
+                .orElse(BufferModel.indexOfBol(fileContent, offset));
 
         var pLib = promptRef.getLibrary(project);
 
@@ -31,14 +31,14 @@ public class TagsEditHandler {
         newContent.append(fileContent, 0, tOffset);
         newContent.append(ftModel.getTPrefix()).append(promptRef.templateRef()).append("\n");
         for (var varName : pLib.getVariables(promptRef.getId())) {
-            var varValue = FileTypeModel.VAR_PLACEHOLDER;
+            var varValue = BufferModel.ARG_PLACEHOLDER;
             if (pLib.getDefaults().containsKey(varName)) {
                 varValue = String.valueOf(pLib.getDefaults().get(varName));
             }
-            newContent.append(ftModel.getAPrefix()).append(varName).append(FileTypeModel.VAR_SEPARATOR).append(varValue).append("\n");
+            newContent.append(ftModel.getAPrefix()).append(varName).append(BufferModel.ARG_SEPARATOR).append(varValue).append("\n");
         }
         newContent.append(ftModel.getGPrefix()).append(ActionResultGateway.CHAT.name().toLowerCase(Locale.ROOT)).append("\n");
-        newContent.append(ftModel.getPlusPrefix()).append(FileTypeModel.VAR_PLACEHOLDER).append("\n");
+        newContent.append(ftModel.getPlusPrefix()).append(BufferModel.ARG_PLACEHOLDER).append("\n");
         newContent.append(fileContent, tOffset, fileContent.length());
 
         var tagsResult = new TagsResult(ActionResultGateway.CONTENT);
@@ -53,17 +53,17 @@ public class TagsEditHandler {
         var existingSections = ftModel.getSections(fileContent).keySet();
 
         var sectionIndex = 1;
-        var newSectionName = FileTypeModel.SECTION_ROOT_ID + sectionIndex;
+        var newSectionName = BufferModel.SECTION_ROOT_ID + sectionIndex;
         while (existingSections.contains(newSectionName)) {
-            newSectionName = FileTypeModel.SECTION_ROOT_ID + (++sectionIndex);
+            newSectionName = BufferModel.SECTION_ROOT_ID + (++sectionIndex);
         }
 
-        fromOffset = FileTypeModel.indexOfBol(fileContent, fromOffset);
-        toOffset = FileTypeModel.indexOfEol(fileContent, toOffset);
+        fromOffset = BufferModel.indexOfBol(fileContent, fromOffset);
+        toOffset = BufferModel.indexOfEol(fileContent, toOffset);
 
         var newContent = new StringBuilder(fileContent.length() + 64);
         newContent.append(fileContent, 0, fromOffset);
-        newContent.append(sPrefix).append(FileTypeModel.SECTION_NAME_START).append(newSectionName).append(FileTypeModel.SECTION_NAME_END).append("\n");
+        newContent.append(sPrefix).append(BufferModel.SECTION_NAME_START).append(newSectionName).append(BufferModel.SECTION_NAME_END).append("\n");
         var startOffset = newContent.length();
         newContent.append(fileContent, fromOffset, toOffset);
         var endOffset = newContent.length();
@@ -71,10 +71,10 @@ public class TagsEditHandler {
             newContent.append("\n");
         }
         newContent.append(sPrefix)
-                .append(FileTypeModel.SECTION_NAME_START)
-                .append(FileTypeModel.SECTION_CLOSE)
+                .append(BufferModel.SECTION_NAME_START)
+                .append(BufferModel.SECTION_CLOSE)
                 .append(newSectionName)
-                .append(FileTypeModel.SECTION_NAME_END)
+                .append(BufferModel.SECTION_NAME_END)
                 .append("\n");
         newContent.append(fileContent, toOffset, fileContent.length());
 
