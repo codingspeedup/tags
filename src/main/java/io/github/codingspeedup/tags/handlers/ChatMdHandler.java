@@ -2,23 +2,18 @@ package io.github.codingspeedup.tags.handlers;
 
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.output.FinishReason;
 import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.ChatMdModel;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.TagPlusModel;
 import io.github.codingspeedup.tags.ai.composition.reactive.GroovyScriptExecutor;
-import io.github.codingspeedup.tags.ai.composition.reactive.ToolboxManagerService;
 import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
-import io.github.codingspeedup.tags.ai.primitives.models.LLM;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl;
 import io.github.codingspeedup.tags.ai.primitives.reactive.TagsPrompt;
-import io.github.codingspeedup.tags.minions.Minions;
-import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
+import io.github.codingspeedup.tags.minions.*;
+import io.github.codingspeedup.tags.plugin.settings.SettingsState;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jspecify.annotations.NonNull;
@@ -31,10 +26,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl.*;
-import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl.toChatRequestParameters;
 
 public class ChatMdHandler extends ChatMdModel implements ActionHandler {
 
+    private final VirtualFile contentFile;
     private final String contentName;
     private final String content;
     private final int contentOffset;
@@ -45,8 +40,9 @@ public class ChatMdHandler extends ChatMdModel implements ActionHandler {
     private final List<FencedCodeBlock> groovyBlocks;
     private final List<TagPlusModel> tagPlusModels;
 
-    public ChatMdHandler(String contentName, String content, int contentOffset) {
-        this.contentName = contentName;
+    public ChatMdHandler(VirtualFile contentFile, String content, int contentOffset) {
+        this.contentFile = contentFile;
+        this.contentName = contentFile.getName();
         this.content = content;
         this.contentOffset = contentOffset;
 
@@ -167,32 +163,25 @@ public class ChatMdHandler extends ChatMdModel implements ActionHandler {
             return Optional.empty();
         }
 
-        var llmParametersSpec =  parametersBlocks.stream()
-                .map(this::getContent)
-                .filter(StringUtils::isNotBlank)
-                .findFirst();
+        var promptBuilder = TagsPrompt.builder(
+                SettingsState.getInstance(),
+                new ProjectBufferProvider(project, contentFile, content),
+                new ProjectPromptLibraryProvider(project),
+                new ProjectToolboxSupport(project));
 
         var tagPlusModel = tagPlusModels.get(blockIndex);
         fillTagPlusModel(tagPlusModel, content);
-
-
-        var promptBuilder = TagsPrompt.builder(new ProjectPromptLibraryProvider(project));
-        llmParametersSpec.map(promptBuilder::llmParameters);
-        extractMessage(systemBlocks, contentOffset).map(promptBuilder::systemMessage);
         promptBuilder.tagPlus(tagPlusModel);
-        promptBuilder.build();
 
-        var system = extractMessage(systemBlocks, contentOffset).map(SystemMessage::from);
+        parametersBlocks.stream()
+                .map(this::getContent)
+                .filter(StringUtils::isNotBlank)
+                .findFirst()
+                .ifPresent(promptBuilder::llmParameters);
 
-        var userMessage = UserMessage.from(tagPlusModel.getTemplate());
+        extractMessage(systemBlocks, contentOffset).ifPresent(promptBuilder::systemMessage);
 
-
-        var llmParameters = llmParametersSpec
-                .map(data -> toChatRequestParameters(PromptUtl.parseProperties(data)))
-                .orElse(ChatRequestParameters.builder().build());
-
-        var llmResponse = system.map(systemMessage -> LLM.doChat(llmParameters, null, systemMessage, userMessage))
-                .orElse(LLM.doChat(llmParameters, null, userMessage));
+        var llmResponse = promptBuilder.build().execute();
 
         if (llmResponse.metadata().finishReason() == FinishReason.OTHER) {
             return Optional.empty();

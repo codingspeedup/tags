@@ -2,10 +2,11 @@ package io.github.codingspeedup.tags.plugin.console;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
+import io.github.codingspeedup.tags.ai.boundary.ToolboxSupport;
 import io.github.codingspeedup.tags.plugin.core.TagsMessageBundle;
 
 @Service(Service.Level.PROJECT)
-public final class TagsConsoleService extends ConsoleServiceBase {
+public final class TagsConsoleService extends ConsoleServiceBase implements ToolboxSupport {
 
     public static TagsConsoleService getInstance(Project project) {
         return project.getService(TagsConsoleService.class);

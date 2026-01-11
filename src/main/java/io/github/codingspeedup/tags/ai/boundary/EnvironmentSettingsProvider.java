@@ -1,12 +1,6 @@
-package io.github.codingspeedup.tags.plugin.settings;
+package io.github.codingspeedup.tags.ai.boundary;
 
-import com.intellij.openapi.application.ApplicationManager;
-
-public interface TagsSettings {
-
-    static TagsSettings getInstance() {
-        return ApplicationManager.getApplication().getService(SettingsState.class);
-    }
+public interface EnvironmentSettingsProvider {
 
     boolean isUseAzureOpenAiModel();
 

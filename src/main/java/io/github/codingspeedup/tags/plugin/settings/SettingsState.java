@@ -6,6 +6,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import io.github.codingspeedup.tags.ai.boundary.EnvironmentSettingsProvider;
 import lombok.Getter;
 import org.jspecify.annotations.NonNull;
 
@@ -13,7 +14,7 @@ import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager
 import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.GEMINI_API_KEY;
 
 @State(name = "TagsPluginSettings", storages = @Storage("tagsPluginSettings.xml"))
-class SettingsState implements PersistentStateComponent<SettingsState>, TagsSettings {
+public class SettingsState implements PersistentStateComponent<SettingsState>, EnvironmentSettingsProvider {
 
     @Getter
     public boolean useAzureOpenAiModel = false;

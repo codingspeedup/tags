@@ -1,4 +1,4 @@
-package io.github.codingspeedup.tags.ai.composition.reactive;
+package io.github.codingspeedup.tags.minions;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
@@ -7,7 +7,6 @@ import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
 import groovy.lang.GroovyClassLoader;
-import io.github.codingspeedup.tags.minions.PluginUtl;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

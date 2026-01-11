@@ -177,14 +177,6 @@ public final class PromptUtl {
         return userVariables;
     }
 
-    public static void fillArguments(HashMap<String, Object> arguments, Set<String> requiredVariables) {
-        requiredVariables.forEach(key -> {
-            if (!arguments.containsKey(key)) {
-                arguments.put(key, ARG_PLACEHOLDER);
-            }
-        });
-    }
-
     public static Optional<List<ToolSpecification>> buildToolSpec(String toolkitClassFQN) {
         toolkitClassFQN = StringUtils.trimToEmpty(toolkitClassFQN);
         if (StringUtils.isEmpty(toolkitClassFQN) || toolkitClassFQN.equals(ARG_PLACEHOLDER)) {

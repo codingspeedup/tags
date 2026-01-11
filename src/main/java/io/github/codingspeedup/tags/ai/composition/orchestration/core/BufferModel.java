@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.codingspeedup.tags.ai.composition.orchestration.buffers.ChatMdModel.CHAT_MD_EXTENSION;
 import static io.github.codingspeedup.tags.ai.composition.orchestration.buffers.TextModel.TEXT_EXTENSION;
-import static io.github.codingspeedup.tags.ai.composition.reactive.ToolboxManagerService.GROOVY_EXTENSION;
+import static io.github.codingspeedup.tags.minions.ToolboxManagerService.GROOVY_EXTENSION;
 
 @Getter
 public abstract class BufferModel {
@@ -59,6 +59,9 @@ public abstract class BufferModel {
     }
 
     public static Optional<BufferModel> of(String fileName) {
+        if (fileName == null) {
+            return Optional.empty();
+        }
         fileName = fileName.toLowerCase(Locale.ROOT);
         var fileExtension = "." + StringUtils.trimToEmpty(FilenameUtils.getExtension(fileName));
         if (fileName.endsWith(CHAT_MD_EXTENSION)) {

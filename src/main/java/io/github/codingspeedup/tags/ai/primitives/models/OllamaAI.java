@@ -3,7 +3,7 @@ package io.github.codingspeedup.tags.ai.primitives.models;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.ollama.OllamaChatModel;
-import io.github.codingspeedup.tags.plugin.settings.TagsSettings;
+import io.github.codingspeedup.tags.ai.boundary.EnvironmentSettingsProvider;
 
 import java.time.Duration;
 
@@ -11,9 +11,9 @@ public class OllamaAI implements LLM {
 
     private final OllamaChatModel ollamaChatModel;
 
-    public OllamaAI() {
+    public OllamaAI(EnvironmentSettingsProvider settings) {
         this.ollamaChatModel = OllamaChatModel.builder()
-                .baseUrl(TagsSettings.getInstance().getOllamaUrl())
+                .baseUrl(settings.getOllamaUrl())
                 .timeout(Duration.ofMinutes(5))
                 .maxRetries(0)
                 .build();

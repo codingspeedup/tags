@@ -1,23 +1,26 @@
 package io.github.codingspeedup.tags.ai.primitives.reactive;
 
-import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.model.chat.request.ChatRequestParameters;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import io.github.codingspeedup.tags.ai.boundary.BufferProvider;
+import io.github.codingspeedup.tags.ai.boundary.EnvironmentSettingsProvider;
 import io.github.codingspeedup.tags.ai.boundary.PromptLibraryProvider;
-import io.github.codingspeedup.tags.ai.primitives.models.Model;
-import lombok.RequiredArgsConstructor;
+import io.github.codingspeedup.tags.ai.boundary.ToolboxSupport;
+import io.github.codingspeedup.tags.ai.primitives.models.LLM;
 
-import java.util.List;
+public record TagsPrompt(LLM llm, ChatRequest chatRequest) {
 
-@RequiredArgsConstructor
-public class TagsPrompt {
+    public static TagsPromptBuilder builder(
+            EnvironmentSettingsProvider settings,
+            BufferProvider bufferProvider,
+            PromptLibraryProvider promptLibraryProvider,
+            ToolboxSupport toolboxSupport
+    ) {
+        return new TagsPromptBuilder(settings, bufferProvider, promptLibraryProvider, toolboxSupport);
+    }
 
-    private final ChatRequestParameters llmParameters;
-    private final String toolsApiDesc;
-    private final List<ChatMessage> chatMessages;
-    private final Model llm;
-
-    public static TagsPromptBuilder builder(PromptLibraryProvider plp) {
-        return new TagsPromptBuilder(plp);
+    public ChatResponse execute() {
+        return llm.chat(chatRequest);
     }
 
 }

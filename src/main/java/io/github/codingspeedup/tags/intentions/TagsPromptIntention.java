@@ -12,7 +12,7 @@ import com.intellij.openapi.util.Iconable;
 import com.intellij.psi.PsiFile;
 import io.github.codingspeedup.tags.plugin.core.TagsMessageBundle;
 import io.github.codingspeedup.tags.actions.TagsGroup;
-import io.github.codingspeedup.tags.ai.composition.reactive.ToolboxManagerService;
+import io.github.codingspeedup.tags.minions.ToolboxManagerService;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import org.jetbrains.annotations.NotNull;
 

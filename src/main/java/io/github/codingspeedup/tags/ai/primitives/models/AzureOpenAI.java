@@ -4,7 +4,7 @@ import com.azure.ai.openai.OpenAIServiceVersion;
 import dev.langchain4j.model.azure.AzureOpenAiChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import io.github.codingspeedup.tags.plugin.settings.TagsSettings;
+import io.github.codingspeedup.tags.ai.boundary.EnvironmentSettingsProvider;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -19,8 +19,7 @@ public class AzureOpenAI implements LLM {
 
     private final AzureOpenAiChatModel.Builder modelBuilder;
 
-    public AzureOpenAI() {
-        var settings = TagsSettings.getInstance();
+    public AzureOpenAI(EnvironmentSettingsProvider settings) {
         modelBuilder = AzureOpenAiChatModel.builder()
                 .apiKey(settings.getAzureOpenAiApiKey())
                 .endpoint(settings.getAzureOpenAiUrl())

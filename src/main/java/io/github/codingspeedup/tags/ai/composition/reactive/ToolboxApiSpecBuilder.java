@@ -1,9 +1,8 @@
 package io.github.codingspeedup.tags.ai.composition.reactive;
 
-import com.intellij.openapi.project.Project;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
+import io.github.codingspeedup.tags.ai.boundary.ToolboxSupport;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -46,30 +45,27 @@ public class ToolboxApiSpecBuilder {
         this.tools = tools;
     }
 
-    public static Optional<String> of(Project project, String... toolkit) {
+    public static Optional<String> of(ToolboxSupport toolboxSupport, String... toolkit) {
         if (ArrayUtils.isEmpty(toolkit)) {
             return Optional.empty();
         }
-        return of(project, List.of(toolkit));
+        return of(toolboxSupport, List.of(toolkit));
     }
 
-    public static Optional<String> of(Project project, List<String> toolkit) {
+    public static Optional<String> of(ToolboxSupport toolboxSupport, List<String> toolkit) {
+        toolkit = toolkit.stream()
+                .map(StringUtils::trimToEmpty)
+                .filter(StringUtils::isNotEmpty)
+                .filter(tool -> !ARG_PLACEHOLDER.equals(tool))
+                .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(toolkit)) {
             return Optional.empty();
         }
 
-        ClassLoader classLoader;
-        if (project == null) {
-            classLoader = ToolboxApiSpecBuilder.class.getClassLoader();
-        } else {
-            var toolbox = ToolboxManagerService.getInstance(project);
-            toolbox.reloadIfChanged();
-            classLoader = toolbox.getActiveLoader();
-        }
+        var classLoader = toolboxSupport.getToolboxClassLoader();
 
         var tools = toolkit.stream()
                 .map(StringUtils::trimToNull)
-                .map(toolFQN -> ARG_PLACEHOLDER.equals(toolFQN) ? null : toolFQN)
                 .filter(Objects::nonNull)
                 .map(toolFQN -> {
                     try {
@@ -78,9 +74,7 @@ public class ToolboxApiSpecBuilder {
                         try {
                             return classLoader.loadClass(TOOLS_PACKAGE_PREFIX + toolFQN);
                         } catch (ClassNotFoundException ex) {
-                            if (project != null) {
-                                TagsConsoleService.getInstance(project).warn("Could not load `" + toolFQN + "'");
-                            }
+                            toolboxSupport.warn("Could not load `" + toolFQN + "'");
                         }
                     }
                     return null;

@@ -12,7 +12,7 @@ import io.github.codingspeedup.tags.handlers.ChatMdHandler;
 import io.github.codingspeedup.tags.handlers.GroovyScriptHandler;
 import io.github.codingspeedup.tags.handlers.SelectionHandler;
 import io.github.codingspeedup.tags.handlers.TagsActionHandler;
-import io.github.codingspeedup.tags.ai.composition.reactive.ToolboxManagerService;
+import io.github.codingspeedup.tags.minions.ToolboxManagerService;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
@@ -104,11 +104,11 @@ public class ProcessAction extends AnAction {
                         tagsResult = new SelectionHandler(editorFileName, editorSelection, promptRef).process(project, indicator);
                     } else {
                         if (TagsGroup.isChatMd(editorFileName)) {
-                            tagsResult = new ChatMdHandler(editorFileName, documentText, documentOffset).process(project, indicator);
+                            tagsResult = new ChatMdHandler(editorFile, documentText, documentOffset).process(project, indicator);
                         } else  if (ToolboxManagerService.isGroovy(editorFileName)) {
                             tagsResult = new GroovyScriptHandler(editorFileName, documentText).process(project, indicator);
                         } else {
-                            tagsResult = new TagsActionHandler(editorFile.getParent(), editorFileName, documentText, documentOffset).process(project, indicator);
+                            tagsResult = new TagsActionHandler(editorFile, documentText, documentOffset).process(project, indicator);
                         }
                     }
 
