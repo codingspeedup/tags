@@ -10,14 +10,14 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.plugin.core.TagsUtl;
-import io.github.codingspeedup.tags.prompting.plib.PromptLib;
+import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLib;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
 import static io.github.codingspeedup.tags.plugin.core.TagsUtl.reportError;
-import static io.github.codingspeedup.tags.prompting.chat.ChatMdUtl.*;
+import static io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl.*;
 
 public class NewChatMdAction extends AnAction {
 

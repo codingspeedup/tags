@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import static io.github.codingspeedup.tags.integration.llms.AzureOpenAI.identifyVersion;
+import static io.github.codingspeedup.tags.ai.primitives.models.AzureOpenAI.identifyVersion;
 import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.AZURE_OPEN_AI_API_KEY;
 import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.GEMINI_API_KEY;
 

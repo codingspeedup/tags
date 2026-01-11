@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.codingspeedup"
-version = "2026-01-10"
+version = "2026-01-11"
 
 repositories {
     mavenCentral()

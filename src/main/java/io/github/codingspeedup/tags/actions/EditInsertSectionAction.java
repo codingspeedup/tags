@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.engine.TagsEditHandler;
+import io.github.codingspeedup.tags.handlers.TagsEditHandler;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import io.github.codingspeedup.tags.plugin.core.TagsUtl;
 import org.jetbrains.annotations.NotNull;

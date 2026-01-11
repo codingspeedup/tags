@@ -1,13 +1,13 @@
 package io.github.codingspeedup.tags.utils;
 
-import io.github.codingspeedup.tags.prompting.plib.PromptLib;
+import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLib;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static io.github.codingspeedup.tags.prompting.plib.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_EXTENSION;
-import static io.github.codingspeedup.tags.prompting.plib.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME;
+import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_EXTENSION;
+import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PromptLibTest {

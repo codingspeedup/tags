@@ -11,7 +11,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import io.github.codingspeedup.tags.plugin.core.TagsUtl;
-import io.github.codingspeedup.tags.prompting.plib.PromptLibUtl;
+import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

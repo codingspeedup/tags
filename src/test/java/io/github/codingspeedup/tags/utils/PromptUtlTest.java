@@ -1,8 +1,8 @@
 package io.github.codingspeedup.tags.utils;
 
 import dev.langchain4j.internal.Json;
-import io.github.codingspeedup.tags.prompting.chat.PromptUtl;
-import io.github.codingspeedup.tags.prompting.toolbox.ToolboxApiSpecBuilder;
+import io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl;
+import io.github.codingspeedup.tags.ai.composition.reactive.ToolboxApiSpecBuilder;
 import org.junit.jupiter.api.Test;
 import tools.builtin.codegen.java.TypeAugmenter;
 import tools.builtin.codegen.java.TypeGenerator;

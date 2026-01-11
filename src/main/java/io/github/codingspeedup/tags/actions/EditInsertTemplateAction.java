@@ -4,10 +4,10 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.engine.TagsEditHandler;
+import io.github.codingspeedup.tags.handlers.TagsEditHandler;
 import io.github.codingspeedup.tags.plugin.core.TagsUtl;
-import io.github.codingspeedup.tags.prompting.plib.PromptLibUtl;
-import io.github.codingspeedup.tags.prompting.plib.PromptRef;
+import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
+import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import org.jetbrains.annotations.NotNull;
 

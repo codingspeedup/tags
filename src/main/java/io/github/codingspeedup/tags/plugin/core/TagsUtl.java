@@ -19,9 +19,9 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
-import io.github.codingspeedup.tags.engine.TagsResult;
+import io.github.codingspeedup.tags.handlers.TagsResult;
 import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
-import io.github.codingspeedup.tags.prompting.plib.PromptLibUtl;
+import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
@@ -39,8 +39,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.prompting.plib.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_EXTENSION;
-import static io.github.codingspeedup.tags.prompting.plib.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME;
+import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_EXTENSION;
+import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TagsUtl {
