@@ -9,13 +9,10 @@ system: |
 prompts:
   - id: "Explain"
     template: |
-      Explain the following construct
+      Explain the following construct:
       {{construct}}
-  - id: "Review"
+  - id: "TranslateToEnglish"
     template: |
-      Review the following code snippet:
-      {{snippet}}
-  - id: "Document"
-    template: |
-      Document the following code snippet:
-      {{snippet}}
+      Translate to English the following phrase:
+      {{phrase}}
+

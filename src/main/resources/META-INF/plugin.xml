@@ -75,25 +75,27 @@
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
         
-<!--        <separator id="EditorPopupMenuTopSeparator">-->
-<!--            <add-to-group group-id="EditorPopupMenu.Run" anchor="last"/>-->
-<!--        </separator>-->
         <action id="Execute"
                 class="io.github.codingspeedup.tags.actions.ProcessAction"
                 icon="/META-INF/toolIcon.svg">
             <add-to-group group-id="EditorPopupMenu.Run" anchor="last"/>
         </action>
+
         <group id="SendToLLMAs"
                class="io.github.codingspeedup.tags.actions.ProcessAsGroup"
                popup="true"
                icon="/META-INF/toolIcon.svg">
             <add-to-group group-id="EditorPopupMenu.Run" anchor="last"/>
         </group>
+
         <group id="TagsGroupEditorPopupMenu"
                class="io.github.codingspeedup.tags.actions.TagsGroup"
                popup="true"
                icon="/META-INF/toolIcon.svg">
             <add-to-group group-id="EditorPopupMenu.Run" anchor="last"/>
+
+            <action id="InsertTagsSection"
+                    class="io.github.codingspeedup.tags.actions.EditInsertSectionAction"/>
 
             <group id="InsertTagsTemplate"
                    class="io.github.codingspeedup.tags.actions.EditInsertTemplateGroup"
@@ -104,9 +106,9 @@
                        popup="true"
                        class="io.github.codingspeedup.tags.actions.EditInsertTemplateFromLibraryGroup"/>
             </group>
-            <action id="InsertTagsSection"
-                    class="io.github.codingspeedup.tags.actions.EditInsertSectionAction"/>
+
             <separator id="TagsGroupInternalSeparator"/>
+
             <action id="StripTags"
                     class="io.github.codingspeedup.tags.actions.EditStripAction"/>
         </group>
