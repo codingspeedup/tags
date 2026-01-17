@@ -50,7 +50,8 @@ public class TagsPromptBuilder {
                 var pLib = promptLibraryProvider.load(pRef).orElseThrow();
                 llmParameters(pLib.getParameters());
                 systemTemplate(pLib.getSystemTemplate());
-                userTemplate(pLib.getPromptTemplate(pRef.getId()));
+                userTemplate(pLib.getPromptTemplate(pRef.getId()).orElseThrow(
+                        () -> new UnsupportedOperationException("Unavailable prompt template `" + pRef.getId() + "'")));
                 contextArgs(pLib.getDefaults());
             } else {
                 userTemplate(t);
@@ -289,6 +290,10 @@ public class TagsPromptBuilder {
         fileRef = fileRef.replace('\\', '/').replaceAll("[ \t]*/[ \t/]*", "/");
         var refBuffer = bufferProvider.resolve(fileRef).orElseThrow();
         var thatFileContent = refBuffer.getContent();
+
+        if (StringUtils.isBlank(linesSelection) && StringUtils.isBlank(sectionName)) {
+            return thatFileContent;
+        }
 
         var value = new StringBuilder();
 

@@ -46,7 +46,7 @@ public class SelectionHandler implements ActionHandler {
         if (promptRef.getId().isEmpty()) {
             promptBuilder.userMessage(selection);
         } else {
-            var promptTemplate = promptLib.getPromptTemplate(promptRef.getId());
+            var promptTemplate = promptLib.getPromptTemplate(promptRef.getId()).orElseThrow();
             promptBuilder.userTemplate(promptTemplate);
             var promptVars = findVariables(promptTemplate);
             promptBuilder.contextArgs(promptVars.iterator().next(), selection);

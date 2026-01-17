@@ -42,8 +42,8 @@ public class PromptLib {
         });
     }
 
-    public PromptTemplate getPromptTemplate(String promptId) {
-        return prompts.get(promptId);
+    public Optional<PromptTemplate> getPromptTemplate(String promptId) {
+        return Optional.ofNullable(prompts.get(promptId));
     }
 
     public Set<String> getVariables() {
@@ -52,7 +52,7 @@ public class PromptLib {
 
     public Set<String> getVariables(String promptId) {
         var vars = getVariables();
-        vars.addAll(PromptUtl.findVariables(getPromptTemplate(promptId)));
+        vars.addAll(PromptUtl.findVariables(getPromptTemplate(promptId).orElseThrow()));
         return vars;
     }
 
