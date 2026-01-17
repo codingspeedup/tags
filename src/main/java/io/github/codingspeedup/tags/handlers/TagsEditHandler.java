@@ -76,8 +76,10 @@ public class TagsEditHandler {
                 .append(BufferModel.SECTION_NAME_START)
                 .append(BufferModel.SECTION_CLOSE)
                 .append(newSectionName)
-                .append(BufferModel.SECTION_NAME_END)
-                .append("\n");
+                .append(BufferModel.SECTION_NAME_END);
+        if (toOffset < fileContent.length() && fileContent.charAt(toOffset) != '\n') {
+            newContent.append("\n");
+        }
         newContent.append(fileContent, toOffset, fileContent.length());
 
         var tagsResult = new TagsResult(ResponseGateway.CONTENT);
