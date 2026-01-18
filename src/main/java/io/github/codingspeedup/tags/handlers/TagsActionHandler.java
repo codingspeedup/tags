@@ -9,7 +9,6 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.SectionModel;
-import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
 import io.github.codingspeedup.tags.ai.primitives.reactive.TagsPrompt;
 import io.github.codingspeedup.tags.minions.ProjectBufferProvider;
 import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
@@ -20,9 +19,9 @@ import org.apache.commons.lang.StringUtils;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.SECTION_REF_MARKER;
 import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.parseSectionName;
 import static io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl.*;
+import static io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway.resolveGateway;
 import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl.toProperties;
 
 public class TagsActionHandler implements ActionHandler {
@@ -102,17 +101,6 @@ public class TagsActionHandler implements ActionHandler {
 
         }
         return Optional.of(tagsResult);
-    }
-
-    private ResponseGateway resolveGateway(String gateway) {
-        gateway = StringUtils.trimToEmpty(gateway);
-        if (gateway.startsWith(SECTION_REF_MARKER)) {
-            return ResponseGateway.CONTENT;
-        }
-        if (StringUtils.equalsIgnoreCase(ResponseGateway.CLIPBOARD.name(), gateway)) {
-            return ResponseGateway.CLIPBOARD;
-        }
-        return ResponseGateway.CHAT;
     }
 
     private Buffer buildChatBuffer(ChatRequest chatRequest, ChatResponse chatResponse) {

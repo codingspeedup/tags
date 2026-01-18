@@ -22,7 +22,7 @@ public class PromptLib {
     private final Properties parameters = new Properties();
     private final Properties defaults = new Properties();
     private final PromptTemplate systemTemplate;
-    private final Map<String, PromptTemplate> prompts = new LinkedHashMap<>();
+    private final Map<String, PromptDesc> prompts = new LinkedHashMap<>();
 
     @SuppressWarnings("unchecked")
     public PromptLib(String name, Map<String, Object> data) {
@@ -37,13 +37,33 @@ public class PromptLib {
         var prompts = (List<Map<String, Object>>) data.get("prompts");
         prompts.forEach(prompt -> {
             var id = StringUtils.trimToEmpty((String) prompt.get("id"));
+
             var template = (String) prompt.get("template");
-            this.prompts.put(id, PromptTemplate.from(template, this.name + "." + id));
+            var promptTemplate = PromptTemplate.from(template, this.name + "." + id);
+
+            var gateway = prompt.get("gateway");
+            var promptGateway = new ArrayList<String>();
+            if (gateway instanceof String gatewayStr) {
+                promptGateway.add(StringUtils.trimToEmpty(gatewayStr));
+            }
+
+            var plus = prompt.get("plus");
+            var promptPlus = new ArrayList<String>();
+            if (plus instanceof String plusStr) {
+                promptPlus.add(StringUtils.trimToEmpty(plusStr));
+            }
+
+            var promptDesc = new PromptDesc(promptTemplate, List.copyOf(promptGateway), List.copyOf(promptPlus));
+            this.prompts.put(id, promptDesc);
         });
     }
 
-    public Optional<PromptTemplate> getPromptTemplate(String promptId) {
+    public Optional<PromptDesc> getPromptDescription(String promptId) {
         return Optional.ofNullable(prompts.get(promptId));
+    }
+
+    public Optional<PromptTemplate> getPromptTemplate(String promptId) {
+        return getPromptDescription(promptId).map(PromptDesc::template);
     }
 
     public Set<String> getVariables() {

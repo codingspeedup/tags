@@ -7,11 +7,15 @@ import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
 import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import lombok.AllArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.*;
 import static io.github.codingspeedup.tags.minions.Minions.endsWith;
 
 @AllArgsConstructor
@@ -25,22 +29,63 @@ public class TagsEditHandler {
                 .filter(section -> section.contains(offset))
                 .findFirst()
                 .map(BufferRange::getFromOffset)
-                .orElse(BufferModel.indexOfBol(fileContent, offset));
+                .orElse(indexOfBol(fileContent, offset));
 
         var pLib = new ProjectPromptLibraryProvider(project).load(promptRef).orElseThrow();
+        var pDesc = pLib.getPromptDescription(promptRef.getId()).orElseThrow();
 
         var newContent = new StringBuilder(fileContent.length() + 1024);
+
         newContent.append(fileContent, 0, tOffset);
+
+        // T
         newContent.append(ftModel.getTPrefix()).append(promptRef).append("\n");
+
+        // A
         for (var varName : pLib.getVariables(promptRef.getId())) {
-            var varValue = BufferModel.ARG_PLACEHOLDER;
+            var varValue = ARG_PLACEHOLDER;
             if (pLib.getDefaults().containsKey(varName)) {
                 varValue = String.valueOf(pLib.getDefaults().get(varName));
             }
-            newContent.append(ftModel.getAPrefix()).append(varName).append(BufferModel.ARG_SEPARATOR).append(varValue).append("\n");
+            newContent.append(ftModel.getAPrefix()).append(varName).append(ARG_SEPARATOR).append(varValue).append("\n");
         }
-        newContent.append(ftModel.getGPrefix()).append(ResponseGateway.CHAT.name().toLowerCase(Locale.ROOT)).append("\n");
-        newContent.append(ftModel.getPlusPrefix()).append(BufferModel.ARG_PLACEHOLDER).append("\n");
+
+        // G
+        var newSections = new ArrayList<String>();
+        if (CollectionUtils.isNotEmpty(pDesc.gateway())) {
+            var existingSections = new HashSet<String>();
+            pDesc.gateway().forEach(gateway -> {
+                var gatewayType = ResponseGateway.resolveGateway(gateway);
+                if (gatewayType == ResponseGateway.CONTENT) {
+                    var nextSectionName = gateway.substring(SECTION_REF_MARKER.length()).trim();
+                    if (SECTION_ROOT_ID.equals(nextSectionName)) {
+                        if (existingSections.isEmpty()) {
+                            existingSections.addAll(ftModel.getSections(fileContent).keySet());
+                        }
+                        nextSectionName = getNextSectionName(existingSections);
+                        newSections.add(nextSectionName);
+                        existingSections.add(nextSectionName);
+                    }
+                    newContent.append(ftModel.getGPrefix()).append(SECTION_REF_MARKER).append(nextSectionName).append("\n");
+                } else {
+                    newContent.append(ftModel.getGPrefix()).append(gatewayType.name().toLowerCase(Locale.ROOT)).append("\n");
+                }
+            });
+        }
+
+        // +
+        if (CollectionUtils.isNotEmpty(pDesc.plus())) {
+            pDesc.plus().forEach(plus -> newContent.append(ftModel.getPlusPrefix()).append(plus).append("\n"));
+        }
+
+        // S
+        if (CollectionUtils.isNotEmpty(newSections)) {
+            var sPrefix = ftModel.getSPrefix();
+            newSections.forEach(newSectionName ->
+                    newContent.append(sPrefix).append(buildSectionStartMarker(newSectionName)).append("\n")
+                            .append(sPrefix).append(buildSectionEndMarker(newSectionName)).append("\n"));
+        }
+
         newContent.append(fileContent, tOffset, fileContent.length());
 
         var tagsResult = new TagsResult(ResponseGateway.CONTENT);
@@ -54,29 +99,21 @@ public class TagsEditHandler {
         var sPrefix = ftModel.getSPrefix();
         var existingSections = ftModel.getSections(fileContent).keySet();
 
-        var sectionIndex = 1;
-        var newSectionName = BufferModel.SECTION_ROOT_ID + sectionIndex;
-        while (existingSections.contains(newSectionName)) {
-            newSectionName = BufferModel.SECTION_ROOT_ID + (++sectionIndex);
-        }
+        var nextSectionName = getNextSectionName(existingSections);
 
-        fromOffset = BufferModel.indexOfBol(fileContent, fromOffset);
-        toOffset = BufferModel.indexOfEol(fileContent, toOffset);
+        fromOffset = indexOfBol(fileContent, fromOffset);
+        toOffset = indexOfEol(fileContent, toOffset);
 
         var newContent = new StringBuilder(fileContent.length() + 64);
         newContent.append(fileContent, 0, fromOffset);
-        newContent.append(sPrefix).append(BufferModel.SECTION_NAME_START).append(newSectionName).append(BufferModel.SECTION_NAME_END).append("\n");
+        newContent.append(sPrefix).append(buildSectionStartMarker(nextSectionName)).append("\n");
         var startOffset = newContent.length();
         newContent.append(fileContent, fromOffset, toOffset);
         var endOffset = newContent.length();
         if (!endsWith(newContent, "\n")) {
             newContent.append("\n");
         }
-        newContent.append(sPrefix)
-                .append(BufferModel.SECTION_NAME_START)
-                .append(BufferModel.SECTION_CLOSE)
-                .append(newSectionName)
-                .append(BufferModel.SECTION_NAME_END);
+        newContent.append(sPrefix).append(buildSectionEndMarker(nextSectionName));
         if (toOffset < fileContent.length() && fileContent.charAt(toOffset) != '\n') {
             newContent.append("\n");
         }

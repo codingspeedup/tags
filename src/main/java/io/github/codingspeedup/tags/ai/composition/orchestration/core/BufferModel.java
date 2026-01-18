@@ -6,11 +6,9 @@ import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.TextMod
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jspecify.annotations.NonNull;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.codingspeedup.tags.ai.composition.orchestration.buffers.ChatMdModel.CHAT_MD_EXTENSION;
@@ -94,6 +92,23 @@ public abstract class BufferModel {
 
     public static String parseSectionName(String value) {
         return value.substring(1).trim();
+    }
+
+    public static @NonNull String getNextSectionName(Set<String> existingSections) {
+        var sectionIndex = 1;
+        var newSectionName = SECTION_ROOT_ID + sectionIndex;
+        while (existingSections.contains(newSectionName)) {
+            newSectionName = SECTION_ROOT_ID + (++sectionIndex);
+        }
+        return newSectionName;
+    }
+
+    public static @NonNull String buildSectionStartMarker(String sectionName) {
+        return SECTION_NAME_START + sectionName + SECTION_NAME_END;
+    }
+
+    public static @NonNull String buildSectionEndMarker(String sectionName) {
+        return SECTION_NAME_START + SECTION_CLOSE + sectionName + SECTION_NAME_END;
     }
 
     public abstract List<TagPlusModel> locateTagPlusRanges(String content);

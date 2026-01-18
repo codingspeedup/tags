@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 import java.util.Properties;
 
+import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.*;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PromptLibUtl {
 
@@ -13,7 +15,7 @@ public final class PromptLibUtl {
 
     public static final String PLUGIN_PROMPT_LIBRARY_EXTENSION = ".yaml";
 
-    public static final String SAMPLE_LIBRARY_CONTENT = """
+    public static final String SAMPLE_LIBRARY_CONTENT = String.format("""
             parameters:
               temperature: null
               topP: null
@@ -24,7 +26,7 @@ public final class PromptLibUtl {
               stopSequences: null
             
             defaults:
-              some-var: default value
+              some-var: %s
             
             system: |
               You are a helpful and precise AI assistant.
@@ -34,10 +36,10 @@ public final class PromptLibUtl {
               - id: "LoremIpsum"
                 template: |
                   Lorem ipsum {{some-var}} ...
-                gateway: #tags+
+                gateway: "%s%s"
                 plus: null
             
-            """;
+            """, ARG_PLACEHOLDER, SECTION_REF_MARKER, SECTION_ROOT_ID);
 
     public static String buildPromptLibraryFileName(int version) {
         return String.format("plib%d%s", version, PLUGIN_PROMPT_LIBRARY_EXTENSION);
