@@ -18,7 +18,7 @@ class TypeGenerator {
     @Tool("Generates a standard Java Class")
     static String generateClass(
             @P("className") String className,
-            @P(value = "extendsClass -- - the parent class name", required = false) @Nullable String extendsClass,
+            @P(value = "extendsClass -- - the parent class fileName", required = false) @Nullable String extendsClass,
             @P(value = "implementsList", required = false) @Nullable List<String> implementsList
     ) {
         var cu = createCU()

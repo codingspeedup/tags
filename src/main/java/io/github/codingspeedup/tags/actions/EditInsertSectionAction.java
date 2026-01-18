@@ -1,11 +1,9 @@
 package io.github.codingspeedup.tags.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import io.github.codingspeedup.tags.handlers.TagsEditHandler;
-import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
 import io.github.codingspeedup.tags.minions.PluginUtl;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,51 +13,25 @@ public class EditInsertSectionAction extends EditActionBase {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        var project = e.getProject();
-        if (project == null) {
-            return;
-        }
+        extractEditActionContext(e).ifPresent(ac -> {
+            var editorCaret = ac.editor().getCaretModel().getPrimaryCaret();
+            var fromOffset = editorCaret.hasSelection() ? editorCaret.getSelectionStart() : ac.editor().getCaretModel().getOffset();
+            var toOffset = editorCaret.hasSelection() ? editorCaret.getSelectionEnd() : fromOffset;
 
-        var editor = e.getData(CommonDataKeys.EDITOR);
-        if (editor == null) {
-            reportError(project, "No editor selected");
-            return;
-        }
-
-        var editorFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
-        if (editorFile == null) {
-            reportError(project, "No virtual file selected");
-            return;
-        }
-
-        var editorFileName = editorFile.getName();
-        var editorCaret = editor.getCaretModel().getPrimaryCaret();
-
-        var ftModel = BufferModel.of(editorFileName).orElse(null);
-        if (ftModel == null) {
-            reportError(project, String.format("Unrecognized file model for `%s'", editorFileName));
-            return;
-        }
-
-        var document = editor.getDocument();
-        var documentText = document.getText();
-
-        var fromOffset = editorCaret.hasSelection() ? editorCaret.getSelectionStart() : editor.getCaretModel().getOffset();
-        var toOffset = editorCaret.hasSelection() ? editorCaret.getSelectionEnd() : fromOffset;
-
-        new Task.Backgroundable(project, "Marking new section in " + editorFileName) {
-            @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                indicator.setIndeterminate(true);
-                try {
-                    var tagsEditor = new TagsEditHandler(ftModel, documentText);
-                    var tagsResult = tagsEditor.insertNewSection(fromOffset, toOffset);
-                    PluginUtl.updateEditorDocument(project, editor, document, tagsResult);
-                } catch (Exception e) {
-                    reportError(project, "Error processing file", e);
+            new Task.Backgroundable(ac.project(), "Marking new section in " + ac.fileName()) {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    indicator.setIndeterminate(true);
+                    try {
+                        var tagsEditor = new TagsEditHandler(ac.model(), ac.documentText());
+                        var tagsResult = tagsEditor.insertNewSection(fromOffset, toOffset);
+                        PluginUtl.updateEditorDocument(ac.project(), ac.editor(), ac.document(), tagsResult);
+                    } catch (Exception e) {
+                        reportError(ac.project(), "Error processing file", e);
+                    }
                 }
-            }
-        }.queue();
+            }.queue();
+        });
     }
 
 }

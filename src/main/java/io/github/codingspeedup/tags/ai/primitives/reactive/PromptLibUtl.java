@@ -34,6 +34,8 @@ public final class PromptLibUtl {
               - id: "LoremIpsum"
                 template: |
                   Lorem ipsum {{some-var}} ...
+                gateway: #tags+
+                plus: null
             
             """;
 

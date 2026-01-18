@@ -25,8 +25,8 @@ public final class ToolboxUtl {
                 "@Canonical\n" +
                 "class " + toolboxName + "Value {\n" +
                 "\n" +
-                "    @F(value = \"name field description\", required = true)\n" +
-                "    String name\n" +
+                "    @F(value = \"fileName field description\", required = true)\n" +
+                "    String fileName\n" +
                 "\n" +
                 "    @F(value = \"value field description\", required = false)\n" +
                 "    String value\n" +

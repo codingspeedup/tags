@@ -1,30 +1,25 @@
 package io.github.codingspeedup.tags.actions;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.handlers.ChatMdHandler;
-import io.github.codingspeedup.tags.handlers.GroovyScriptHandler;
-import io.github.codingspeedup.tags.handlers.SelectionHandler;
-import io.github.codingspeedup.tags.handlers.TagsActionHandler;
-import io.github.codingspeedup.tags.minions.ToolboxManagerService;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
+import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
-import io.github.codingspeedup.tags.handlers.TagsResult;
+import io.github.codingspeedup.tags.handlers.*;
 import io.github.codingspeedup.tags.minions.PluginUtl;
+import io.github.codingspeedup.tags.minions.ToolboxManagerService;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-import static io.github.codingspeedup.tags.minions.PluginUtl.*;
+import static io.github.codingspeedup.tags.minions.PluginUtl.reportError;
+import static io.github.codingspeedup.tags.minions.PluginUtl.reportInfo;
 
-public class ProcessAction extends AnAction {
+public class ProcessAction extends TagsActionBase {
 
     private final PromptRef promptRef;
 
@@ -38,7 +33,7 @@ public class ProcessAction extends AnAction {
         getTemplatePresentation().setText(text);
     }
 
-    public static boolean isAvailable(@NotNull AnActionEvent e) {
+    public static boolean isProcessable(@NotNull AnActionEvent e) {
         var isAvailable = e.getProject() != null;
         if (isAvailable) {
             var file = e.getData(CommonDataKeys.VIRTUAL_FILE);
@@ -58,79 +53,57 @@ public class ProcessAction extends AnAction {
     }
 
     @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
-    }
-
-    @Override
     public void update(@NotNull AnActionEvent e) {
-        e.getPresentation().setEnabledAndVisible(isAvailable(e));
+        e.getPresentation().setEnabledAndVisible(isProcessable(e));
     }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        var project = e.getProject();
-        if (project == null) {
-            return;
-        }
+        extractDocumentActionContext(e).ifPresent(ac -> {
+            var editorSelection = ac.editor().getSelectionModel().getSelectedText();
+            var documentOffset = ac.editor().getCaretModel().getOffset();
 
-        var editor = e.getData(CommonDataKeys.EDITOR);
-        if (editor == null) {
-            reportError(project, "No editor selected");
-            return;
-        }
+            new Task.Backgroundable(ac.project(), "Processing " + ac.fileName()) {
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    indicator.setIndeterminate(true);
+                    try {
+                        Optional<TagsResult> tagsResult;
 
-        var editorFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
-        if (editorFile == null) {
-            reportError(project, "No virtual file selected");
-            return;
-        }
-
-        var editorFileName = editorFile.getName();
-        var editorSelection = editor.getSelectionModel().getSelectedText();
-
-        var document = editor.getDocument();
-        var documentText = document.getText();
-        var documentOffset = editor.getCaretModel().getOffset();
-
-        new Task.Backgroundable(project, "Processing " + editorFileName) {
-            @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                indicator.setIndeterminate(true);
-                try {
-                    Optional<TagsResult> tagsResult;
-
-                    if (editorSelection != null) {
-                        tagsResult = new SelectionHandler(editorFileName, editorSelection, promptRef).process(project, indicator);
-                    } else {
-                        if (TagsGroup.isChatMd(editorFileName)) {
-                            tagsResult = new ChatMdHandler(editorFile, documentText, documentOffset).process(project, indicator);
-                        } else  if (ToolboxManagerService.isGroovy(editorFileName)) {
-                            tagsResult = new GroovyScriptHandler(editorFileName, documentText).process(project, indicator);
+                        if (editorSelection != null) {
+                            tagsResult = new SelectionHandler(ac.fileName(), editorSelection, promptRef).process(ac.project(), indicator);
                         } else {
-                            tagsResult = new TagsActionHandler(editorFile, documentText, documentOffset).process(project, indicator);
+                            if (TagsGroup.isChatMd(ac.fileName())) {
+                                tagsResult = new ChatMdHandler(ac.file(), ac.documentText(), documentOffset).process(ac.project(), indicator);
+                            } else if (ToolboxManagerService.isGroovy(ac.fileName())) {
+                                tagsResult = new GroovyScriptHandler(ac.fileName(), ac.documentText()).process(ac.project(), indicator);
+                            } else {
+                                tagsResult = new TagsActionHandler(ac.file(), ac.documentText(), documentOffset).process(ac.project(), indicator);
+                            }
                         }
+
+                        tagsResult.ifPresentOrElse(
+                                tr -> ApplicationManager.getApplication().invokeLater(() -> {
+                                    switch (tr.getGateway()) {
+                                        case CHAT -> PluginUtl.openChatBuffer(ac.project(), tr);
+                                        case CLIPBOARD -> PluginUtl.sendToClipboard(ac.project(), tr);
+                                        case CONTENT ->
+                                                PluginUtl.updateEditorDocument(ac.project(), ac.editor(), ac.document(), tr);
+                                        case INFO -> PluginUtl.reportInfo(ac.project(), tr.getContent());
+                                        case WARN -> PluginUtl.reportWarning(ac.project(), tr.getContent());
+                                        case ERROR -> PluginUtl.reportError(ac.project(), tr.getContent());
+                                    }
+                                }, ModalityState.defaultModalityState()),
+                                () -> reportInfo(ac.project(), "Prompt execution produced no result")
+                        );
+
+                    } catch (Exception e) {
+                        reportError(ac.project(), "Processing error", e);
                     }
-
-                    tagsResult.ifPresentOrElse(
-                            tr -> ApplicationManager.getApplication().invokeLater(() -> {
-                                switch (tr.getGateway()) {
-                                    case CHAT -> PluginUtl.openChatBuffer(project, tr);
-                                    case CLIPBOARD -> PluginUtl.sendToClipboard(project, tr);
-                                    case CONTENT -> PluginUtl.updateEditorDocument(project, editor, document, tr);
-                                    case INFO -> PluginUtl.reportInfo(project, tr.getContent());
-                                    case WARN -> PluginUtl.reportWarning(project, tr.getContent());
-                                    case ERROR -> PluginUtl.reportError(project, tr.getContent());
-                                }
-                            }, ModalityState.defaultModalityState()),
-                            () -> reportInfo(project, "Prompt execution produced no result")
-                    );
-
-                } catch (Exception e) {
-                    reportError(project, "Processing error", e);
                 }
-            }
-        }.queue();
+            }.queue();
+        });
+
     }
 
 }

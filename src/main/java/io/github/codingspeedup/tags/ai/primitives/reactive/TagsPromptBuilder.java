@@ -300,12 +300,12 @@ public class TagsPromptBuilder {
         if (StringUtils.isNotBlank(linesSelection)) {
             var allLines = thatFileContent.lines().toList();
 
-            Arrays.stream(linesSelection.split(","))
+            Arrays.stream(linesSelection.split(LINES_REF_GROUP_SEPARATOR))
                     .map(String::trim)
                     .filter(StringUtils::isNotEmpty)
                     .flatMap(spec -> {
-                        if (spec.contains("-")) {
-                            var boundaries = spec.split("-", 2);
+                        if (spec.contains(LINES_REF_INTERVAL)) {
+                            var boundaries = spec.split(LINES_REF_INTERVAL, 2);
                             var start = Integer.parseInt(boundaries[0].trim());
                             var end = Integer.parseInt(boundaries[1].trim());
                             return IntStream.rangeClosed(start, end).boxed();

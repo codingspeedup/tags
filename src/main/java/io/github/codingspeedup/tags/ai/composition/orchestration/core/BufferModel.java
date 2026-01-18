@@ -41,6 +41,8 @@ public abstract class BufferModel {
 
     public static final String FILE_REF_MARKER = "file://";
     public static final String LINES_REF_MARKER = ":";
+    public static final String LINES_REF_INTERVAL = "-";
+    public static final String LINES_REF_GROUP_SEPARATOR = ",";
 
     private static final Map<String, BufferModel> MODEL_REGISTRY = new ConcurrentHashMap<>();
 

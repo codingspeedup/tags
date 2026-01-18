@@ -3,11 +3,11 @@
     <!-- Unique identifier of the plugin. It should be FQN, cannot be changed between the plugin versions. -->
     <id>io.github.codingspeedup.tags</id>
 
-    <!-- Public plugin name should be written in Title Case.
+    <!-- Public plugin fileName should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
     <name>TAGS+</name>
 
-    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <!-- A displayed Vendor fileName or Organization ID displayed on the Plugins Page. -->
     <vendor url="https://github.com/codingspeedup/tags">CodingSpeedup</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
@@ -74,7 +74,12 @@
                 icon="/META-INF/toolIcon.svg">
             <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
-        
+
+        <action id="CopyFileRef"
+                class="io.github.codingspeedup.tags.actions.CopyFileRefAction">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        </action>
+
         <action id="Execute"
                 class="io.github.codingspeedup.tags.actions.ProcessAction"
                 icon="/META-INF/toolIcon.svg">
@@ -107,7 +112,7 @@
                        class="io.github.codingspeedup.tags.actions.EditInsertTemplateFromLibraryGroup"/>
             </group>
 
-            <separator id="TagsGroupInternalSeparator"/>
+            <separator/>
 
             <action id="StripTags"
                     class="io.github.codingspeedup.tags.actions.EditStripAction"/>

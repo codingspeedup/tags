@@ -1,7 +1,5 @@
 package io.github.codingspeedup.tags.actions;
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
@@ -19,12 +17,7 @@ import java.io.IOException;
 
 import static io.github.codingspeedup.tags.minions.PluginUtl.reportError;
 
-public class NewToolboxAction extends AnAction {
-
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
-    }
+public class NewToolboxAction extends TagsActionBase {
 
     @Override
     public void update(@NotNull AnActionEvent e) {
@@ -43,39 +36,27 @@ public class NewToolboxAction extends AnAction {
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
-        var project = e.getProject();
-        if (project == null) {
-            return;
-        }
-        var location = e.getData(CommonDataKeys.VIRTUAL_FILE);
-        if (location != null && !location.isDirectory()) {
-            location = location.getParent();
-        }
-        if (location == null) {
-            return;
-        }
-        var toolboxFolder = location;
-
-        new Task.Backgroundable(project, "Creating new toolbox") {
-            @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                indicator.setIndeterminate(true);
-                ApplicationManager.getApplication().invokeLater(() ->
-                        WriteCommandAction.runWriteCommandAction(project, () -> {
-                            try {
-                                var toolboxFile = PluginUtl.nextFile(toolboxFolder, ToolboxUtl::buildToolboxFileName);
-                                var packageName = VfsUtilCore.getRelativePath(toolboxFolder,
-                                        PluginUtl.resolveToolboxFolder(project).orElseThrow().getParent(), '.');
-                                var toolboxName = FilenameUtils.getBaseName(toolboxFile.getName());
-                                var toolboxSource = ToolboxUtl.buildSampleToolbox(packageName, toolboxName);
-                                PluginUtl.writeText(project, toolboxFile, toolboxSource);
-                                FileEditorManager.getInstance(project).openFile(toolboxFile, true);
-                            } catch (IOException e) {
-                                reportError(project, "Error creating new toolbox", e);
-                            }
-                        }), project.getDisposed());
-            }
-        }.queue();
+        extractFolderActionContext(e).ifPresent(ac ->
+                new Task.Backgroundable(ac.project(), "Creating new toolbox") {
+                    @Override
+                    public void run(@NotNull ProgressIndicator indicator) {
+                        indicator.setIndeterminate(true);
+                        ApplicationManager.getApplication().invokeLater(() ->
+                                WriteCommandAction.runWriteCommandAction(ac.project(), () -> {
+                                    try {
+                                        var toolboxFile = PluginUtl.nextFile(ac.folder(), ToolboxUtl::buildToolboxFileName);
+                                        var packageName = VfsUtilCore.getRelativePath(ac.folder(),
+                                                PluginUtl.resolveToolboxFolder(ac.project()).orElseThrow().getParent(), '.');
+                                        var toolboxName = FilenameUtils.getBaseName(toolboxFile.getName());
+                                        var toolboxSource = ToolboxUtl.buildSampleToolbox(packageName, toolboxName);
+                                        PluginUtl.writeText(ac.project(), toolboxFile, toolboxSource);
+                                        FileEditorManager.getInstance(ac.project()).openFile(toolboxFile, true);
+                                    } catch (IOException e) {
+                                        reportError(ac.project(), "Error creating new toolbox", e);
+                                    }
+                                }), ac.project().getDisposed());
+                    }
+                }.queue());
     }
 
 }
