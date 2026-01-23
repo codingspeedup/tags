@@ -13,10 +13,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.*;
-import static io.github.codingspeedup.tags.minions.Minions.endsWith;
 
 @AllArgsConstructor
 public class TagsEditHandler {
@@ -96,63 +94,27 @@ public class TagsEditHandler {
     }
 
     public TagsResult insertNewSection(int fromOffset, int toOffset) {
-        var sPrefix = ftModel.getSPrefix();
         var existingSections = ftModel.getSections(fileContent).keySet();
-
         var nextSectionName = getNextSectionName(existingSections);
-
-        fromOffset = indexOfBol(fileContent, fromOffset);
-        toOffset = indexOfEol(fileContent, toOffset);
-
-        var newContent = new StringBuilder(fileContent.length() + 64);
-        newContent.append(fileContent, 0, fromOffset);
-        newContent.append(sPrefix).append(buildSectionStartMarker(nextSectionName)).append("\n");
-        var startOffset = newContent.length();
-        newContent.append(fileContent, fromOffset, toOffset);
-        var endOffset = newContent.length();
-        if (!endsWith(newContent, "\n")) {
-            newContent.append("\n");
-        }
-        newContent.append(sPrefix).append(buildSectionEndMarker(nextSectionName));
-        if (toOffset < fileContent.length() && fileContent.charAt(toOffset) != '\n') {
-            newContent.append("\n");
-        }
-        newContent.append(fileContent, toOffset, fileContent.length());
+        var section = ftModel.insertSection(nextSectionName, fileContent, fromOffset, toOffset);
 
         var tagsResult = new TagsResult(ResponseGateway.CONTENT);
-        tagsResult.setContent(newContent.toString());
-        tagsResult.setStartOffset(startOffset);
-        tagsResult.setEndOffset(endOffset);
+        tagsResult.setContent(section.getLeft());
+        tagsResult.setStartOffset(section.getMiddle());
+        tagsResult.setEndOffset(section.getRight());
         return tagsResult;
     }
 
     public Optional<TagsResult> stripTags(int offset) {
-        var tPrefix = ftModel.getTPrefix();
-        var aPrefix = ftModel.getAPrefix();
-        var gPrefix = ftModel.getGPrefix();
-        var sPrefix = ftModel.getSPrefix();
-        var pPrefix = ftModel.getPlusPrefix();
-
-        var contentChanged = new AtomicBoolean();
-        var newContent = new StringBuilder();
-        fileContent.lines().forEach(line -> {
-            var foo = line.stripLeading();
-            if (foo.startsWith(tPrefix) || foo.startsWith(aPrefix) || foo.startsWith(gPrefix) || foo.startsWith(sPrefix) || foo.startsWith(pPrefix)) {
-                contentChanged.set(true);
-            } else {
-                newContent.append(line).append("\n");
-            }
-        });
-
-        if (!contentChanged.get()) {
-            return Optional.empty();
+        var newContent = ftModel.stripTags(fileContent);
+        if (newContent.isPresent()) {
+            var tagsResult = new TagsResult(ResponseGateway.CONTENT);
+            tagsResult.setContent(newContent.get());
+            tagsResult.setStartOffset(offset);
+            tagsResult.setEndOffset(offset);
+            return Optional.of(tagsResult);
         }
-
-        var tagsResult = new TagsResult(ResponseGateway.CONTENT);
-        tagsResult.setContent(newContent.toString());
-        tagsResult.setStartOffset(offset);
-        tagsResult.setEndOffset(offset);
-        return Optional.of(tagsResult);
+        return Optional.empty();
     }
 
 }

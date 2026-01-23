@@ -70,6 +70,10 @@ the [intellij-platform-gradle-plugin][gh:intellij-platform-gradle-plugin-docs].
 You can also upload the plugin to the [JetBrains Plugin Repository](https://plugins.jetbrains.com/plugin/upload)
 manually via UI.
 
+[//]: # (Lorem ipsum)
+[//]: # (dolor sit)
+[//]: # (amet)
+
 ## Useful links
 
 - [IntelliJ Platform SDK Plugin SDK][docs]
@@ -115,3 +119,4 @@ manually via UI.
 [jb:ipe]: https://jb.gg/ipe
 
 [jb:ui-guidelines]: https://jetbrains.github.io/ui
+

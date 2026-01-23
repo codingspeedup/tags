@@ -1,16 +1,16 @@
 package io.github.codingspeedup.tags.ai.composition.orchestration.buffers;
 
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
-import io.github.codingspeedup.tags.ai.composition.orchestration.core.SectionMarker;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.SectionModel;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.TagPlusModel;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.github.codingspeedup.tags.minions.Minions.endsWith;
 
 public class TextModel extends BufferModel {
 
@@ -117,16 +117,49 @@ public class TextModel extends BufferModel {
         return sections;
     }
 
-    private SectionMarker parseSectionLine(String line) {
-        if (line.startsWith(SECTION_NAME_START) && line.endsWith(SECTION_NAME_END)) {
-            line = line.substring(SECTION_NAME_START.length(), line.length() - SECTION_NAME_END.length());
-            var closing = line.startsWith(SECTION_CLOSE);
-            if (closing) {
-                line = StringUtils.trimToEmpty(line.substring(SECTION_CLOSE.length()));
+    @Override
+    public Optional<String> stripTags(String content) {
+        var contentChanged = new AtomicBoolean();
+        var newContent = new StringBuilder();
+        content.lines().forEach(line -> {
+            var foo = line.stripLeading();
+            if (foo.startsWith(tPrefix)
+                    || foo.startsWith(aPrefix)
+                    || foo.startsWith(gPrefix)
+                    || foo.startsWith(sPrefix)
+                    || foo.startsWith(plusPrefix)) {
+                contentChanged.set(true);
+            } else {
+                newContent.append(line).append("\n");
             }
-            return new SectionMarker(line, closing);
-        }
-        return null;
+        });
+        return contentChanged.get() ? Optional.of(newContent.toString()) : Optional.empty();
     }
+
+    @Override
+    public Triple<String, Integer, Integer> insertSection(String sectionName, String content, int fromOffset, int toOffset) {
+        fromOffset = indexOfBol(content, fromOffset);
+        toOffset = indexOfEol(content, toOffset);
+
+        var newContent = new StringBuilder(content.length() + 64);
+        newContent.append(content, 0, fromOffset);
+        newContent.append(sPrefix).append(buildSectionStartMarker(sectionName)).append("\n");
+
+        var startOffset = newContent.length();
+        newContent.append(content, fromOffset, toOffset);
+
+        var endOffset = newContent.length();
+        if (!endsWith(newContent, "\n")) {
+            newContent.append("\n");
+        }
+        newContent.append(sPrefix).append(buildSectionEndMarker(sectionName));
+        if (toOffset < content.length() && content.charAt(toOffset) != '\n') {
+            newContent.append("\n");
+        }
+        newContent.append(content, toOffset, content.length());
+
+        return Triple.of(newContent.toString(), startOffset, endOffset);
+    }
+
 
 }

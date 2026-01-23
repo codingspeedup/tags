@@ -1,17 +1,20 @@
 package io.github.codingspeedup.tags.ai.composition.orchestration.core;
 
 import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.ChatMdModel;
+import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.MdModel;
 import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.SourceCodeModel;
 import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.TextModel;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.codingspeedup.tags.ai.composition.orchestration.buffers.ChatMdModel.CHAT_MD_EXTENSION;
+import static io.github.codingspeedup.tags.ai.composition.orchestration.buffers.MdModel.MD_EXTENSION;
 import static io.github.codingspeedup.tags.ai.composition.orchestration.buffers.TextModel.TEXT_EXTENSION;
 import static io.github.codingspeedup.tags.minions.ToolboxManagerService.GROOVY_EXTENSION;
 
@@ -69,11 +72,13 @@ public abstract class BufferModel {
         }
 
         var fileModel = MODEL_REGISTRY.computeIfAbsent(fileExtension, (key) -> switch (key) {
+            case CHAT_MD_EXTENSION -> new ChatMdModel() {
+            };
+            case MD_EXTENSION -> new MdModel() {
+            };
             case ".java", ".go", GROOVY_EXTENSION, ".cs" -> new SourceCodeModel("// ") {
             };
             case TEXT_EXTENSION -> new TextModel() {
-            };
-            case CHAT_MD_EXTENSION -> new ChatMdModel() {
             };
             default -> null;
         });
@@ -116,5 +121,24 @@ public abstract class BufferModel {
     public abstract void fillTagPlusModel(TagPlusModel tagPlus, String content);
 
     public abstract Map<String, SectionModel> getSections(String content);
+
+    public abstract Optional<String> stripTags(String content);
+
+    public abstract Triple<String, Integer, Integer> insertSection(String sectionName, String content, int fromOffset, int toOffset);
+
+    protected static SectionMarker parseSectionLine(String line) {
+        var fromIndex = line.indexOf(SECTION_NAME_START);
+        if (fromIndex >= 0) {
+            fromIndex += SECTION_NAME_START.length();
+            var toIndex = line.indexOf(SECTION_NAME_END, fromIndex);
+            line = line.substring(fromIndex, toIndex);
+            var closing = line.startsWith(SECTION_CLOSE);
+            if (closing) {
+                line = StringUtils.trimToEmpty(line.substring(SECTION_CLOSE.length()));
+            }
+            return new SectionMarker(line, closing);
+        }
+        return null;
+    }
 
 }

@@ -1,16 +1,15 @@
 package io.github.codingspeedup.tags.ai.composition.orchestration.buffers;
 
 import com.vladsch.flexmark.ast.FencedCodeBlock;
-import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
-import io.github.codingspeedup.tags.ai.composition.orchestration.core.SectionModel;
 import io.github.codingspeedup.tags.ai.composition.orchestration.core.TagPlusModel;
 import io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ChatMdModel extends BufferModel {
+public class ChatMdModel extends MdModelBase {
 
     public static final String CHAT_MD_EXTENSION = ".chat.md";
 
@@ -19,7 +18,11 @@ public class ChatMdModel extends BufferModel {
     public static final String USER_BLOCK_INFO = "llm-user-message";
 
     public ChatMdModel() {
-        super(StringUtils.EMPTY, A_MARKER, StringUtils.EMPTY, StringUtils.EMPTY, PLUS_MARKER);
+        super(StringUtils.EMPTY,
+                A_MARKER,
+                StringUtils.EMPTY,
+                MD_COMMENT_PREFIX + S_MARKER,
+                PLUS_MARKER);
     }
 
     protected static TagPlusModel toTagPlusRange(FencedCodeBlock codeBlock) {
@@ -31,7 +34,7 @@ public class ChatMdModel extends BufferModel {
 
     @Override
     public List<TagPlusModel> locateTagPlusRanges(String content) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return List.of();
     }
 
     @Override
@@ -62,8 +65,18 @@ public class ChatMdModel extends BufferModel {
     }
 
     @Override
-    public Map<String, SectionModel> getSections(String content) {
-        return Map.of();
+    public Optional<String> stripTags(String content) {
+        var contentChanged = new AtomicBoolean();
+        var newContent = new StringBuilder();
+        content.lines().forEach(line -> {
+            var foo = line.strip();
+            if (foo.startsWith(sPrefix) && foo.endsWith(MD_COMMENT_SUFFIX)) {
+                contentChanged.set(true);
+            } else {
+                newContent.append(line).append("\n");
+            }
+        });
+        return contentChanged.get() ? Optional.of(newContent.toString()) : Optional.empty();
     }
 
 }
