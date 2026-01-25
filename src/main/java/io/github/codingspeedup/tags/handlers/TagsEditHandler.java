@@ -1,10 +1,10 @@
 package io.github.codingspeedup.tags.handlers;
 
 import com.intellij.openapi.project.Project;
-import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
-import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferRange;
-import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
+import io.github.codingspeedup.tags.ai.composition_orchestration.core.BufferModel;
+import io.github.codingspeedup.tags.ai.composition_orchestration.core.BufferRange;
+import io.github.codingspeedup.tags.ai.deployment_orchestration.ResponseGateway;
+import io.github.codingspeedup.tags.ai.primitives_reactive.PromptRef;
 import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Optional;
 
-import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.*;
+import static io.github.codingspeedup.tags.ai.composition_orchestration.core.BufferModel.*;
 
 @AllArgsConstructor
 public class TagsEditHandler {

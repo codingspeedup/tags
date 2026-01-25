@@ -8,7 +8,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.vfs.VfsUtilCore;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
+import io.github.codingspeedup.tags.ai.primitives_reactive.PromptLibUtl;
 import io.github.codingspeedup.tags.minions.PluginUtl;
 import org.jetbrains.annotations.NotNull;
 

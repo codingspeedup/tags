@@ -3,9 +3,9 @@ package io.github.codingspeedup.tags.handlers;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
-import io.github.codingspeedup.tags.ai.composition.reactive.GroovyScriptExecutor;
+import io.github.codingspeedup.tags.ai.composition_reactive.GroovyScriptExecutor;
 import io.github.codingspeedup.tags.minions.ToolboxManagerService;
-import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
+import io.github.codingspeedup.tags.ai.deployment_orchestration.ResponseGateway;
 import io.github.codingspeedup.tags.plugin.console.ConsoleOutputStream;
 import io.github.codingspeedup.tags.plugin.console.GroovyConsoleService;
 

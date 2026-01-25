@@ -1,7 +1,7 @@
 package tools.builtin.codegen.java
 
 import groovy.transform.Canonical
-import io.github.codingspeedup.tags.ai.composition.reactive.F
+import io.github.codingspeedup.tags.ai.composition_reactive.F
 
 @Canonical
 class Parameter {

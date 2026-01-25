@@ -3,9 +3,10 @@ package io.github.codingspeedup.tags.handlers;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import dev.langchain4j.data.message.UserMessage;
-import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
-import io.github.codingspeedup.tags.ai.primitives.reactive.TagsPrompt;
+import io.github.codingspeedup.tags.ai.composition_orchestration.buffers.ChatMdModel;
+import io.github.codingspeedup.tags.ai.deployment_orchestration.ResponseGateway;
+import io.github.codingspeedup.tags.ai.primitives_reactive.PromptRef;
+import io.github.codingspeedup.tags.ai.primitives_reactive.TagsPrompt;
 import io.github.codingspeedup.tags.minions.ProjectBufferProvider;
 import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import io.github.codingspeedup.tags.minions.ProjectToolboxSupport;
@@ -14,9 +15,8 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.Optional;
 
-import static io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl.*;
-import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl.findVariables;
-import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl.toProperties;
+import static io.github.codingspeedup.tags.ai.primitives_reactive.PromptUtl.findVariables;
+import static io.github.codingspeedup.tags.ai.primitives_reactive.PromptUtl.toProperties;
 
 public class SelectionHandler implements ActionHandler {
 
@@ -60,16 +60,16 @@ public class SelectionHandler implements ActionHandler {
         var chatResponse = prompt.execute();
 
         var mdContent = new StringBuilder();
-        mdContent.append(renderParametersBlock(toProperties(prompt.chatRequest().parameters(), false)));
-        mdContent.append(renderSystemBlock(promptLib.getSystemTemplate().template()));
+        mdContent.append(ChatMdModel.renderParametersBlock(toProperties(prompt.chatRequest().parameters(), false)));
+        mdContent.append(ChatMdModel.renderSystemBlock(promptLib.getSystemTemplate().template()));
         var chatMessages = prompt.chatRequest().messages();
-        mdContent.append(renderUserBlock((UserMessage) chatMessages.get(chatMessages.size() - 1)));
+        mdContent.append(ChatMdModel.renderUserBlock((UserMessage) chatMessages.get(chatMessages.size() - 1)));
         var mdOffset = mdContent.length();
-        mdContent.append(renderAiBlock(chatResponse.aiMessage().text()));
+        mdContent.append(ChatMdModel.renderAiBlock(chatResponse.aiMessage().text()));
         mdContent.append(StringUtils.EMPTY);
 
         var tagsResult = new TagsResult(ResponseGateway.CHAT);
-        tagsResult.setBufferName(nextChatMdBufferName(project, fileName));
+        tagsResult.setBufferName(ChatMdModel.nextChatMdBufferName(project, fileName));
         tagsResult.setContent(mdContent.toString());
         tagsResult.setStartOffset(mdOffset);
         tagsResult.setEndOffset(mdOffset);

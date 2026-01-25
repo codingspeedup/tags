@@ -1,6 +1,6 @@
 package io.github.codingspeedup.tags.handlers;
 
-import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
+import io.github.codingspeedup.tags.ai.deployment_orchestration.ResponseGateway;
 import lombok.Getter;
 import lombok.Setter;
 

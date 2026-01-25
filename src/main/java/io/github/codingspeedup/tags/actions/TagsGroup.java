@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.ChatMdModel;
+import io.github.codingspeedup.tags.ai.composition_orchestration.buffers.ChatMdModel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;

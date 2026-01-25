@@ -1,7 +1,7 @@
 package io.github.codingspeedup.tags.ai.boundary;
 
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLib;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
+import io.github.codingspeedup.tags.ai.primitives_reactive.PromptLib;
+import io.github.codingspeedup.tags.ai.primitives_reactive.PromptRef;
 
 import java.util.Optional;
 

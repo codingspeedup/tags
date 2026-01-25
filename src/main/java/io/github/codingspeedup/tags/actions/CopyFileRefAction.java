@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.datatransfer.StringSelection;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.*;
+import static io.github.codingspeedup.tags.ai.composition_orchestration.core.BufferModel.*;
 
 public class CopyFileRefAction extends TagsActionBase {
 

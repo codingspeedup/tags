@@ -7,9 +7,10 @@ import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
-import io.github.codingspeedup.tags.ai.composition.orchestration.core.SectionModel;
-import io.github.codingspeedup.tags.ai.primitives.reactive.TagsPrompt;
+import io.github.codingspeedup.tags.ai.composition_orchestration.buffers.ChatMdModel;
+import io.github.codingspeedup.tags.ai.composition_orchestration.core.BufferModel;
+import io.github.codingspeedup.tags.ai.composition_orchestration.core.SectionModel;
+import io.github.codingspeedup.tags.ai.primitives_reactive.TagsPrompt;
 import io.github.codingspeedup.tags.minions.ProjectBufferProvider;
 import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import io.github.codingspeedup.tags.minions.ProjectToolboxSupport;
@@ -19,10 +20,9 @@ import org.apache.commons.lang.StringUtils;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel.parseSectionName;
-import static io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl.*;
-import static io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway.resolveGateway;
-import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl.toProperties;
+import static io.github.codingspeedup.tags.ai.composition_orchestration.core.BufferModel.parseSectionName;
+import static io.github.codingspeedup.tags.ai.deployment_orchestration.ResponseGateway.resolveGateway;
+import static io.github.codingspeedup.tags.ai.primitives_reactive.PromptUtl.toProperties;
 
 public class TagsActionHandler implements ActionHandler {
 
@@ -93,7 +93,7 @@ public class TagsActionHandler implements ActionHandler {
             case CHAT:
             default: {
                 var bc = buildChatBuffer(prompt.chatRequest(), chatResponse);
-                tagsResult.setBufferName(nextChatMdBufferName(project, fileName));
+                tagsResult.setBufferName(ChatMdModel.nextChatMdBufferName(project, fileName));
                 tagsResult.setContent(bc.content());
                 tagsResult.setStartOffset(bc.offset());
                 tagsResult.setEndOffset(bc.offset());
@@ -105,16 +105,16 @@ public class TagsActionHandler implements ActionHandler {
 
     private Buffer buildChatBuffer(ChatRequest chatRequest, ChatResponse chatResponse) {
         var mdContent = new StringBuilder();
-        mdContent.append(renderParametersBlock(toProperties(chatRequest.parameters(), false)));
+        mdContent.append(ChatMdModel.renderParametersBlock(toProperties(chatRequest.parameters(), false)));
         chatRequest.messages().forEach(message -> {
             switch (message.type()) {
-                case SYSTEM -> mdContent.append(renderSystemBlock((SystemMessage) message));
-                case USER -> mdContent.append(renderUserBlock((UserMessage) message));
+                case SYSTEM -> mdContent.append(ChatMdModel.renderSystemBlock((SystemMessage) message));
+                case USER -> mdContent.append(ChatMdModel.renderUserBlock((UserMessage) message));
             }
         });
         var bufferOffset = mdContent.length() + 1;
-        mdContent.append(renderAiBlock(chatResponse.aiMessage().text()));
-        mdContent.append(renderUserBlock(StringUtils.EMPTY));
+        mdContent.append(ChatMdModel.renderAiBlock(chatResponse.aiMessage().text()));
+        mdContent.append(ChatMdModel.renderUserBlock(StringUtils.EMPTY));
         return new Buffer(mdContent.toString(), bufferOffset);
     }
 

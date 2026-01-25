@@ -6,7 +6,7 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
-import io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl;
+import io.github.codingspeedup.tags.ai.composition_orchestration.buffers.ChatMdModel;
 import io.github.codingspeedup.tags.minions.PluginUtl;
 import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import org.apache.commons.lang.StringUtils;
@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-import static io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl.*;
 import static io.github.codingspeedup.tags.minions.PluginUtl.reportError;
 
 public class NewChatMdAction extends TagsActionBase {
@@ -26,9 +25,9 @@ public class NewChatMdAction extends TagsActionBase {
 
             @SuppressWarnings("all")
             var chatMdContent = new StringBuilder();
-            chatMdContent.append(renderParametersBlock(pLib.getParameters()));
-            chatMdContent.append(renderSystemBlock(pLib.getSystemTemplate().template()));
-            chatMdContent.append(renderUserBlock(StringUtils.EMPTY));
+            chatMdContent.append(ChatMdModel.renderParametersBlock(pLib.getParameters()));
+            chatMdContent.append(ChatMdModel.renderSystemBlock(pLib.getSystemTemplate().template()));
+            chatMdContent.append(ChatMdModel.renderUserBlock(StringUtils.EMPTY));
 
             new Task.Backgroundable(ac.project(), "Opening new chat buffer") {
                 @Override
@@ -37,7 +36,7 @@ public class NewChatMdAction extends TagsActionBase {
                     ApplicationManager.getApplication().invokeLater(() ->
                             WriteCommandAction.runWriteCommandAction(ac.project(), () -> {
                                 try {
-                                    var chatMdFile = PluginUtl.nextFile(ac.folder(), ChatMdUtl::buildChatMdFileName);
+                                    var chatMdFile = PluginUtl.nextFile(ac.folder(), ChatMdModel::buildChatMdFileName);
                                     PluginUtl.writeText(ac.project(), chatMdFile, chatMdContent.toString());
                                     FileEditorManager.getInstance(ac.project()).openFile(chatMdFile, true);
                                 } catch (IOException e) {

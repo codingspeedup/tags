@@ -7,11 +7,11 @@ import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import dev.langchain4j.model.output.FinishReason;
-import io.github.codingspeedup.tags.ai.composition.orchestration.buffers.ChatMdModel;
-import io.github.codingspeedup.tags.ai.composition.orchestration.core.TagPlusModel;
-import io.github.codingspeedup.tags.ai.composition.reactive.GroovyScriptExecutor;
-import io.github.codingspeedup.tags.ai.deployment.orchestration.ResponseGateway;
-import io.github.codingspeedup.tags.ai.primitives.reactive.TagsPrompt;
+import io.github.codingspeedup.tags.ai.composition_orchestration.buffers.ChatMdModel;
+import io.github.codingspeedup.tags.ai.composition_orchestration.core.TagPlusModel;
+import io.github.codingspeedup.tags.ai.composition_reactive.GroovyScriptExecutor;
+import io.github.codingspeedup.tags.ai.deployment_orchestration.ResponseGateway;
+import io.github.codingspeedup.tags.ai.primitives_reactive.TagsPrompt;
 import io.github.codingspeedup.tags.minions.*;
 import io.github.codingspeedup.tags.plugin.settings.SettingsState;
 import org.apache.commons.collections.CollectionUtils;
@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static io.github.codingspeedup.tags.ai.deployment.orchestration.ChatMdUtl.*;
 
 public class ChatMdHandler extends ChatMdModel implements ActionHandler {
 

@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import io.github.codingspeedup.tags.ai.composition.orchestration.core.BufferModel;
+import io.github.codingspeedup.tags.ai.composition_orchestration.core.BufferModel;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 

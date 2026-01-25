@@ -1,7 +1,7 @@
 package io.github.codingspeedup.tags.actions;
 
 import com.intellij.openapi.actionSystem.*;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
+import io.github.codingspeedup.tags.ai.primitives_reactive.PromptLibUtl;
 import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

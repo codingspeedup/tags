@@ -1,6 +1,6 @@
 package io.github.codingspeedup.tags.integration.groovy;
 
-import io.github.codingspeedup.tags.ai.composition.reactive.GroovyScriptExecutor;
+import io.github.codingspeedup.tags.ai.composition_reactive.GroovyScriptExecutor;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;

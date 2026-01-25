@@ -1,8 +1,8 @@
 package io.github.codingspeedup.tags.minions;
 
 import dev.langchain4j.internal.Json;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptUtl;
-import io.github.codingspeedup.tags.ai.composition.reactive.ToolboxApiSpecBuilder;
+import io.github.codingspeedup.tags.ai.primitives_reactive.PromptUtl;
+import io.github.codingspeedup.tags.ai.composition_reactive.ToolboxApiSpecBuilder;
 import org.junit.jupiter.api.Test;
 import tools.builtin.codegen.java.TypeAugmenter;
 import tools.builtin.codegen.java.TypeGenerator;

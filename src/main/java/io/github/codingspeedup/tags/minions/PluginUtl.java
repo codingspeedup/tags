@@ -19,7 +19,7 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.LightVirtualFile;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl;
+import io.github.codingspeedup.tags.ai.primitives_reactive.PromptLibUtl;
 import io.github.codingspeedup.tags.handlers.TagsResult;
 import io.github.codingspeedup.tags.plugin.console.TagsConsoleService;
 import io.github.codingspeedup.tags.plugin.core.TagsMessageBundle;
@@ -41,8 +41,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_EXTENSION;
-import static io.github.codingspeedup.tags.ai.primitives.reactive.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME;
+import static io.github.codingspeedup.tags.ai.primitives_reactive.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_EXTENSION;
+import static io.github.codingspeedup.tags.ai.primitives_reactive.PromptLibUtl.PLUGIN_PROMPT_LIBRARY_NAME;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PluginUtl {

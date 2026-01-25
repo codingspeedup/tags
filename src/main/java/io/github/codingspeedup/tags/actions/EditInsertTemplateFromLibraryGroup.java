@@ -7,7 +7,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.vfs.VirtualFile;
 import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import io.github.codingspeedup.tags.minions.PluginUtl;
-import io.github.codingspeedup.tags.ai.primitives.reactive.PromptRef;
+import io.github.codingspeedup.tags.ai.primitives_reactive.PromptRef;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
