@@ -5,26 +5,31 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import io.github.codingspeedup.tags.ai.boundary.EnvironmentSettingsProvider;
 import org.apache.commons.lang.StringUtils;
+import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.interceptor.Context;
+import software.amazon.awssdk.core.interceptor.ExecutionAttributes;
+import software.amazon.awssdk.core.interceptor.ExecutionInterceptor;
+import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
 
 import java.util.Locale;
-
 
 public class AmazonBedrockAI implements LLM {
 
     private final BedrockChatModel model;
 
     public AmazonBedrockAI(EnvironmentSettingsProvider settings) {
-        // System.setProperty("aws.accessKeyId", settings.getAwsAccessKeyId());
+        // this is valid
+//        System.setProperty("aws.accessKeyId", settings.getAwsAccessKeyId());
+//        System.setProperty("aws.secretAccessKey", settings.getAwsSecretAccessKey());
 
         var region = resolveRegion(settings.getAwsRegion());
 
         BedrockRuntimeClient client;
-
         if (StringUtils.isBlank(settings.getAmazonBedrockModelToken())) {
             var credentials = StringUtils.isBlank(settings.getAwsSessionToken())
                     ? AwsBasicCredentials.create(settings.getAwsAccessKeyId(), settings.getAwsSecretAccessKey())
@@ -35,7 +40,21 @@ public class AmazonBedrockAI implements LLM {
                     .credentialsProvider(StaticCredentialsProvider.create(credentials))
                     .build();
         } else {
-            client = null;
+
+            var apiKeyInterceptor = new ExecutionInterceptor() {
+                @Override
+                public SdkHttpRequest modifyHttpRequest(Context.ModifyHttpRequest context, ExecutionAttributes executionAttributes) {
+                    return context.httpRequest().toBuilder()
+                            .putHeader("Authorization", "Bearer " + settings.getAmazonBedrockModelToken())
+                            .build();
+                }
+            };
+
+            client = BedrockRuntimeClient.builder()
+                    .region(region)
+                    .overrideConfiguration(conf -> conf.addExecutionInterceptor(apiKeyInterceptor))
+                    .credentialsProvider(AnonymousCredentialsProvider.create())
+                    .build();
         }
 
         model = BedrockChatModel.builder()
