@@ -10,7 +10,7 @@ import io.github.codingspeedup.tags.ai.primitives_reactive.TagsPrompt;
 import io.github.codingspeedup.tags.minions.ProjectBufferProvider;
 import io.github.codingspeedup.tags.minions.ProjectPromptLibraryProvider;
 import io.github.codingspeedup.tags.minions.ProjectToolboxSupport;
-import io.github.codingspeedup.tags.plugin.settings.SettingsState;
+import io.github.codingspeedup.tags.plugin.settings.SettingsModel;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Optional;
@@ -34,7 +34,7 @@ public class SelectionHandler implements ActionHandler {
         var promptLib = new ProjectPromptLibraryProvider(project).load().orElseThrow();
 
         var promptBuilder = TagsPrompt.builder(
-                SettingsState.getInstance(),
+                SettingsModel.getInstance(),
                 new ProjectBufferProvider(project, null, selection),
                 new ProjectPromptLibraryProvider(project),
                 new ProjectToolboxSupport(project));

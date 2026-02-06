@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 
-public class SettingsPanel implements Disposable {
+public class SettingsView implements Disposable {
 
     private final JPanel mainPanel;
 
@@ -29,15 +29,17 @@ public class SettingsPanel implements Disposable {
     private final DefaultComboBoxModel<String> azureOpenAiApiVersionComboModel = new DefaultComboBoxModel<>();
     private final ComboBox<String> azureOpenAiApiVersionField = new ComboBox<>(azureOpenAiApiVersionComboModel);
 
+    private final JBCheckBox geminiEnabled = new JBCheckBox("Use this model");
     private final JBPasswordField geminiApiKeyField = new JBPasswordField();
     private final DefaultComboBoxModel<SettingsComboEntry> geminiModelsComboModel = new DefaultComboBoxModel<>(new SettingsComboEntry[]{SettingsComboEntry.EMPTY_VALUE});
     private final ComboBox<SettingsComboEntry> geminiModelField = new ComboBox<>(geminiModelsComboModel);
 
+    private final JBCheckBox ollamaEnabled = new JBCheckBox("Use this model");
     private final JBTextField ollamaUrlField = new JBTextField();
     private final DefaultComboBoxModel<SettingsComboEntry> ollamaModelsComboModel = new DefaultComboBoxModel<>(new SettingsComboEntry[]{SettingsComboEntry.EMPTY_VALUE});
     private final ComboBox<SettingsComboEntry> ollamaModelField = new ComboBox<>(ollamaModelsComboModel);
 
-    public SettingsPanel() {
+    public SettingsView() {
         Arrays.stream(OpenAIServiceVersion.values())
                 .map(OpenAIServiceVersion::getVersion)
                 .sorted(Comparator.reverseOrder())
@@ -52,11 +54,13 @@ public class SettingsPanel implements Disposable {
                 .addLabeledComponent(new JBLabel("API version: "), azureOpenAiApiVersionField, 1, false)
 
                 .addVerticalGap(10)
+                .addComponent(geminiEnabled)
                 .addComponent(new TitledSeparator("Gemini Configuration"))
                 .addLabeledComponent(new JBLabel("API key: "), geminiApiKeyField, 1, false)
                 .addLabeledComponent(new JBLabel("Model: "), geminiModelField, 1, false)
 
                 .addVerticalGap(10)
+                .addComponent(ollamaEnabled)
                 .addComponent(new TitledSeparator("Ollama Configuration"))
                 .addLabeledComponent(new JBLabel("URL: "), ollamaUrlField, 1, false)
                 .addLabeledComponent(new JBLabel("Model: "), ollamaModelField, 1, false)
@@ -69,6 +73,18 @@ public class SettingsPanel implements Disposable {
             azureOpenAiUrlField.setEnabled(value);
             azureOpenAiDeploymentField.setEnabled(value);
             azureOpenAiApiVersionField.setEnabled(value);
+        });
+
+        geminiEnabled.addActionListener(e -> {
+            var value = geminiEnabled.isSelected();
+            geminiApiKeyField.setEnabled(value);
+            geminiModelField.setEnabled(value);
+        });
+
+        ollamaEnabled.addActionListener(e -> {
+            var value = ollamaEnabled.isSelected();
+            ollamaUrlField.setEnabled(value);
+            ollamaModelField.setEnabled(value);
         });
 
         new ComponentValidator(this).installOn(azureOpenAiApiKeyField);
@@ -84,6 +100,12 @@ public class SettingsPanel implements Disposable {
     public void dispose() {
         // Keep calm and dispose
     }
+
+    /*
+     * ================
+     * = Azure OpenAI =
+     * ================
+     */
 
     public boolean isUseAzureOpenAiModel() {
         return azureOpenAiEnabled.isSelected();
@@ -140,6 +162,20 @@ public class SettingsPanel implements Disposable {
         }
     }
 
+    /*
+     * ==========
+     * = Gemini =
+     * ==========
+     */
+
+    public boolean isUseGeminiModel() {
+        return geminiEnabled.isSelected();
+    }
+
+    public void setUseGeminiModel(boolean value) {
+        geminiEnabled.setSelected(value);
+    }
+
     public String getGeminiApiKey() {
         return new String(geminiApiKeyField.getPassword());
     }
@@ -177,6 +213,20 @@ public class SettingsPanel implements Disposable {
     public void setGeminiModels(Collection<SettingsComboEntry> comboEntries) {
         geminiModelsComboModel.removeAllElements();
         comboEntries.forEach(geminiModelsComboModel::addElement);
+    }
+
+    /*
+     * ==========
+     * = Ollama =
+     * ==========
+     */
+
+    public boolean isUseOllamaModel() {
+        return ollamaEnabled.isSelected();
+    }
+
+    public void setUseOllamaModel(boolean value) {
+        ollamaEnabled.setSelected(value);
     }
 
     public String getOllamaUrl() {

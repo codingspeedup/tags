@@ -30,14 +30,14 @@ import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager
 import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.GEMINI_API_KEY;
 
 
-public class SettingsConfigurable implements Configurable {
-    private static final Logger LOG = Logger.getInstance(SettingsConfigurable.class);
+public class SettingsController implements Configurable {
+    private static final Logger LOG = Logger.getInstance(SettingsController.class);
 
     private final HttpClient client = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
             .build();
 
-    private SettingsPanel settingsComponent;
+    private SettingsView settingsComponent;
 
     @Override
     public String getDisplayName() {
@@ -46,8 +46,8 @@ public class SettingsConfigurable implements Configurable {
 
     @Override
     public JComponent createComponent() {
-        var settings = SettingsState.getInstance();
-        settingsComponent = new SettingsPanel();
+        var settings = SettingsModel.getInstance();
+        settingsComponent = new SettingsView();
         if (settings.isUseAzureOpenAiModel()) {
             validateAzureOpenAiConnection(
                     settings.getAzureOpenAiApiKey(),
@@ -55,24 +55,32 @@ public class SettingsConfigurable implements Configurable {
                     settings.getAzureOpenAiDeployment(),
                     settings.getAzureOpenAiApiVersion());
         }
-        settingsComponent.setGeminiModels(readGeminiModels(settings.getGeminiApiKey()));
-        settingsComponent.setOllamaModels(readOllamaModels(settings.getOllamaUrl()));
+        if (settings.isUseGeminiModel()) {
+            settingsComponent.setGeminiModels(readGeminiModels(settings.getGeminiApiKey()));
+        }
+        if (settings.isUseOllamaModel()) {
+            settingsComponent.setOllamaModels(readOllamaModels(settings.getOllamaUrl()));
+            return settingsComponent.getPanel();
+        }
         return settingsComponent.getPanel();
     }
 
     @Override
     public boolean isModified() {
-        var settings = SettingsState.getInstance();
+        var settings = SettingsModel.getInstance();
+        boolean modified;
 
-        var modified = settings.isUseAzureOpenAiModel() != settingsComponent.isUseAzureOpenAiModel();
+        modified = settings.isUseAzureOpenAiModel() != settingsComponent.isUseAzureOpenAiModel();
         modified = modified || !StringUtils.equals(settings.getAzureOpenAiApiKey(), settingsComponent.getAzureOpenAiApiKey());
         modified = modified || !StringUtils.equals(settings.getAzureOpenAiUrl(), settingsComponent.getAzureOpenAiUrl());
         modified = modified || !StringUtils.equals(settings.getAzureOpenAiDeployment(), settingsComponent.getAzureOpenAiDeployment());
         modified = modified || !StringUtils.equals(settings.getAzureOpenAiApiVersion(), settingsComponent.getAzureOpenAiApiVersion());
 
+        modified = modified || settings.isUseGeminiModel() != settingsComponent.isUseGeminiModel();
         modified = modified || !StringUtils.equals(settings.getGeminiApiKey(), settingsComponent.getGeminiApiKey());
         modified = modified || !StringUtils.equals(settings.getGeminiModel(), settingsComponent.getGeminiModel());
 
+        modified = modified || settings.isUseOllamaModel() != settingsComponent.isUseOllamaModel();
         modified = modified || !StringUtils.equals(settings.getOllamaUrl(), settingsComponent.getOllamaUrl());
         modified = modified || !StringUtils.equals(settings.getOllamaModel(), settingsComponent.getOllamaModel());
         return modified;
@@ -82,7 +90,7 @@ public class SettingsConfigurable implements Configurable {
     public void apply() {
         validateComponent();
 
-        var settings = SettingsState.getInstance();
+        var settings = SettingsModel.getInstance();
 
         settings.useAzureOpenAiModel = settingsComponent.isUseAzureOpenAiModel();
         SettingsSecretManager.saveSecret(AZURE_OPEN_AI_API_KEY, settingsComponent.getAzureOpenAiApiKey());
@@ -90,16 +98,18 @@ public class SettingsConfigurable implements Configurable {
         settings.azureOpenAiDeployment = settingsComponent.getAzureOpenAiDeployment();
         settings.azureOpenAiApiVersion = settingsComponent.getAzureOpenAiApiVersion();
 
+        settings.useGeminiModel = settingsComponent.isUseGeminiModel();
         SettingsSecretManager.saveSecret(GEMINI_API_KEY, settingsComponent.getGeminiApiKey());
         settings.geminiModel = settingsComponent.getGeminiModel();
 
+        settings.useOllamaModel = settingsComponent.isUseOllamaModel();
         settings.ollamaUrl = settingsComponent.getOllamaUrl();
         settings.ollamaModel = settingsComponent.getOllamaModel();
     }
 
     @Override
     public void reset() {
-        var settings = SettingsState.getInstance();
+        var settings = SettingsModel.getInstance();
 
         settingsComponent.setUseAzureOpenAiModel(settings.isUseAzureOpenAiModel());
         settingsComponent.setAzureOpenAiApiKey(settings.getAzureOpenAiApiKey());
@@ -107,9 +117,11 @@ public class SettingsConfigurable implements Configurable {
         settingsComponent.setAzureOpenAiDeployment(settings.getAzureOpenAiDeployment());
         settingsComponent.setAzureOpenAiApiVersion(settings.getAzureOpenAiApiVersion());
 
+        settingsComponent.setUseGeminiModel(settings.isUseGeminiModel());
         settingsComponent.setGeminiApiKey(settings.getGeminiApiKey());
         settingsComponent.setGeminiModel(settings.getGeminiModel());
 
+        settingsComponent.setUseOllamaModel(settings.isUseOllamaModel());
         settingsComponent.setOllamaUrl(settings.getOllamaUrl());
         settingsComponent.setOllamaModel(settings.getOllamaModel());
     }
@@ -123,7 +135,7 @@ public class SettingsConfigurable implements Configurable {
     }
 
     private void validateComponent() {
-        var settings = SettingsState.getInstance();
+        var settings = SettingsModel.getInstance();
         if (settingsComponent.isUseAzureOpenAiModel()) {
             validateAzureOpenAiConnection(
                     settingsComponent.getAzureOpenAiApiKey(),

@@ -13,7 +13,7 @@ import io.github.codingspeedup.tags.ai.composition_reactive.GroovyScriptExecutor
 import io.github.codingspeedup.tags.ai.deployment_orchestration.ResponseGateway;
 import io.github.codingspeedup.tags.ai.primitives_reactive.TagsPrompt;
 import io.github.codingspeedup.tags.minions.*;
-import io.github.codingspeedup.tags.plugin.settings.SettingsState;
+import io.github.codingspeedup.tags.plugin.settings.SettingsModel;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jspecify.annotations.NonNull;
@@ -162,7 +162,7 @@ public class ChatMdHandler extends ChatMdModel implements ActionHandler {
         }
 
         var promptBuilder = TagsPrompt.builder(
-                SettingsState.getInstance(),
+                SettingsModel.getInstance(),
                 new ProjectBufferProvider(project, contentFile, content),
                 new ProjectPromptLibraryProvider(project),
                 new ProjectToolboxSupport(project));
