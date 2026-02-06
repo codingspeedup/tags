@@ -9,6 +9,10 @@ import io.github.codingspeedup.tags.plugin.core.TagsMessageBundle;
 public class SettingsSecretManager {
 
     public static final String AZURE_OPEN_AI_API_KEY = "azureOpenAiApiKey";
+    public static final String AWS_ACCESS_KEY_ID = "awsAccessKeyID";
+    public static final String AWS_SECRET_ACCESS_KEY = "awsSecretAccessKey";
+    public static final String AWS_SESSION_TOKEN = "awsSessionToken";
+    public static final String AMAZON_BEDROCK_MODEL_TOKEN = "amazonBedrockModelToken";
     public static final String GEMINI_API_KEY = "geminiApiKey";
 
     private static CredentialAttributes createAttributes(String secretKey) {

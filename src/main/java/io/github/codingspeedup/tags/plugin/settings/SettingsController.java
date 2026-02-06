@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.github.codingspeedup.tags.ai.primitives_models.AzureOpenAI.identifyVersion;
-import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.AZURE_OPEN_AI_API_KEY;
-import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.GEMINI_API_KEY;
+import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.*;
 
 
 public class SettingsController implements Configurable {
@@ -76,6 +75,14 @@ public class SettingsController implements Configurable {
         modified = modified || !StringUtils.equals(settings.getAzureOpenAiDeployment(), settingsComponent.getAzureOpenAiDeployment());
         modified = modified || !StringUtils.equals(settings.getAzureOpenAiApiVersion(), settingsComponent.getAzureOpenAiApiVersion());
 
+        modified = modified || settings.isUseAmazonBedrockModel() != settingsComponent.isUseAmazonBedrockModel();
+        modified = modified || !StringUtils.equals(settings.getAwsRegion(), settingsComponent.getAwsRegion());
+        modified = modified || !StringUtils.equals(settings.getAwsAccessKeyId(), settingsComponent.getAwsAccessKeyId());
+        modified = modified || !StringUtils.equals(settings.getAwsSecretAccessKey(), settingsComponent.getAwsSecretAccessKey());
+        modified = modified || !StringUtils.equals(settings.getAwsSessionToken(), settingsComponent.getAwsSessionToken());
+        modified = modified || !StringUtils.equals(settings.getAmazonBedrockModelToken(), settingsComponent.getAmazonBedrockModelToken());
+        modified = modified || !StringUtils.equals(settings.getAmazonBedrockModelId(), settingsComponent.getAmazonBedrockModelId());
+
         modified = modified || settings.isUseGeminiModel() != settingsComponent.isUseGeminiModel();
         modified = modified || !StringUtils.equals(settings.getGeminiApiKey(), settingsComponent.getGeminiApiKey());
         modified = modified || !StringUtils.equals(settings.getGeminiModel(), settingsComponent.getGeminiModel());
@@ -83,6 +90,7 @@ public class SettingsController implements Configurable {
         modified = modified || settings.isUseOllamaModel() != settingsComponent.isUseOllamaModel();
         modified = modified || !StringUtils.equals(settings.getOllamaUrl(), settingsComponent.getOllamaUrl());
         modified = modified || !StringUtils.equals(settings.getOllamaModel(), settingsComponent.getOllamaModel());
+
         return modified;
     }
 
@@ -97,6 +105,14 @@ public class SettingsController implements Configurable {
         settings.azureOpenAiUrl = settingsComponent.getAzureOpenAiUrl();
         settings.azureOpenAiDeployment = settingsComponent.getAzureOpenAiDeployment();
         settings.azureOpenAiApiVersion = settingsComponent.getAzureOpenAiApiVersion();
+
+        settings.useAmazonBedrockModel = settingsComponent.isUseAmazonBedrockModel();
+        settings.awsRegion = settingsComponent.getAwsRegion();
+        SettingsSecretManager.saveSecret(AWS_ACCESS_KEY_ID, settingsComponent.getAwsAccessKeyId());
+        SettingsSecretManager.saveSecret(AWS_SECRET_ACCESS_KEY, settingsComponent.getAwsSecretAccessKey());
+        SettingsSecretManager.saveSecret(AWS_SESSION_TOKEN, settingsComponent.getAwsSessionToken());
+        SettingsSecretManager.saveSecret(AMAZON_BEDROCK_MODEL_TOKEN, settingsComponent.getAmazonBedrockModelToken());
+        settings.amazonBedrockModelId = settingsComponent.getAmazonBedrockModelId();
 
         settings.useGeminiModel = settingsComponent.isUseGeminiModel();
         SettingsSecretManager.saveSecret(GEMINI_API_KEY, settingsComponent.getGeminiApiKey());
@@ -116,6 +132,14 @@ public class SettingsController implements Configurable {
         settingsComponent.setAzureOpenAiUrl(settings.getAzureOpenAiUrl());
         settingsComponent.setAzureOpenAiDeployment(settings.getAzureOpenAiDeployment());
         settingsComponent.setAzureOpenAiApiVersion(settings.getAzureOpenAiApiVersion());
+
+        settingsComponent.setUseAmazonBedrockModel(settings.isUseAmazonBedrockModel());
+        settingsComponent.setAwsRegion(settings.getAwsRegion());
+        settingsComponent.setAwsAccessKeyId(settings.getAwsAccessKeyId());
+        settingsComponent.setAwsSecretAccessKey(settings.getAwsSecretAccessKey());
+        settingsComponent.setAwsSessionToken(settings.getAwsSessionToken());
+        settingsComponent.setAmazonBedrockModelToken(settings.getAmazonBedrockModelToken());
+        settingsComponent.setAmazonBedrockModelId(settings.getAmazonBedrockModelId());
 
         settingsComponent.setUseGeminiModel(settings.isUseGeminiModel());
         settingsComponent.setGeminiApiKey(settings.getGeminiApiKey());

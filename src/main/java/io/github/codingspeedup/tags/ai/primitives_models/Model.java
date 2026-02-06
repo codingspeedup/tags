@@ -21,10 +21,13 @@ public record Model(String name, LLM provider) {
             if (settings.isUseAzureOpenAiModel()) {
                 return Optional.of(new Model(settings.getAzureOpenAiDeployment(), new AzureOpenAI(settings)));
             }
-            if (StringUtils.isNotBlank(settings.getGeminiModel())) {
+            if (settings.isUseAmazonBedrockModel()) {
+                return Optional.of(new Model(settings.getAmazonBedrockModelId(), new AmazonBedrockAI(settings)));
+            }
+            if (settings.isUseGeminiModel()) {
                 return Optional.of(new Model(settings.getGeminiModel(), new GoogleAI(settings)));
             }
-            if (StringUtils.isNotBlank(settings.getOllamaModel())) {
+            if (settings.isUseOllamaModel()) {
                 return Optional.of(new Model(settings.getOllamaModel(), new OllamaAI(settings)));
             }
         }

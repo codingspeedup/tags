@@ -29,6 +29,14 @@ public class SettingsView implements Disposable {
     private final DefaultComboBoxModel<String> azureOpenAiApiVersionComboModel = new DefaultComboBoxModel<>();
     private final ComboBox<String> azureOpenAiApiVersionField = new ComboBox<>(azureOpenAiApiVersionComboModel);
 
+    private final JBCheckBox amazonBedrockEnabled = new JBCheckBox("Use this model");
+    private final JBTextField awsRegionField = new JBTextField();
+    private final JBPasswordField awsAccessKeyIdField = new JBPasswordField();
+    private final JBPasswordField awsSecretAccessKeyField = new JBPasswordField();
+    private final JBPasswordField awsSessionTokenField = new JBPasswordField();
+    private final JBPasswordField amazonBedrockModelTokenField = new JBPasswordField();
+    private final JBTextField amazonBedrockModelIdField = new JBTextField();
+
     private final JBCheckBox geminiEnabled = new JBCheckBox("Use this model");
     private final JBPasswordField geminiApiKeyField = new JBPasswordField();
     private final DefaultComboBoxModel<SettingsComboEntry> geminiModelsComboModel = new DefaultComboBoxModel<>(new SettingsComboEntry[]{SettingsComboEntry.EMPTY_VALUE});
@@ -52,6 +60,16 @@ public class SettingsView implements Disposable {
                 .addLabeledComponent(new JBLabel("URL: "), azureOpenAiUrlField, 1, false)
                 .addLabeledComponent(new JBLabel("Deployment: "), azureOpenAiDeploymentField, 1, false)
                 .addLabeledComponent(new JBLabel("API version: "), azureOpenAiApiVersionField, 1, false)
+
+                .addVerticalGap(10)
+                .addComponent(amazonBedrockEnabled)
+                .addComponent(new TitledSeparator("Amazon Bedrock"))
+                .addLabeledComponent(new JBLabel("AWS region: "), awsRegionField, 1, false)
+                .addLabeledComponent(new JBLabel("AWS access key ID: "), awsAccessKeyIdField, 1, false)
+                .addLabeledComponent(new JBLabel("AWS secret access key: "), awsSecretAccessKeyField, 1, false)
+                .addLabeledComponent(new JBLabel("AWS session token: "), awsSessionTokenField, 1, false)
+                .addLabeledComponent(new JBLabel("Model token: "), amazonBedrockModelTokenField, 1, false)
+                .addLabeledComponent(new JBLabel("Model ID: "), amazonBedrockModelIdField, 1, false)
 
                 .addVerticalGap(10)
                 .addComponent(geminiEnabled)
@@ -100,6 +118,7 @@ public class SettingsView implements Disposable {
     public void dispose() {
         // Keep calm and dispose
     }
+
 
     /*
      * ================
@@ -162,6 +181,70 @@ public class SettingsView implements Disposable {
         }
     }
 
+
+    /*
+     * ==================
+     * = Amazon Bedrock =
+     * ==================
+     */
+
+    public boolean isUseAmazonBedrockModel() {
+        return amazonBedrockEnabled.isSelected();
+    }
+
+    public void setUseAmazonBedrockModel(boolean value) {
+        amazonBedrockEnabled.setSelected(value);
+    }
+
+    public String getAwsRegion() {
+        return awsRegionField.getText();
+    }
+
+    public void setAwsRegion(String text) {
+        awsRegionField.setText(text);
+    }
+
+    public String getAwsAccessKeyId() {
+        return new String(awsAccessKeyIdField.getPassword());
+    }
+
+    public void setAwsAccessKeyId(String text) {
+        awsAccessKeyIdField.setText(text);
+    }
+
+    public String getAwsSecretAccessKey() {
+        return new String(awsSecretAccessKeyField.getPassword());
+    }
+
+    public void setAwsSecretAccessKey(String text) {
+        awsSecretAccessKeyField.setText(text);
+    }
+
+    public String getAwsSessionToken() {
+        return new String(awsSessionTokenField.getPassword());
+    }
+
+    public void setAwsSessionToken(String text) {
+        awsSessionTokenField.setText(text);
+    }
+
+    public String getAmazonBedrockModelToken() {
+        return new String(amazonBedrockModelTokenField.getPassword());
+    }
+
+    public void setAmazonBedrockModelToken(String text) {
+        amazonBedrockModelTokenField.setText(text);
+    }
+
+    public String getAmazonBedrockModelId() {
+        return amazonBedrockModelIdField.getText();
+    }
+
+    public void setAmazonBedrockModelId(String text) {
+        amazonBedrockModelIdField.setText(text);
+    }
+
+
     /*
      * ==========
      * = Gemini =
@@ -215,6 +298,7 @@ public class SettingsView implements Disposable {
         comboEntries.forEach(geminiModelsComboModel::addElement);
     }
 
+
     /*
      * ==========
      * = Ollama =
@@ -267,6 +351,5 @@ public class SettingsView implements Disposable {
         ollamaModelsComboModel.removeAllElements();
         comboEntries.forEach(ollamaModelsComboModel::addElement);
     }
-
 
 }

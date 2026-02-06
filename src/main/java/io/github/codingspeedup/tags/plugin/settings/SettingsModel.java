@@ -8,10 +8,10 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import io.github.codingspeedup.tags.ai.boundary.EnvironmentSettingsProvider;
 import lombok.Getter;
+import org.apache.commons.lang.StringUtils;
 import org.jspecify.annotations.NonNull;
 
-import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.AZURE_OPEN_AI_API_KEY;
-import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.GEMINI_API_KEY;
+import static io.github.codingspeedup.tags.plugin.settings.SettingsSecretManager.*;
 
 @State(name = "TagsPluginSettings", storages = @Storage("tagsPluginSettings.xml"))
 public class SettingsModel implements PersistentStateComponent<SettingsModel>, EnvironmentSettingsProvider {
@@ -26,16 +26,23 @@ public class SettingsModel implements PersistentStateComponent<SettingsModel>, E
     public String azureOpenAiApiVersion = OpenAIServiceVersion.V2025_01_01_PREVIEW.getVersion();
 
     @Getter
+    public boolean useAmazonBedrockModel = false;
+    @Getter
+    public String awsRegion = StringUtils.EMPTY;
+    @Getter
+    public String amazonBedrockModelId = StringUtils.EMPTY;
+
+    @Getter
     public boolean useGeminiModel = false;
     @Getter
-    public String geminiModel = "";
+    public String geminiModel = StringUtils.EMPTY;
 
     @Getter
     public boolean useOllamaModel = false;
     @Getter
     public String ollamaUrl = "http://localhost:11434";
     @Getter
-    public String ollamaModel = "";
+    public String ollamaModel = StringUtils.EMPTY;
 
     public static SettingsModel getInstance() {
         return ApplicationManager.getApplication().getService(SettingsModel.class);
@@ -59,4 +66,25 @@ public class SettingsModel implements PersistentStateComponent<SettingsModel>, E
     public String getAzureOpenAiApiKey() {
         return SettingsSecretManager.getSecret(AZURE_OPEN_AI_API_KEY);
     }
+
+    @Override
+    public String getAwsAccessKeyId() {
+        return SettingsSecretManager.getSecret(AWS_ACCESS_KEY_ID);
+    }
+
+    @Override
+    public String getAwsSecretAccessKey() {
+        return SettingsSecretManager.getSecret(AWS_SECRET_ACCESS_KEY);
+    }
+
+    @Override
+    public String getAwsSessionToken() {
+        return SettingsSecretManager.getSecret(AWS_SESSION_TOKEN);
+    }
+
+    @Override
+    public String getAmazonBedrockModelToken() {
+        return SettingsSecretManager.getSecret(AMAZON_BEDROCK_MODEL_TOKEN);
+    }
+
 }

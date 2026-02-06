@@ -12,9 +12,30 @@ public interface EnvironmentSettingsProvider {
 
     String getAzureOpenAiApiVersion();
 
+
+    boolean isUseAmazonBedrockModel();
+
+    String getAwsRegion();
+
+    String getAwsAccessKeyId();
+
+    String getAwsSecretAccessKey();
+
+    String getAwsSessionToken();
+
+    String getAmazonBedrockModelToken();
+
+    String getAmazonBedrockModelId();
+
+
+    boolean isUseGeminiModel();
+
     String getGeminiApiKey();
 
     String getGeminiModel();
+
+
+    boolean isUseOllamaModel();
 
     String getOllamaUrl();
 
