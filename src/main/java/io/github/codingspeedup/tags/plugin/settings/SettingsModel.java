@@ -30,7 +30,7 @@ public class SettingsModel implements PersistentStateComponent<SettingsModel>, E
     @Getter
     public String awsRegion = StringUtils.EMPTY;
     @Getter
-    public String amazonBedrockModelId = StringUtils.EMPTY;
+    public String amazonBedrockModelId = "us.anthropic.claude-opus-4-5-20251101-v1:0";
 
     @Getter
     public boolean useGeminiModel = false;

@@ -21,7 +21,7 @@ public class TagsInitializer implements ProjectActivity {
                 TagsMessageBundle.message("plugin.label"),
                 project.getName()));
         try {
-            PluginUtl.resolveChatFolder(project).orElseThrow();
+            PluginUtl.resolveVibesFolder(project).orElseThrow();
             PluginUtl.resolvePromptLibrary(project).orElseThrow();
             PluginUtl.resolveToolboxFolder(project).orElseThrow();
             PluginUtl.saveAllDocuments();

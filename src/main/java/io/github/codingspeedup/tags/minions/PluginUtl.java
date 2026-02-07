@@ -181,8 +181,8 @@ public final class PluginUtl {
         return ProjectUtil.guessProjectDir(project);
     }
 
-    public static Optional<VirtualFile> resolveChatFolder(@NotNull Project project) {
-        return resolvePluginFolder(project, "chat");
+    public static Optional<VirtualFile> resolveVibesFolder(@NotNull Project project) {
+        return resolvePluginFolder(project, "vibes");
     }
 
     public static Optional<VirtualFile> resolveToolboxFolder(@NotNull Project project) {
